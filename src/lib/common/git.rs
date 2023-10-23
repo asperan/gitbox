@@ -12,3 +12,16 @@ pub fn git_dir() -> String {
         Err(e) => print_error_and_exit(&e.to_string()),
     }
 }
+
+pub const DEFAULT_COMMIT_TYPES: [&str; 10] = [
+    "feat",
+    "fix",
+    "build",
+    "chore",
+    "ci",
+    "docs",
+    "style",
+    "refactor",
+    "perf",
+    "test",
+];
