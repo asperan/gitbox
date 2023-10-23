@@ -13,6 +13,13 @@ pub fn git_dir() -> String {
     }
 }
 
+pub const EXTRA_DIR_PATH: &str = "/extra";
+pub const TYPES_FILE_PATH: &str = "/types.txt";
+pub const SCOPES_FILE_PATH: &str = "/scopes.txt";
+
+// Groups: 1 = type, 2 = scope with (), 3 = scope, 4 = breaking change, 5 = summary
+pub const CONVENTIONAL_COMMIT_REGEX: &str = r"^(\w+)(\(([\w/-]+)\))?(!)?:(.*)";
+
 pub const DEFAULT_COMMIT_TYPES: [&str; 10] = [
     "feat",
     "fix",
