@@ -1,4 +1,4 @@
-use std::io::Write;
+use std::{io::Write, path::Path};
 
 pub fn print_error_and_exit(message: &str) -> ! {
     eprintln!("{}", message);
@@ -31,4 +31,18 @@ pub fn read_lines(path: &std::path::Path) -> Result<Vec<String>, Box<dyn std::er
 pub fn append_line(path: &str, line: &str) -> std::io::Result<()> {
     let mut f = std::fs::File::options().append(true).open(path).unwrap();
     write!(f, "\n{}", line)
+}
+
+pub fn ensure_dir_exists(path: &str) {
+    let dir = Path::new(path);
+    if !dir.exists() {
+        match std::fs::create_dir_all(dir) {
+            Ok(()) => {}
+            Err(e) => eprintln!(
+            "Failed to create directory {}: {}",
+            dir.display(),
+            e
+        ),
+        }
+    }
 }
