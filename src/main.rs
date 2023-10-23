@@ -1,5 +1,5 @@
-use gitbox_lib::hello;
+use gitbox_lib::run;
 
 fn main() {
-    hello();
+    run();
 }
