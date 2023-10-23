@@ -4,13 +4,9 @@ use std::path::Path;
 
 use crate::common::{
     cached_values::CachedValues,
-    commons::{append_line, print_error_and_exit, read_lines},
-    git::DEFAULT_COMMIT_TYPES,
+    commons::{append_line, print_error_and_exit, read_lines, ensure_dir_exists},
+    git::{DEFAULT_COMMIT_TYPES, EXTRA_DIR_PATH, TYPES_FILE_PATH, SCOPES_FILE_PATH},
 };
-
-const EXTRA_DIR_PATH: &str = "/extra";
-const TYPES_FILE_PATH: &str = "/types.txt";
-const SCOPES_FILE_PATH: &str = "/scopes.txt";
 
 pub struct Prompt {}
 
@@ -125,17 +121,7 @@ impl Prompt {
 
     fn ensure_extra_dir_exists() {
         let extra_dir_absolute_path = CachedValues::git_dir().to_owned() + EXTRA_DIR_PATH;
-        let extra_dir_absolute_path = Path::new(&extra_dir_absolute_path);
-        if !extra_dir_absolute_path.exists() {
-            match std::fs::create_dir_all(extra_dir_absolute_path) {
-                Ok(()) => {}
-                Err(e) => eprintln!(
-                    "Failed to create directory {}: {}",
-                    extra_dir_absolute_path.display(),
-                    e
-                ),
-            }
-        }
+        ensure_dir_exists(&extra_dir_absolute_path);
     }
 
     fn read_values(path: &str, default_values: Vec<String>) -> Vec<String> {
