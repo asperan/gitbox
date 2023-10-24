@@ -1,4 +1,8 @@
+mod docker;
+
 use clap::{Args, Subcommand};
+
+use self::docker::DescribeDockerSubCommand;
 
 #[derive(Args)]
 #[derive(Debug)]
@@ -27,14 +31,3 @@ enum DescribeSubCommands {
     Docker(DescribeDockerSubCommand),
 }
 
-#[derive(Args, Clone)]
-#[derive(Debug)]
-struct DescribeDockerSubCommand {
-
-}
-
-impl DescribeDockerSubCommand {
-    pub fn describe_docker(&self) {
-        println!("describe docker called");
-    }
-}
