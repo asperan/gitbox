@@ -33,7 +33,6 @@ impl Prompt {
 
     pub fn ask_scope() -> String {
         let available_scopes = Prompt::read_scopes();
-        dbg!(&available_scopes);
         let raw_select = Question::raw_select("scope")
             .message("Choose the scope:")
             .choices(&available_scopes)

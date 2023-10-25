@@ -1,6 +1,13 @@
 mod docker;
+mod change_nodes;
+mod change_parser;
+mod change_lexer;
+mod syntax_error;
+mod syntax_checker;
 
 use clap::{Args, Subcommand};
+
+use crate::subcommands::describe::change_parser::ChangeTriggerParser;
 
 use self::docker::DescribeDockerSubCommand;
 
@@ -19,8 +26,14 @@ impl DescribeSubCommand {
             Some(c) => match c {
                 DescribeSubCommands::Docker(cc) => {cc.describe_docker();},
             },
-            None => println!("Default action"),
+            None => self.base_action(),
         }
+    }
+
+    fn base_action(&self) {
+        println!("Basic describe called");
+        let trigger = ChangeTriggerParser::parse("(type = test AND breaking)ORtype=testORscope=core-depsANDtype=featANDtypeIN[test,feat,fix]");
+        dbg!(trigger);
     }
 }
 
@@ -30,4 +43,3 @@ enum DescribeSubCommands {
     #[command(about = "TODO")]
     Docker(DescribeDockerSubCommand),
 }
-
