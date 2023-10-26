@@ -31,7 +31,7 @@ impl Trigger {
 }
 
 #[derive(Debug, Parser)]
-#[grammar = "lib/subcommands/describe/trigger-grammar.pest"]
+#[grammar = "lib/subcommands/describe/change_parser/trigger-grammar.pest"]
 pub(super) struct ChangeTriggerParser {}
 
 impl ChangeTriggerParser {
