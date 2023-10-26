@@ -6,7 +6,7 @@ impl CachedValues {
     pub fn git_dir() -> &'static String {
         unsafe {
             match &GIT_DIR {
-                Some(value) => &value,
+                Some(value) => value,
                 None => {
                     GIT_DIR = Some(git_dir());
                     GIT_DIR.as_ref().unwrap()

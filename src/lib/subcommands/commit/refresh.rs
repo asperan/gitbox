@@ -18,13 +18,11 @@ pub struct RefreshTypesAndScopesSubcommand {}
 impl RefreshTypesAndScopesSubcommand {
     pub fn refresh_types_and_scopes(&self) {
         let conventional_commit_regex = Regex::new(CONVENTIONAL_COMMIT_REGEX).unwrap();
-        let mut all_types = DEFAULT_COMMIT_TYPES.clone().map(|t| t.to_string()).to_vec();
+        let mut all_types = DEFAULT_COMMIT_TYPES.map(|t| t.to_string()).to_vec();
         let mut all_scopes: Vec<String> = vec![];
         self.full_commit_list()
             .iter()
-            .map(|commit| conventional_commit_regex.captures(commit))
-            .filter(|captures| captures.is_some())
-            .map(|o| o.unwrap())
+            .filter_map(|commit| conventional_commit_regex.captures(commit))
             .for_each(|capture| {
                 match capture.get(1) {
                     Some(m) if !all_types.contains(&m.as_str().to_string()) => {
@@ -54,7 +52,7 @@ impl RefreshTypesAndScopesSubcommand {
         let result = CommandIssuer::git(vec!["log", "--all", "--reverse", "--pretty=format:%s"]);
         if result.status.success() {
             match std::str::from_utf8(&result.stdout) {
-                Ok(s) => s.split("\n").map(|s| s.to_string()).collect(),
+                Ok(s) => s.split('\n').map(|s| s.to_string()).collect(),
                 Err(e) => print_error_and_exit(&e.to_string()),
             }
         } else {
@@ -69,11 +67,10 @@ impl RefreshTypesAndScopesSubcommand {
             .truncate(true)
             .open(file_path);
         match file {
-            Ok(mut f) => match writeln!(&mut f, "{}", content) {
-                Ok(()) => {}
-                Err(e) => eprintln!("Failed to update file '{}': {}", file_path, e),
+            Ok(mut f) => if let Err(e) = writeln!(&mut f, "{}", content) {
+                eprintln!("Failed to update file '{}': {}", file_path, e)
             },
-            Err(e) => eprintln!("Failed to open file {}: {}", file_path, e.to_string()),
+            Err(e) => eprintln!("Failed to open file {}: {}", file_path, e),
         }
     }
 }

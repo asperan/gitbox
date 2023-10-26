@@ -59,7 +59,7 @@ impl CommitSubCommand {
                 if !self.quiet {
                     println!("{}", full_message);
                 }
-                let result = CommandIssuer::git(vec!["commit", "-m", &full_message]);
+                let result = CommandIssuer::git(vec!["commit", "-m", full_message]);
                 if !result.status.success() {
                     print_cli_error_message_and_exit(&result.stderr, "create a commit");
                 }

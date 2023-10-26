@@ -42,11 +42,11 @@ impl ChangeTriggerParser {
         Trigger::new(match parse_result {
             Ok(mut v) => ChangeTriggerParser::parse_start(v.next().unwrap()),
             // TODO: Improve error messages
-            Err(e) => print_error_and_exit(&format!("{}", &e.to_string())),
+            Err(e) => print_error_and_exit(&e.to_string()),
         })
     }
 
-    fn parse_start<'a>(token: Pair<'a, Rule>) -> Start {
+    fn parse_start(token: Pair<Rule>) -> Start {
         match &token.as_rule() {
             Rule::AND_STMT => Start::And(Self::parse_and(token.into_inner())),
             Rule::OR_STMT => Start::Or(Self::parse_or(token.into_inner())),
@@ -55,7 +55,7 @@ impl ChangeTriggerParser {
         }
     }
 
-    fn parse_and<'a>(mut tokens: Pairs<'a, Rule>) -> AndStatement {
+    fn parse_and(mut tokens: Pairs<Rule>) -> AndStatement {
         let lhs = tokens.next().unwrap();
         let left_node = match lhs.as_rule() {
             Rule::PAR_STMT => FirstAndValue::Priority(Box::new(Self::parse_priority(
@@ -81,7 +81,7 @@ impl ChangeTriggerParser {
         }
     }
 
-    fn parse_priority<'a>(token: Pair<'a, Rule>) -> PriorityStatement {
+    fn parse_priority(token: Pair<Rule>) -> PriorityStatement {
         match token.as_rule() {
             Rule::OR_STMT => PriorityStatement {
                 internal_node: Self::parse_or(token.into_inner()),
@@ -90,7 +90,7 @@ impl ChangeTriggerParser {
         }
     }
 
-    fn parse_or<'a>(mut tokens: Pairs<'a, Rule>) -> OrStatement {
+    fn parse_or(mut tokens: Pairs<Rule>) -> OrStatement {
         let lhs = tokens.next().unwrap();
         let left_node = match lhs.as_rule() {
             Rule::AND_STMT => FirstOrValue::And(Self::parse_and(lhs.into_inner())),
@@ -110,7 +110,7 @@ impl ChangeTriggerParser {
         }
     }
 
-    fn parse_basic<'a>(token: Pair<'a, Rule>) -> BasicStatement {
+    fn parse_basic(token: Pair<Rule>) -> BasicStatement {
         match &token.as_rule() {
             Rule::BREAKING_STMT => BasicStatement::Breaking(BreakingNode {}),
             Rule::ARRAY_STMT => BasicStatement::In(Self::parse_in(token.into_inner())),
@@ -118,7 +118,7 @@ impl ChangeTriggerParser {
         }
     }
 
-    fn parse_in<'a>(mut tokens: Pairs<'a, Rule>) -> InNode {
+    fn parse_in(mut tokens: Pairs<Rule>) -> InNode {
         let object_node = Self::parse_object(tokens.next().unwrap());
         let array_node = Self::parse_array(tokens.next().unwrap());
         InNode {
@@ -127,7 +127,7 @@ impl ChangeTriggerParser {
         }
     }
 
-    fn parse_object<'a>(token: Pair<'a, Rule>) -> ObjectNode {
+    fn parse_object(token: Pair<Rule>) -> ObjectNode {
         let inner_token = token.into_inner().next().unwrap();
         match inner_token.as_rule() {
             Rule::TYPE_OBJECT => ObjectNode::Type(TypeNode {}),
@@ -136,7 +136,7 @@ impl ChangeTriggerParser {
         }
     }
 
-    fn parse_array<'a>(token: Pair<'a, Rule>) -> ArrayNode {
+    fn parse_array(token: Pair<Rule>) -> ArrayNode {
         ArrayNode {
             values: token.into_inner().map(|t| t.as_str().to_string()).collect(),
         }

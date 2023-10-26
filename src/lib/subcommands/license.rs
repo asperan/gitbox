@@ -6,6 +6,8 @@ use requestty::{Question, Answer, prompt_one};
 
 use crate::common::commons::print_error_and_exit;
 
+type NetError = Box<ureq::Error>;
+
 const BASE_LICENSE_URL: &str = "https://choosealicense.com";
 const HTML_LICENSE_PREFIX: &str = "<pre id=\"license-text\">";
 const HTML_LICENSE_SUFFIX: &str = "</pre>";
@@ -50,31 +52,26 @@ impl LicenseSubCommand {
         }
     }
 
-    fn download_license_list(&self) -> Result<Vec<(String, String)>, ureq::Error> {
+    fn download_license_list(&self) -> Result<Vec<(String, String)>, NetError> {
         let list_url = BASE_LICENSE_URL.to_owned() + "/appendix";
         let raw_list = ureq::get(&list_url).call()?.into_string();
         match raw_list {
             Ok(s) => {
                 let url_and_name_regex = Regex::new("<a href=\"(.*)\">(.*)</a>").unwrap();
-                let raw_licenses: Vec<(String, String)> = s.split("\n")
+                let raw_licenses: Vec<(String, String)> = s.split('\n')
                     .filter(|line| { line.contains("<th scope=\"row\">") })
-                    .map(|line| {
+                    .filter_map(|line| {
                         let captures = url_and_name_regex.captures(line);
-                        match captures {
-                            Some(c) => Some((c.get(1).unwrap().as_str().to_owned(), c.get(2).unwrap().as_str().to_owned())),
-                            None => None,
-                        }
+                        captures.map(|c| (c.get(1).unwrap().as_str().to_owned(), c.get(2).unwrap().as_str().to_owned()))
                     })
-                    .filter(|o| o.is_some())
-                    .map(|o| o.unwrap())
-                .collect();
+                    .collect();
                 Ok(raw_licenses)
             },
-            Err(e) => Err(e.into()),
+            Err(e) => Err(Box::new(e.into())),
         }
     }
 
-    fn download_license(&self, url_path: &str) -> Result<String, ureq::Error> {
+    fn download_license(&self, url_path: &str) -> Result<String, NetError> {
         let license_url = BASE_LICENSE_URL.to_owned() + url_path;
         let raw_license_page = ureq::get(&license_url).call()?.into_string();
         match raw_license_page {
@@ -97,7 +94,7 @@ impl LicenseSubCommand {
                     None => print_error_and_exit("Failed to parse license text"),
                 }
             },
-            Err(e) => Err(e.into()),
+            Err(e) => Err(Box::new(e.into())),
         }
     }
 

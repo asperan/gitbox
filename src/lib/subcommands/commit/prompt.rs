@@ -134,10 +134,7 @@ impl Prompt {
                         default_values.join("\n")
                     };
                     let write_result = std::fs::write(file_absolute_path, content);
-                    match write_result {
-                        Err(e) => eprintln!("Failed to write '{}': {}", path, e),
-                        _ => {}
-                    }
+                    if let Err(e) = write_result { eprintln!("Failed to write '{}': {}", path, e) }
                     default_values
                 } else {
                     match read_lines(file_absolute_path) {
