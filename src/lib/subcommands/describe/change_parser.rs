@@ -25,7 +25,7 @@ impl Trigger {
         Trigger { start_node }
     }
 
-    pub(super) fn call(&self, commit_type: &str, scope: &str, breaking: bool) -> bool {
+    pub(super) fn call(&self, commit_type: &str, scope: &Option<String>, breaking: bool) -> bool {
         self.start_node.visit(commit_type, scope, breaking)
     }
 }
