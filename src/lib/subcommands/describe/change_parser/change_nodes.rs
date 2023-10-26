@@ -1,20 +1,20 @@
-pub(super) trait Visitable<T> {
-    fn visit(&self, commit_type: &str, scope: &str, breaking: bool) -> T;
+pub(super) trait Visitable<'a, T> {
+    fn visit(&self, commit_type: &str, scope: &'a Option<String>, breaking: bool) -> T;
 }
 
 #[derive(Debug)]
 pub(super) struct TypeNode {}
-impl Visitable<String> for TypeNode {
-    fn visit(&self, commit_type: &str, _scope: &str, _breaking: bool) -> String {
+impl Visitable<'_, String> for TypeNode {
+    fn visit(&self, commit_type: &str, _scope: &Option<String>, _breaking: bool) -> String {
         commit_type.to_owned()
     }
 }
 
 #[derive(Debug)]
 pub(super) struct ScopeNode {}
-impl Visitable<String> for ScopeNode {
-    fn visit(&self, _commit_type: &str, scope: &str, _breaking: bool) -> String {
-        scope.to_owned()
+impl<'a> Visitable<'a, &'a Option<String>> for ScopeNode {
+    fn visit(&self, _commit_type: &str, scope: &'a Option<String>, _breaking: bool) -> &'a Option<String> {
+        scope
     }
 }
 
@@ -24,19 +24,10 @@ pub(super) enum ObjectNode {
     Type(TypeNode),
 }
 
-impl Visitable<String> for ObjectNode {
-    fn visit(&self, commit_type: &str, scope: &str, breaking: bool) -> String {
-        match self {
-            ObjectNode::Scope(n) => n.visit(commit_type, scope, breaking),
-            ObjectNode::Type(n) => n.visit(commit_type, scope, breaking),
-        }
-    }
-}
-
 #[derive(Debug)]
 pub(super) struct BreakingNode {}
-impl Visitable<bool> for BreakingNode {
-    fn visit(&self, _commit_type: &str, _scope: &str, breaking: bool) -> bool {
+impl Visitable<'_, bool> for BreakingNode {
+    fn visit(&self, _commit_type: &str, _scope: &Option<String>, breaking: bool) -> bool {
         breaking
     }
 }
@@ -45,8 +36,8 @@ impl Visitable<bool> for BreakingNode {
 pub(super) struct LiteralNode {
     value: String,
 }
-impl Visitable<String> for LiteralNode {
-    fn visit(&self, _commit_type: &str, _scope: &str, _breaking: bool) -> std::string::String {
+impl Visitable<'_, String> for LiteralNode {
+    fn visit(&self, _commit_type: &str, _scope: &Option<String>, _breaking: bool) -> std::string::String {
         self.value.clone()
     }
 }
@@ -55,8 +46,8 @@ impl Visitable<String> for LiteralNode {
 pub(super) struct ArrayNode {
     pub values: Vec<String>,
 }
-impl Visitable<Vec<String>> for ArrayNode {
-    fn visit(&self, _commit_type: &str, _scope: &str, _breaking: bool) -> Vec<String> {
+impl Visitable<'_, Vec<String>> for ArrayNode {
+    fn visit(&self, _commit_type: &str, _scope: &Option<String>, _breaking: bool) -> Vec<String> {
         self.values.clone()
     }
 }
@@ -66,9 +57,16 @@ pub(super) struct InNode {
     pub object: ObjectNode,
     pub array: ArrayNode,
 }
-impl Visitable<bool> for InNode {
-    fn visit(&self, commit_type: &str, scope: &str, breaking: bool) -> bool {
-        self.array.visit(commit_type, scope, breaking).contains(&self.object.visit(commit_type, scope, breaking))
+impl Visitable<'_, bool> for InNode {
+    fn visit(&self, commit_type: &str, scope: &Option<String>, breaking: bool) -> bool {
+        match &self.object {
+            ObjectNode::Type(type_node) => self.array.visit(commit_type, scope, breaking).contains(&type_node.visit(commit_type, scope, breaking)),
+            ObjectNode::Scope(scope_node) => match scope_node.visit(commit_type, scope, breaking) {
+                Some(this_scope) => self.array.visit(commit_type, scope, breaking).contains(this_scope),
+                None => false,
+            },
+
+        }
     }
 }
 
@@ -78,8 +76,8 @@ pub(super) enum BasicStatement {
     Breaking(BreakingNode),
 }
 
-impl Visitable<bool> for BasicStatement {
-    fn visit(&self, commit_type: &str, scope: &str, breaking: bool) -> bool {
+impl Visitable<'_, bool> for BasicStatement {
+    fn visit(&self, commit_type: &str, scope: &Option<String>, breaking: bool) -> bool {
         match self {
             BasicStatement::In(n) => n.visit(commit_type, scope, breaking),
             BasicStatement::Breaking(n) => n.visit(commit_type, scope, breaking),
@@ -93,8 +91,8 @@ pub(super) enum FirstAndValue {
     Priority(Box<PriorityStatement>),
 }
 
-impl Visitable<bool> for FirstAndValue {
-    fn visit(&self, commit_type: &str, scope: &str, breaking: bool) -> bool {
+impl Visitable<'_, bool> for FirstAndValue {
+    fn visit(&self, commit_type: &str, scope: &Option<String>, breaking: bool) -> bool {
         match self {
             FirstAndValue::Basic(node) => node.visit(commit_type, scope, breaking),
             FirstAndValue::Priority(node) => node.visit(commit_type, scope, breaking),
@@ -109,8 +107,8 @@ pub(super) enum SecondAndValue {
     And(Box<AndStatement>),
 }
 
-impl Visitable<bool> for SecondAndValue {
-    fn visit(&self, commit_type: &str, scope: &str, breaking: bool) -> bool {
+impl Visitable<'_, bool> for SecondAndValue {
+    fn visit(&self, commit_type: &str, scope: &Option<String>, breaking: bool) -> bool {
         match self {
             Self::Basic(n) => n.visit(commit_type, scope, breaking),
             Self::And(n) => n.visit(commit_type, scope, breaking),
@@ -125,8 +123,8 @@ pub(super) struct AndStatement {
     pub right: SecondAndValue,
 }
 
-impl Visitable<bool> for AndStatement {
-    fn visit(&self, commit_type: &str, scope: &str, breaking: bool) -> bool {
+impl Visitable<'_, bool> for AndStatement {
+    fn visit(&self, commit_type: &str, scope: &Option<String>, breaking: bool) -> bool {
         self.left.visit(commit_type, scope, breaking) && self.right.visit(commit_type, scope, breaking)
     }
 }
@@ -137,8 +135,8 @@ pub(super) enum FirstOrValue {
     Basic(BasicStatement),
 }
 
-impl Visitable<bool> for FirstOrValue {
-    fn visit(&self, commit_type: &str, scope: &str, breaking: bool) -> bool {
+impl Visitable<'_, bool> for FirstOrValue {
+    fn visit(&self, commit_type: &str, scope: &Option<String>, breaking: bool) -> bool {
         match self {
             Self::And(n) => n.visit(commit_type, scope, breaking),
             Self::Basic(n) => n.visit(commit_type, scope, breaking),
@@ -153,8 +151,8 @@ pub(super) enum SecondOrValue {
     Or(Box<OrStatement>),
 }
 
-impl Visitable<bool> for SecondOrValue {
-    fn visit(&self, commit_type: &str, scope: &str, breaking: bool) -> bool {
+impl Visitable<'_, bool> for SecondOrValue {
+    fn visit(&self, commit_type: &str, scope: &Option<String>, breaking: bool) -> bool {
         match self {
             Self::And(n) => n.visit(commit_type, scope, breaking),
             Self::Basic(n) => n.visit(commit_type, scope, breaking),
@@ -169,8 +167,8 @@ pub(super) struct OrStatement {
     pub right: SecondOrValue,
 }
 
-impl Visitable<bool> for OrStatement {
-    fn visit(&self, commit_type: &str, scope: &str, breaking: bool) -> bool {
+impl Visitable<'_, bool> for OrStatement {
+    fn visit(&self, commit_type: &str, scope: &Option<String>, breaking: bool) -> bool {
         self.left.visit(commit_type, scope, breaking) || self.right.visit(commit_type, scope, breaking)
     }
 }
@@ -180,8 +178,8 @@ pub(super) struct PriorityStatement {
     pub internal_node: OrStatement,
 }
 
-impl Visitable<bool> for PriorityStatement {
-    fn visit(&self, commit_type: &str, scope: &str, breaking: bool) -> bool {
+impl Visitable<'_, bool> for PriorityStatement {
+    fn visit(&self, commit_type: &str, scope: &Option<String>, breaking: bool) -> bool {
         self.internal_node.visit(commit_type, scope, breaking)
     }
 }
@@ -193,8 +191,8 @@ pub(super) enum Start {
     Basic(BasicStatement),
 }
 
-impl Visitable<bool> for Start {
-    fn visit(&self, commit_type: &str, scope: &str, breaking: bool) -> bool {
+impl Visitable<'_, bool> for Start {
+    fn visit(&self, commit_type: &str, scope: &Option<String>, breaking: bool) -> bool {
         match self {
             Self::And(n) => n.visit(commit_type, scope, breaking),
             Self::Or(n) => n.visit(commit_type, scope, breaking),
