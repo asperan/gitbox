@@ -1,5 +1,4 @@
 use clap::Args;
-use regex::Regex;
 use std::io::Write;
 
 use crate::common::{
@@ -7,7 +6,7 @@ use crate::common::{
     command_issuer::CommandIssuer,
     commons::{ensure_dir_exists, print_cli_error_message_and_exit, print_error_and_exit},
     git::{
-        CONVENTIONAL_COMMIT_REGEX, DEFAULT_COMMIT_TYPES, EXTRA_DIR_PATH, SCOPES_FILE_PATH,
+        DEFAULT_COMMIT_TYPES, EXTRA_DIR_PATH, SCOPES_FILE_PATH,
         TYPES_FILE_PATH,
     },
 };
@@ -17,7 +16,7 @@ pub struct RefreshTypesAndScopesSubcommand {}
 
 impl RefreshTypesAndScopesSubcommand {
     pub fn refresh_types_and_scopes(&self) {
-        let conventional_commit_regex = Regex::new(CONVENTIONAL_COMMIT_REGEX).unwrap();
+        let conventional_commit_regex = CachedValues::conventional_commit_regex();
         let mut all_types = DEFAULT_COMMIT_TYPES.map(|t| t.to_string()).to_vec();
         let mut all_scopes: Vec<String> = vec![];
         self.full_commit_list()
@@ -49,7 +48,7 @@ impl RefreshTypesAndScopesSubcommand {
     }
 
     fn full_commit_list(&self) -> Vec<String> {
-        let result = CommandIssuer::git(vec!["log", "--all", "--reverse", "--pretty=format:%s"]);
+        let result = CommandIssuer::git(&["log", "--all", "--reverse", "--pretty=format:%s"]);
         if result.status.success() {
             match std::str::from_utf8(&result.stdout) {
                 Ok(s) => s.split('\n').map(|s| s.to_string()).collect(),
