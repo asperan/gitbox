@@ -18,12 +18,12 @@ impl InitSubCommand {
         if is_in_git_repository() {
             print_error_and_exit("The current directory is already a git repository");
         }
-        let init_output = CommandIssuer::git(vec!["init"]);
+        let init_output = CommandIssuer::git(&["init"]);
         if !init_output.status.success() {
             print_cli_error_message_and_exit(&init_output.stderr, "initialize repository");
         }
         if !self.empty {
-            let commit_output = CommandIssuer::git(vec![
+            let commit_output = CommandIssuer::git(&[
                 "commit",
                 "--allow-empty",
                 "-m",

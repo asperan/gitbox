@@ -18,7 +18,7 @@ impl TreeSubCommand {
         if !is_in_git_repository() {
             print_error_and_exit("tree must be run inside a git repository");
         }
-        let git_log_result = CommandIssuer::git(vec!["log", "--all", "--graph", "--decorate=short", "--date-order", "--color", &format!("--pretty=format:{}", TREE_FORMAT)]);
+        let git_log_result = CommandIssuer::git(&["log", "--all", "--graph", "--decorate=short", "--date-order", "--color", &format!("--pretty=format:{}", TREE_FORMAT)]);
         if !&git_log_result.status.success() {
             print_cli_error_message_and_exit(&git_log_result.stderr, "retrieve commit tree");
         }
