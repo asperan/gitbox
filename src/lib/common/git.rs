@@ -81,7 +81,7 @@ pub(super) fn last_release() -> Option<String> {
     }
 }
 
-pub fn commit_list(from: Option<String>) -> Vec<String> {
+pub fn commit_list(from: Option<&String>) -> Vec<String> {
     let result = match from {
         Some(value) => CommandIssuer::git(&[ "--no-pager", "log", "--oneline", "--pretty=format:%s", &format!("^{} HEAD", value)]),
         None => CommandIssuer::git(&[ "--no-pager", "log", "--oneline", "--pretty=format:%s"]),
