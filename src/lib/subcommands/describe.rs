@@ -1,9 +1,5 @@
 mod docker;
-mod change_nodes;
 mod change_parser;
-mod change_lexer;
-mod syntax_error;
-mod syntax_checker;
 
 use clap::{Args, Subcommand};
 
