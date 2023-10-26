@@ -1,9 +1,10 @@
 mod docker;
 mod change_parser;
+mod stable;
 
 use clap::{Args, Subcommand};
 
-use crate::subcommands::describe::change_parser::ChangeTriggerParser;
+use crate::{subcommands::describe::stable::StableVersionCalculator, common::cached_values::CachedValues};
 
 use self::docker::DescribeDockerSubCommand;
 
@@ -44,18 +45,48 @@ pub struct DescribeSubCommand {
 impl DescribeSubCommand {
     pub fn describe(&self) {
         println!("describe called");
+        let new_version = self.update_version();
         match &self.subcommand {
             Some(c) => match c {
                 DescribeSubCommands::Docker(cc) => {cc.describe_docker();},
             },
-            None => self.base_action(),
+            None => self.print_version(&new_version, CachedValues::last_version().as_deref()),
         }
     }
 
-    fn base_action(&self) {
+    fn update_version(&self) -> String {
+        /*
         println!("Basic describe called");
-        let trigger = ChangeTriggerParser::parse("(type = test AND breaking)ORtype=testORscope=core-depsANDtype=featANDtypeIN[test,feat,fix]");
-        dbg!(trigger);
+        let test_trigger = "scope IN [core-deps, frontend] AND type IN [ test, feat ] OR breaking";
+        // let test_trigger = "type IN [ test, feat ]";
+        // let test_trigger = "breaking";
+        // let test_trigger = "scope IN [ core-deps, backend ]";
+        let trigger = ChangeTriggerParser::run(test_trigger);
+        dbg!(&trigger);
+        dbg!(trigger.call("test", &Some("backend".to_string()), false));
+        */
+        dbg!(CachedValues::last_version());
+        dbg!(CachedValues::last_release());
+        let stable_updater = StableVersionCalculator::new(&self.major_trigger, &self.minor_trigger, &self.patch_trigger);
+        let new_stable_version = stable_updater.next_stable(CachedValues::last_release());
+        // TODO: calc prerelease (needs last_version and new_stable_version), returns a Option? and
+        // starts as None?
+        // TODO: calc metadata, it is an Option
+        // TODO: final version: format!("{}{}{}", new_stable_version, prerelease.map_or(|p|
+        // format!("-{}", p), ""), metadata.map_or(|m| format!("+{}", m), "")
+        // TODO: if new_version == last_release.stable_version && !prerelease => error "No
+        // important changes since last release. Change triggers or commit some relevant changes."
+        dbg!(&new_stable_version);
+        new_stable_version
+    }
+
+    fn print_version(&self, new_version: &str, old_version: Option<&str>) {
+        let left_part = if self.diff {
+            format!("{} -> ", old_version.unwrap_or("none"))
+        } else {
+            String::from("")
+        };
+        println!("{}{}", left_part, new_version);
     }
 }
 
@@ -65,3 +96,4 @@ enum DescribeSubCommands {
     #[command(about = "TODO")]
     Docker(DescribeDockerSubCommand),
 }
+
