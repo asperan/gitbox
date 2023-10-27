@@ -36,7 +36,7 @@ impl PrereleaseUpdater {
             self.new_pattern.replace("%d", "1")
         } else {
             let old_pattern_regex = Regex::new(&self.old_pattern.replace("%d", "(\\d+)")).unwrap();
-            let number:u16 = old_pattern_regex.captures(&old_version.as_ref().unwrap().prerelease().as_ref().unwrap()).unwrap().get(1).unwrap().as_str().parse::<u16>().unwrap() + 1;
+            let number:u16 = old_pattern_regex.captures(old_version.as_ref().unwrap().prerelease().as_ref().unwrap()).unwrap().get(1).unwrap().as_str().parse::<u16>().unwrap() + 1;
             self.new_pattern.replace("%d", &number.to_string())
 
         }
