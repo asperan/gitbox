@@ -46,6 +46,18 @@ impl SemanticVersion {
     pub fn patch(&self) -> u16 {
         self.patch
     }
+
+    pub fn prerelease(&self) -> &Option<String> {
+        &self.prerelease
+    }
+
+    pub fn add_prerelease(&mut self, prerelease: Option<String>) {
+        self.prerelease = prerelease;
+    }
+
+    pub fn add_metadata(&mut self, metadata: Option<String>) {
+        self.metadata = metadata;
+    }
 }
 
 impl PartialOrd<SemanticVersion> for SemanticVersion {
