@@ -28,11 +28,11 @@ pub struct MetadataGenerator {}
 impl MetadataGenerator {
     pub fn generate<'a>(specs: impl IntoIterator<Item = &'a MetadataSpecs>) -> Option<String> {
         let mut unique_specs: Vec<MetadataSpecs> = Vec::with_capacity(MetadataSpecs::value_variants().len());
-        specs.into_iter().for_each(|s| if !unique_specs.contains(&s) { unique_specs.push(*s); });
+        specs.into_iter().for_each(|s| if !unique_specs.contains(s) { unique_specs.push(*s); });
         if unique_specs.is_empty() {
             None
         } else {
-            unique_specs.iter().map(|s| MetadataGenerator::spec_to_string(&s)).reduce(|accumulator, element| accumulator + "-" + &element)
+            unique_specs.iter().map(MetadataGenerator::spec_to_string).reduce(|accumulator, element| accumulator + "-" + &element)
         }
     }
 

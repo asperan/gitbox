@@ -45,7 +45,7 @@ impl StableVersionCalculator {
     pub fn next_stable(&self, last_stable: &Option<SemanticVersion>) -> SemanticVersion {
         match last_stable {
             Some(version) => {
-                let commit_list = commit_list(Some(&version));
+                let commit_list = commit_list(Some(version));
                 let max_change = commit_list.iter().filter_map(|c| self.message_to_change(c)).max();
                 match max_change {
                     Some(Change::Major) => SemanticVersion::new(version.major() + 1, 0, 0, None, None),
