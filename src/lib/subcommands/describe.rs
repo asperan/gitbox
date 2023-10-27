@@ -67,9 +67,9 @@ impl DescribeSubCommand {
         dbg!(trigger.call("test", &Some("backend".to_string()), false));
         */
         dbg!(CachedValues::last_version());
-        dbg!(CachedValues::last_release());
+        dbg!(CachedValues::last_stable_release());
         let stable_updater = StableVersionCalculator::new(&self.major_trigger, &self.minor_trigger, &self.patch_trigger);
-        let new_stable_version = stable_updater.next_stable(CachedValues::last_release());
+        let new_stable_version = stable_updater.next_stable(CachedValues::last_stable_release());
 
         // TODO: calc prerelease (needs last_version and new_stable_version), returns a Option? and
         // starts as None?
@@ -78,7 +78,7 @@ impl DescribeSubCommand {
         dbg!(&metadata_str);
         // TODO: final version: format!("{}{}{}", new_stable_version, prerelease.map_or(|p|
         // format!("-{}", p), ""), metadata.map_or(|m| format!("+{}", m), "")
-        if CachedValues::last_release().as_ref().is_some_and(|v| new_stable_version == *v) {
+        if CachedValues::last_stable_release().as_ref().is_some_and(|v| new_stable_version == *v) {
             print_error_and_exit("There are no relevant changes since the last stable version. Change triggers or commit some relevant changes to describe a new version.")
         }
         dbg!(&new_stable_version);

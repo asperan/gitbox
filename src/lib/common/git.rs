@@ -55,7 +55,7 @@ pub(super) fn last_version() -> Option<SemanticVersion> {
     }
 }
 
-pub(super) fn last_release() -> Option<SemanticVersion> {
+pub(super) fn last_stable_version() -> Option<SemanticVersion> {
     let result = CommandIssuer::git(&["--no-pager", "tag", "--list", "--merged"]);
     if result.status.success() {
         match std::str::from_utf8(&result.stdout) {
