@@ -1,12 +1,13 @@
 mod docker;
 mod change_parser;
 mod stable;
+mod metadata;
 
 use clap::{Args, Subcommand};
 
-use crate::{subcommands::describe::stable::StableVersionCalculator, common::cached_values::CachedValues};
+use crate::{subcommands::describe::{stable::StableVersionCalculator, metadata::MetadataGenerator}, common::{cached_values::CachedValues, semantic_version::SemanticVersion, commons::print_error_and_exit}};
 
-use self::docker::DescribeDockerSubCommand;
+use self::{docker::DescribeDockerSubCommand, metadata::MetadataSpecs};
 
 #[derive(Args)]
 #[derive(Debug)]
@@ -26,8 +27,8 @@ pub struct DescribeSubCommand {
     #[arg(short, long, help = "Print the last version (if possible) in addition to the new version")]
     diff: bool,
 
-    #[arg(short, long, help = "Add a metadata to include in the new version (can be used multiple times)")]
-    metadata: Vec<String>,
+    #[arg(short, long, help = "Add a metadata to include in the new version (can be used multiple times)", value_parser = clap::builder::EnumValueParser::<MetadataSpecs>::new())]
+    metadata: Vec<MetadataSpecs>,
 
     #[arg(long, help = "Set the expression which triggers a major change")]
     major_trigger: Option<String>,
@@ -50,11 +51,11 @@ impl DescribeSubCommand {
             Some(c) => match c {
                 DescribeSubCommands::Docker(cc) => {cc.describe_docker();},
             },
-            None => self.print_version(&new_version, CachedValues::last_version().as_deref()),
+            None => self.print_version(&new_version, CachedValues::last_version().as_ref()),
         }
     }
 
-    fn update_version(&self) -> String {
+    fn update_version(&self) -> SemanticVersion {
         /*
         println!("Basic describe called");
         let test_trigger = "scope IN [core-deps, frontend] AND type IN [ test, feat ] OR breaking";
@@ -69,20 +70,24 @@ impl DescribeSubCommand {
         dbg!(CachedValues::last_release());
         let stable_updater = StableVersionCalculator::new(&self.major_trigger, &self.minor_trigger, &self.patch_trigger);
         let new_stable_version = stable_updater.next_stable(CachedValues::last_release());
+
         // TODO: calc prerelease (needs last_version and new_stable_version), returns a Option? and
         // starts as None?
-        // TODO: calc metadata, it is an Option
+        dbg!(&self.metadata);
+        let metadata_str = MetadataGenerator::generate(&self.metadata);
+        dbg!(&metadata_str);
         // TODO: final version: format!("{}{}{}", new_stable_version, prerelease.map_or(|p|
         // format!("-{}", p), ""), metadata.map_or(|m| format!("+{}", m), "")
-        // TODO: if new_version == last_release.stable_version && !prerelease => error "No
-        // important changes since last release. Change triggers or commit some relevant changes."
+        if CachedValues::last_release().as_ref().is_some_and(|v| new_stable_version == *v) {
+            print_error_and_exit("There are no relevant changes since the last stable version. Change triggers or commit some relevant changes to describe a new version.")
+        }
         dbg!(&new_stable_version);
         new_stable_version
     }
 
-    fn print_version(&self, new_version: &str, old_version: Option<&str>) {
+    fn print_version(&self, new_version: &SemanticVersion, old_version: Option<&SemanticVersion>) {
         let left_part = if self.diff {
-            format!("{} -> ", old_version.unwrap_or("none"))
+            format!("{} -> ", old_version.map_or(String::from("none"), |v| v.to_string()))
         } else {
             String::from("")
         };
