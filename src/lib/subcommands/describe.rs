@@ -46,11 +46,10 @@ pub struct DescribeSubCommand {
 
 impl DescribeSubCommand {
     pub fn describe(&self) {
-        println!("describe called");
         let new_version = self.update_version();
         match &self.subcommand {
             Some(c) => match c {
-                DescribeSubCommands::Docker(cc) => {cc.describe_docker();},
+                DescribeSubCommands::Docker(cc) => {cc.describe_docker(&new_version);},
             },
             None => self.print_version(&new_version, CachedValues::last_version().as_ref()),
         }
@@ -88,7 +87,7 @@ impl DescribeSubCommand {
 #[derive(Subcommand, Clone)]
 #[derive(Debug)]
 enum DescribeSubCommands {
-    #[command(about = "TODO")]
+    #[command(about = "Print versions for a docker image, without metadata")]
     Docker(DescribeDockerSubCommand),
 }
 
