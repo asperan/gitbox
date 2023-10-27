@@ -1,6 +1,6 @@
 use regex::Regex;
 
-use super::git::{git_dir, last_version, last_release, FULL_SEMANTIC_VERSION_PATTERN, CONVENTIONAL_COMMIT_PATTERN};
+use super::{git::{git_dir, last_version, last_release, FULL_SEMANTIC_VERSION_PATTERN, CONVENTIONAL_COMMIT_PATTERN}, semantic_version::SemanticVersion};
 
 pub struct CachedValues {}
 
@@ -17,7 +17,7 @@ impl CachedValues {
         }
     }
 
-    pub fn last_version() -> &'static Option<String> {
+    pub fn last_version() -> &'static Option<SemanticVersion> {
         unsafe {
             match &LAST_VERSION {
                 Some(value) => value,
@@ -29,7 +29,7 @@ impl CachedValues {
         }
     }
 
-    pub fn last_release() -> &'static Option<String> {
+    pub fn last_release() -> &'static Option<SemanticVersion> {
         unsafe {
             match &LAST_RELEASE {
                 Some(value) => value,
@@ -67,7 +67,7 @@ impl CachedValues {
 }
 
 static mut GIT_DIR: Option<String> = None;
-static mut LAST_VERSION: Option<Option<String>> = None;
-static mut LAST_RELEASE: Option<Option<String>> = None;
+static mut LAST_VERSION: Option<Option<SemanticVersion>> = None;
+static mut LAST_RELEASE: Option<Option<SemanticVersion>> = None;
 static mut CONVENTIONAL_COMMIT_REGEX: Option<Regex> = None;
 static mut SEMANTIC_VERSION_REGEX: Option<Regex> = None;

@@ -1,6 +1,6 @@
 use crate::common::command_issuer::CommandIssuer;
 
-use super::{commons::print_error_and_exit, cached_values::CachedValues};
+use super::{commons::print_error_and_exit, cached_values::CachedValues, semantic_version::SemanticVersion};
 
 pub fn is_in_git_repository() -> bool {
     CommandIssuer::git(&["rev-parse", "--is-inside-work-tree"]).status.success()
@@ -33,7 +33,6 @@ pub const DEFAULT_COMMIT_TYPES: [&str; 10] = [
     "test",
 ];
 
-pub const FIRST_STABLE_RELEASE: &str = "0.1.0";
 pub(super) const FULL_SEMANTIC_VERSION_PATTERN: &str = concat!(
     // GROUPS:
     // 1 = Stable version, 2 = major, 3 = minor, 4 = patch
@@ -44,11 +43,11 @@ pub(super) const FULL_SEMANTIC_VERSION_PATTERN: &str = concat!(
     r"(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$"
 );
 
-pub(super) fn last_version() -> Option<String> {
+pub(super) fn last_version() -> Option<SemanticVersion> {
     let result = CommandIssuer::git(&["describe", "--tags", "--abbrev=0"]);
     if result.status.success() {
         match std::str::from_utf8(&result.stdout) {
-            Ok(version) => Some(version.trim().to_owned()),
+            Ok(version) => Some(SemanticVersion::from_str(version.trim())),
             Err(e) => print_error_and_exit(&e.to_string()),
         }
     } else {
@@ -56,7 +55,7 @@ pub(super) fn last_version() -> Option<String> {
     }
 }
 
-pub(super) fn last_release() -> Option<String> {
+pub(super) fn last_release() -> Option<SemanticVersion> {
     let result = CommandIssuer::git(&["--no-pager", "tag", "--list", "--merged"]);
     if result.status.success() {
         match std::str::from_utf8(&result.stdout) {
@@ -71,7 +70,7 @@ pub(super) fn last_release() -> Option<String> {
                         ).map(|version| version.replace('+', "_"))
                         .collect();
                     to_sort_versions.sort_unstable();
-                    to_sort_versions.last().map(|s| s.replace('_', "+").to_owned())
+                    to_sort_versions.last().map(|s| SemanticVersion::from_str(&s.replace('_', "+")))
                 }
             },
             Err(e) => print_error_and_exit(&e.to_string()),
@@ -81,7 +80,8 @@ pub(super) fn last_release() -> Option<String> {
     }
 }
 
-pub fn commit_list(from: Option<&String>) -> Vec<String> {
+// TODO: Commit list should returns an iterator
+pub fn commit_list(from: Option<&SemanticVersion>) -> Vec<String> {
     let result = match from {
         Some(value) => CommandIssuer::git(&[ "--no-pager", "log", "--oneline", "--pretty=format:%s", &format!("^{} HEAD", value)]),
         None => CommandIssuer::git(&[ "--no-pager", "log", "--oneline", "--pretty=format:%s"]),

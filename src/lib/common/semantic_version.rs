@@ -34,6 +34,18 @@ impl SemanticVersion {
     pub fn first_release() -> SemanticVersion {
         SemanticVersion { major: 0, minor: 1, patch: 0, prerelease: None, metadata: None }
     }
+
+    pub fn major(&self) -> u16 {
+        self.major
+    }
+
+    pub fn minor(&self) -> u16 {
+        self.minor
+    }
+
+    pub fn patch(&self) -> u16 {
+        self.patch
+    }
 }
 
 impl PartialOrd<SemanticVersion> for SemanticVersion {

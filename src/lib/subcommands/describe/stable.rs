@@ -1,4 +1,4 @@
-use crate::common::{cached_values::CachedValues, git::{FIRST_STABLE_RELEASE, commit_list}};
+use crate::common::{cached_values::CachedValues, git::commit_list, semantic_version::SemanticVersion};
 
 use super::change_parser::{Trigger, ChangeTriggerParser};
 
@@ -42,23 +42,19 @@ impl StableVersionCalculator {
         }
     }
 
-    pub fn next_stable(&self, last_stable: &Option<String>) -> String {
+    pub fn next_stable(&self, last_stable: &Option<SemanticVersion>) -> SemanticVersion {
         match last_stable {
             Some(version) => {
-                let commit_list = commit_list(Some(version));
-                let captures = CachedValues::semantic_version_regex().captures(version).unwrap();
-                let major: u16 = captures.get(2).unwrap().as_str().parse().unwrap();
-                let minor: u16 = captures.get(3).unwrap().as_str().parse().unwrap();
-                let patch: u16 = captures.get(4).unwrap().as_str().parse().unwrap();
+                let commit_list = commit_list(Some(&version));
                 let max_change = commit_list.iter().filter_map(|c| self.message_to_change(c)).max();
                 match max_change {
-                    Some(Change::Major) => format!("{}.{}.{}", major + 1, 0, 0),
-                    Some(Change::Minor) => format!("{}.{}.{}", major, minor + 1, 0),
-                    Some(Change::Patch) => format!("{}.{}.{}", major, minor, patch + 1),
-                    _ => version.to_owned(),
+                    Some(Change::Major) => SemanticVersion::new(version.major() + 1, 0, 0, None, None),
+                    Some(Change::Minor) => SemanticVersion::new(version.major(), version.minor() + 1, 0, None, None),
+                    Some(Change::Patch) => SemanticVersion::new(version.major(), version.minor(), version.patch() + 1, None, None),
+                    _ => SemanticVersion::new(version.major(), version.minor(), version.patch(), None, None),
                 }
             },
-            None => FIRST_STABLE_RELEASE.to_string(),
+            None => SemanticVersion::first_release(),
         }
     }
 
