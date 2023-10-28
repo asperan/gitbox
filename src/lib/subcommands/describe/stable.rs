@@ -1,6 +1,4 @@
-use crate::common::{cached_values::CachedValues, git::commit_list, semantic_version::SemanticVersion};
-
-use super::change_parser::{Trigger, ChangeTriggerParser};
+use crate::common::{cached_values::CachedValues, git::commit_list, semantic_version::SemanticVersion, trigger::Trigger};
 
 type DefaultChangeAcceptor = Box<dyn Fn(&str, &Option<String>, bool) -> bool>;
 
@@ -13,7 +11,7 @@ impl TriggerWrapper {
     fn accept(&self, commit_type: &str, scope: &Option<String>, breaking: bool) -> bool {
         match self {
             TriggerWrapper::Default(function) => function(commit_type, scope, breaking),
-            TriggerWrapper::Custom(trigger) => trigger.call(commit_type, scope, breaking),
+            TriggerWrapper::Custom(trigger) => trigger.accept(commit_type, scope, breaking),
         }
     }
 }
@@ -28,15 +26,15 @@ impl StableVersionCalculator {
     pub fn new(major_str: &Option<String>, minor_str: &Option<String>, patch_str: &Option<String>) -> StableVersionCalculator {
         StableVersionCalculator {
             major_trigger: match major_str {
-                Some(s) => TriggerWrapper::Custom(ChangeTriggerParser::run(s)),
+                Some(s) => TriggerWrapper::Custom(Trigger::from(s)),
                 None => TriggerWrapper::Default(Box::new(StableVersionCalculator::default_major_trigger)),
             },
             minor_trigger: match minor_str {
-                Some(s) => TriggerWrapper::Custom(ChangeTriggerParser::run(s)),
+                Some(s) => TriggerWrapper::Custom(Trigger::from(s)),
                 None => TriggerWrapper::Default(Box::new(StableVersionCalculator::default_minor_trigger)),
             },
             patch_trigger: match patch_str {
-                Some(s) => TriggerWrapper::Custom(ChangeTriggerParser::run(s)),
+                Some(s) => TriggerWrapper::Custom(Trigger::from(s)),
                 None => TriggerWrapper::Default(Box::new(StableVersionCalculator::default_patch_trigger)),
             }
         }
