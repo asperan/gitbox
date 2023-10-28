@@ -5,10 +5,10 @@ use clap::{Parser, CommandFactory};
 use crate::{subcommands::Commands, common::commons::print_error_and_exit};
 
 #[derive(Parser,Debug)]
-#[command(name = "gitbox")]
+#[command(name = "gb")]
 #[command(author = "Alex Speranza")]
 #[command(version = "0.1.0-dev1")]
-#[command(about = "Enhance git", long_about = None)]
+#[command(about = "Gitbox (gb) is wrapper for git and it enhance some functionalities.", long_about = None)]
 struct CliParser {
     #[command(subcommand)]
     command: Commands,
