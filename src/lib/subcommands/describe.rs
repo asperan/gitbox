@@ -30,11 +30,11 @@ pub struct DescribeSubCommand {
     #[arg(short, long, help = "Add a metadata to include in the new version (can be used multiple times)", value_parser = clap::builder::EnumValueParser::<MetadataSpecs>::new())]
     metadata: Vec<MetadataSpecs>,
 
-    #[arg(long, help = "Set the expression which triggers a major change (Default behaviour is equivalent to 'breaking')")]
+    #[arg(long, help = "Set the expression which triggers a major change (Default behaviour is equivalent to 'breaking'). For more informations about the grammar, run 'help grammar'")]
     major_trigger: Option<String>,
-    #[arg(long, help = "Set the expression which triggers a minor change (Default behaviour is equivalent to 'type IN [ feat ]')")]
+    #[arg(long, help = "Set the expression which triggers a minor change (Default behaviour is equivalent to 'type IN [ feat ]'). For more informations about the grammar, run 'help grammar'")]
     minor_trigger: Option<String>,
-    #[arg(long, help = "Set the expression which triggers a patch change (Default behaviou is equivalent to 'type IN [ fix ]')")]
+    #[arg(long, help = "Set the expression which triggers a patch change (Default behaviou is equivalent to 'type IN [ fix ]'). For more informations about the grammar, run 'help grammar'")]
     patch_trigger: Option<String>,
 
     #[arg(short = 't', long, help = "Create a new signed tag with the computed version")]
