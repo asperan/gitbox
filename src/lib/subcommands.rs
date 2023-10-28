@@ -7,7 +7,7 @@ use self::{
     describe::DescribeSubCommand,
     init::InitSubCommand,
     license::LicenseSubCommand,
-    tree::TreeSubCommand,
+    tree::TreeSubCommand, grammar::GrammarSubCommand,
 };
 
 mod changelog;
@@ -17,6 +17,7 @@ mod describe;
 mod init;
 mod license;
 mod tree;
+mod grammar;
 
 #[derive(Subcommand, Debug)]
 pub enum Commands {
@@ -27,4 +28,6 @@ pub enum Commands {
     Init(InitSubCommand),
     License(LicenseSubCommand),
     Tree(TreeSubCommand),
+    // HIDDEN COMMANDS
+    Grammar(GrammarSubCommand),
 }
