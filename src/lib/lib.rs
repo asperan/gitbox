@@ -7,7 +7,7 @@ use crate::{subcommands::Commands, common::commons::print_error_and_exit};
 #[derive(Parser,Debug)]
 #[command(name = "gb")]
 #[command(author = "Alex Speranza")]
-#[command(version = "0.1.0-dev1")]
+#[command(version = "0.1.0")]
 #[command(about = "Gitbox (gb) is wrapper for git and it enhance some functionalities.", long_about = None)]
 struct CliParser {
     #[command(subcommand)]
