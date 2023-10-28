@@ -27,3 +27,8 @@ ureq = "2.8.0"
 name = "gitbox_lib"
 path = "src/lib/lib.rs"
 
+[[bin]]
+name = "gb"
+path = "src/main.rs"
+
+
