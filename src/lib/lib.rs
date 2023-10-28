@@ -2,7 +2,7 @@ mod subcommands;
 mod common;
 
 use clap::Parser;
-use crate::subcommands::Commands;
+use crate::{subcommands::Commands, common::commons::print_error_and_exit};
 
 #[derive(Parser,Debug)]
 #[command(name = "gitbox")]
@@ -28,6 +28,8 @@ pub fn run() {
         Commands::Init(c) => c.init_repository(),
         Commands::License(c) => c.create_license(),
         Commands::Tree(c) => c.print_tree(),
+        // Catch-all branch for hidden commands
+        _ => print_error_and_exit("Unknown command. See '--help' or subcommand 'help' for available commands")
     }
 }
 
