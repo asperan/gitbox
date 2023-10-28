@@ -1,7 +1,7 @@
 mod subcommands;
 mod common;
 
-use clap::Parser;
+use clap::{Parser, CommandFactory};
 use crate::{subcommands::Commands, common::commons::print_error_and_exit};
 
 #[derive(Parser,Debug)]
@@ -23,7 +23,7 @@ pub fn run() {
     match &cli.command {
         Commands::Changelog(c) => c.changelog(),
         Commands::Commit(c) => c.commit(),
-        Commands::Complete(c) => c.print_completion_script(),
+        Commands::Complete(c) => c.print_completion_script(&mut CliParser::command_for_update()),
         Commands::Describe(c) => c.describe(),
         Commands::Init(c) => c.init_repository(),
         Commands::License(c) => c.create_license(),
