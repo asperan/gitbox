@@ -16,7 +16,7 @@ use self::change_nodes::{
 };
 
 #[derive(Debug)]
-pub(super) struct Trigger {
+pub struct Trigger {
     start_node: Start,
 }
 
@@ -25,17 +25,21 @@ impl Trigger {
         Trigger { start_node }
     }
 
-    pub(super) fn call(&self, commit_type: &str, scope: &Option<String>, breaking: bool) -> bool {
+    pub fn from(dsl: &str) -> Trigger {
+        ChangeTriggerParser::run(dsl)
+    }
+
+    pub fn accept(&self, commit_type: &str, scope: &Option<String>, breaking: bool) -> bool {
         self.start_node.visit(commit_type, scope, breaking)
     }
 }
 
 #[derive(Debug, Parser)]
-#[grammar = "lib/subcommands/describe/change_parser/trigger-grammar.pest"]
-pub(super) struct ChangeTriggerParser {}
+#[grammar = "lib/common/trigger/trigger-grammar.pest"]
+struct ChangeTriggerParser {}
 
 impl ChangeTriggerParser {
-    pub(super) fn run(dsl: &str) -> Trigger {
+    fn run(dsl: &str) -> Trigger {
         let parse_result = Self::parse(Rule::START, dsl);
         #[cfg(debug_assertions)]
         dbg!(&parse_result);
