@@ -1,7 +1,7 @@
 use clap::Args;
 use ahash::AHashMap;
 
-use crate::common::{git::commit_list, cached_values::CachedValues, semantic_version::SemanticVersion, commons::print_error_and_exit};
+use crate::common::{git::commit_list, cached_values::CachedValues, semantic_version::SemanticVersion, commons::print_error_and_exit, trigger::Trigger};
 
 const NO_SCOPE_TITLE: &str = "General";
 const NON_CONVENTIONAL_TYPE: &str = "Non conventional";
@@ -29,8 +29,9 @@ pub struct ChangelogSubCommand {
     item_format: String,
     #[arg(short = 'b', long, help = "Set the breaking commit format. The content placeholder is '%s'", default_value("!!! %s "), allow_hyphen_values(true))]
     breaking_format: String,
-    // TODO: shortcut for markdown format
-    // TODO: exclude trigger (same grammar as change triggers)
+
+    #[arg(long, help = "Set the trigger to use to exclude commits from the changelog. For more informations about the grammar, run 'help grammar'")]
+    exclude_trigger: Option<String>,
 }
 
 impl ChangelogSubCommand {
@@ -41,6 +42,7 @@ impl ChangelogSubCommand {
     }
 
     fn categorize_commits_from(&self, version: &Option<SemanticVersion>) -> TypeMap {
+        let exclude_trigger = self.exclude_trigger.as_ref().map(|s| Trigger::from(s));
         let commit_list = commit_list(version.as_ref());
         let mut types_map: TypeMap = AHashMap::new();
         commit_list.iter().for_each(|c| {
@@ -51,11 +53,12 @@ impl ChangelogSubCommand {
                     let scope = caps.get(3).map_or(NO_SCOPE_TITLE, |m| m.as_str());
                     let is_breaking = caps.get(4).is_some();
                     let message = caps.get(5).unwrap().as_str();
-                    // TODO: this is the place where to exclude commits
-                    Self::ensure_inner_map_exists(&mut types_map, &commit_type.to_owned());
-                    let scopes_map = types_map.get_mut(commit_type).unwrap();
-                    Self::ensure_inner_vector_exists(scopes_map, &scope.to_owned());
-                    scopes_map.get_mut(scope).unwrap().push((message.trim().to_string(), is_breaking));
+                    if !exclude_trigger.as_ref().is_some_and(|t| t.accept(commit_type, &Some(scope.to_owned()), is_breaking)) {
+                        Self::ensure_inner_map_exists(&mut types_map, &commit_type.to_owned());
+                        let scopes_map = types_map.get_mut(commit_type).unwrap();
+                        Self::ensure_inner_vector_exists(scopes_map, &scope.to_owned());
+                        scopes_map.get_mut(scope).unwrap().push((message.trim().to_string(), is_breaking));
+                    }
                 },
                 None => {
                     Self::ensure_inner_map_exists(&mut types_map, &NON_CONVENTIONAL_TYPE.to_owned());
