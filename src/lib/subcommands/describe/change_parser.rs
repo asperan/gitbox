@@ -6,7 +6,7 @@ use self::change_nodes::{
 use crate::common::commons::print_error_and_exit;
 use pest::{
     iterators::{Pair, Pairs},
-    Parser,
+    Parser, error::Error,
 };
 use pest_derive::Parser;
 
@@ -41,8 +41,28 @@ impl ChangeTriggerParser {
         dbg!(&parse_result);
         Trigger::new(match parse_result {
             Ok(mut v) => ChangeTriggerParser::parse_start(v.next().unwrap()),
-            // TODO: Improve error messages
-            Err(e) => print_error_and_exit(&e.to_string()),
+            Err(e) => print_error_and_exit(&ChangeTriggerParser::format_rules(e).to_string()),
+        })
+    }
+
+    fn format_rules(error: Error<Rule>) -> Error<Rule> {
+        error.renamed_rules(|rule| {
+            match rule {
+                Rule::BREAKING_STMT => "'breaking'",
+                Rule::SCOPE_OBJECT => "'scope'",
+                Rule::TYPE_OBJECT => "'type'",
+                Rule::ARRAY_STMT => "'type/scope IN [ _ ]'",
+                Rule::WHITESPACE => "whitespace",
+                Rule::PAR_STMT => "statement with parenthesis '( _ )'",
+                Rule::LITERAL => "literal",
+                Rule::OBJECT => "'type'/'scope'",
+                Rule::ARRAY => "'[ _ ]'",
+                Rule::STMT => "'breaking'/'type/scope IN [ _ ]'",
+                Rule::OR_STMT => "OR statement '(_ OR _)'",
+                Rule::AND_STMT => "AND statement '(_ AND _)'",
+                Rule::EOI => "End Of Input",
+                Rule::START => "Main statement",
+            }.to_string()
         })
     }
 
