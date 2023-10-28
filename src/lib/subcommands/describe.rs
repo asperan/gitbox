@@ -1,5 +1,4 @@
 mod docker;
-mod change_parser;
 mod stable;
 mod metadata;
 mod prerelease;
