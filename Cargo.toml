@@ -2,6 +2,9 @@
 name = "gitbox"
 version = "1.0.0"
 edition = "2021"
+description = "Git toolbox to simplify adoption of conventional commits and semantic version, among other things."
+license = "MIT"
+repository = "https://github.com/asperan/gitbox"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
