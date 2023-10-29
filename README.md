@@ -5,7 +5,9 @@ Gitbox is the spiritual successor and rewrite of [get](https://github.com/aspera
 It leverages the git CLI tool to enable fast and simple semantic versioning and conventional commits.
 
 ## Installation
-As of now, the only way to install this software is by cloning the repository and installing it with cargo:
+If you want to install the distributed binary, run `cargo install gitbox`.
+
+If you want to install from source, clone the repository and install it by providing the path to cargo:
 ```
 git clone <origin-URL> gitbox
 cd gitbox
