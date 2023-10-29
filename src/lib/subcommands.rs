@@ -1,23 +1,19 @@
 use clap::Subcommand;
 
 use self::{
-    changelog::ChangelogSubCommand,
-    commit::CommitSubCommand,
-    complete::CompleteSubCommand,
-    describe::DescribeSubCommand,
-    init::InitSubCommand,
-    license::LicenseSubCommand,
-    tree::TreeSubCommand, grammar::GrammarSubCommand,
+    changelog::ChangelogSubCommand, commit::CommitSubCommand, complete::CompleteSubCommand,
+    describe::DescribeSubCommand, grammar::GrammarSubCommand, init::InitSubCommand,
+    license::LicenseSubCommand, tree::TreeSubCommand,
 };
 
 mod changelog;
 mod commit;
 mod complete;
 mod describe;
+mod grammar;
 mod init;
 mod license;
 mod tree;
-mod grammar;
 
 #[derive(Subcommand, Debug)]
 pub enum Commands {

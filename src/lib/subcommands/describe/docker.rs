@@ -2,11 +2,14 @@ use clap::Args;
 
 use crate::common::semantic_version::SemanticVersion;
 
-#[derive(Args, Clone)]
-#[derive(Debug)]
+#[derive(Args, Clone, Debug)]
 pub struct DescribeDockerSubCommand {
-
-    #[arg(short, long, help = "The separator to use between versions", default_value = "\n")]
+    #[arg(
+        short,
+        long,
+        help = "The separator to use between versions",
+        default_value = "\n"
+    )]
     separator: String,
     #[arg(long, help = "Do not print 'latest' as first version")]
     exclude_latest: bool,

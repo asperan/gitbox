@@ -1,7 +1,10 @@
-use clap::Args;
 use ahash::AHashMap;
+use clap::Args;
 
-use crate::common::{git::commit_list, cached_values::CachedValues, semantic_version::SemanticVersion, commons::print_error_and_exit, trigger::Trigger};
+use crate::common::{
+    cached_values::CachedValues, commons::print_error_and_exit, git::commit_list,
+    semantic_version::SemanticVersion, trigger::Trigger,
+};
 
 const NO_SCOPE_TITLE: &str = "General";
 const NON_CONVENTIONAL_TYPE: &str = "Non conventional";
@@ -11,33 +14,78 @@ type CommitDetails = (String, bool);
 type ScopeMap = AHashMap<String, Vec<CommitDetails>>;
 type TypeMap = AHashMap<String, ScopeMap>;
 
-#[derive(Args)]
-#[derive(Debug)]
+#[derive(Args, Debug)]
 #[command(about = "Generate a changelog")]
 pub struct ChangelogSubCommand {
-    #[arg(long, help = "If set, the changelog will be generated with changes since the last version rather than the last stable release")]
+    #[arg(
+        long,
+        help = "If set, the changelog will be generated with changes since the last version rather than the last stable release"
+    )]
     from_latest_version: bool,
-    #[arg(short = 'T', long, help = "Set the title format. The content placeholder is '%s'", default_value("# %s"), allow_hyphen_values(true))]
+    #[arg(
+        short = 'T',
+        long,
+        help = "Set the title format. The content placeholder is '%s'",
+        default_value("# %s"),
+        allow_hyphen_values(true)
+    )]
     title_format: String,
-    #[arg(short = 't', long, help = "Set the type format. The content placeholder is '%s'", default_value("= %s"), allow_hyphen_values(true))]
+    #[arg(
+        short = 't',
+        long,
+        help = "Set the type format. The content placeholder is '%s'",
+        default_value("= %s"),
+        allow_hyphen_values(true)
+    )]
     type_format: String,
-    #[arg(short = 's', long, help = "Set the scope format. The content placeholder is '%s'", default_value("- %s"), allow_hyphen_values(true))]
+    #[arg(
+        short = 's',
+        long,
+        help = "Set the scope format. The content placeholder is '%s'",
+        default_value("- %s"),
+        allow_hyphen_values(true)
+    )]
     scope_format: String,
-    #[arg(short = 'l', long, help = "Set the list format. The content placeholder is '%s'", default_value("%s"), allow_hyphen_values(true))]
+    #[arg(
+        short = 'l',
+        long,
+        help = "Set the list format. The content placeholder is '%s'",
+        default_value("%s"),
+        allow_hyphen_values(true)
+    )]
     list_format: String,
-    #[arg(short = 'i', long, help = "Set the list item format. The content placeholder is '%s'", default_value("* %s"), allow_hyphen_values(true))]
+    #[arg(
+        short = 'i',
+        long,
+        help = "Set the list item format. The content placeholder is '%s'",
+        default_value("* %s"),
+        allow_hyphen_values(true)
+    )]
     item_format: String,
-    #[arg(short = 'b', long, help = "Set the breaking commit format. The content placeholder is '%s'", default_value("!!! %s "), allow_hyphen_values(true))]
+    #[arg(
+        short = 'b',
+        long,
+        help = "Set the breaking commit format. The content placeholder is '%s'",
+        default_value("!!! %s "),
+        allow_hyphen_values(true)
+    )]
     breaking_format: String,
 
-    #[arg(long, help = "Set the trigger to use to exclude commits from the changelog. For more informations about the grammar, run 'help grammar'")]
+    #[arg(
+        long,
+        help = "Set the trigger to use to exclude commits from the changelog. For more informations about the grammar, run 'help grammar'"
+    )]
     exclude_trigger: Option<String>,
 }
 
 impl ChangelogSubCommand {
     pub fn changelog(&self) {
         self.ensure_formats_have_placeholder();
-        let types_map = self.categorize_commits_from(if self.from_latest_version { CachedValues::last_version() } else { CachedValues::last_stable_release() });
+        let types_map = self.categorize_commits_from(if self.from_latest_version {
+            CachedValues::last_version()
+        } else {
+            CachedValues::last_stable_release()
+        });
         println!("{}", self.format_types(&types_map).trim());
     }
 
@@ -53,19 +101,33 @@ impl ChangelogSubCommand {
                     let scope = caps.get(3).map_or(NO_SCOPE_TITLE, |m| m.as_str());
                     let is_breaking = caps.get(4).is_some();
                     let message = caps.get(5).unwrap().as_str();
-                    if !exclude_trigger.as_ref().is_some_and(|t| t.accept(commit_type, &Some(scope.to_owned()), is_breaking)) {
+                    if !exclude_trigger.as_ref().is_some_and(|t| {
+                        t.accept(commit_type, &Some(scope.to_owned()), is_breaking)
+                    }) {
                         Self::ensure_inner_map_exists(&mut types_map, &commit_type.to_owned());
                         let scopes_map = types_map.get_mut(commit_type).unwrap();
                         Self::ensure_inner_vector_exists(scopes_map, &scope.to_owned());
-                        scopes_map.get_mut(scope).unwrap().push((message.trim().to_string(), is_breaking));
+                        scopes_map
+                            .get_mut(scope)
+                            .unwrap()
+                            .push((message.trim().to_string(), is_breaking));
                     }
-                },
+                }
                 None => {
-                    Self::ensure_inner_map_exists(&mut types_map, &NON_CONVENTIONAL_TYPE.to_owned());
+                    Self::ensure_inner_map_exists(
+                        &mut types_map,
+                        &NON_CONVENTIONAL_TYPE.to_owned(),
+                    );
                     let non_conventional_map = types_map.get_mut(NON_CONVENTIONAL_TYPE).unwrap();
-                    Self::ensure_inner_vector_exists(non_conventional_map, &NO_SCOPE_TITLE.to_owned());
-                    non_conventional_map.get_mut(NO_SCOPE_TITLE).unwrap().push((c.to_owned(), false));
-                },
+                    Self::ensure_inner_vector_exists(
+                        non_conventional_map,
+                        &NO_SCOPE_TITLE.to_owned(),
+                    );
+                    non_conventional_map
+                        .get_mut(NO_SCOPE_TITLE)
+                        .unwrap()
+                        .push((c.to_owned(), false));
+                }
             }
         });
         types_map
@@ -73,29 +135,52 @@ impl ChangelogSubCommand {
 
     fn format_types(&self, types_map: &TypeMap) -> String {
         let feat_scopes = types_map.get("feat").map_or(String::from(""), |scope_map| {
-            format!("{}\n{}\n", self.type_format.replace("%s", "feat") , self.format_scopes(scope_map))
+            format!(
+                "{}\n{}\n",
+                self.type_format.replace("%s", "feat"),
+                self.format_scopes(scope_map)
+            )
         });
         let fix_scopes = types_map.get("fix").map_or(String::from(""), |scope_map| {
-            format!("{}\n{}\n", self.scope_format.replace("%s", "fix") , self.format_scopes(scope_map))
+            format!(
+                "{}\n{}\n",
+                self.scope_format.replace("%s", "fix"),
+                self.format_scopes(scope_map)
+            )
         });
         feat_scopes
-        + &fix_scopes
-        + &types_map.iter()
-            .filter(|(key, _)| *key != "feat" && *key != "fix")
-            .map(|(key, value)| format!("{}\n{}\n", self.type_format.replace("%s", key), self.format_scopes(value)))
-            .reduce(|acc, e| acc + "\n" + &e)
-            .unwrap()
+            + &fix_scopes
+            + &types_map
+                .iter()
+                .filter(|(key, _)| *key != "feat" && *key != "fix")
+                .map(|(key, value)| {
+                    format!(
+                        "{}\n{}\n",
+                        self.type_format.replace("%s", key),
+                        self.format_scopes(value)
+                    )
+                })
+                .reduce(|acc, e| acc + "\n" + &e)
+                .unwrap()
     }
 
     fn format_scopes(&self, scope_map: &ScopeMap) -> String {
-        scope_map.iter()
-            .map(|(key, value)| format!("{}\n{}", self.scope_format.replace("%s", key), self.format_list(value)))
+        scope_map
+            .iter()
+            .map(|(key, value)| {
+                format!(
+                    "{}\n{}",
+                    self.scope_format.replace("%s", key),
+                    self.format_list(value)
+                )
+            })
             .reduce(|acc, e| acc + "\n" + &e)
             .unwrap()
     }
 
     fn format_list(&self, commit_list: &[CommitDetails]) -> String {
-        commit_list.iter()
+        commit_list
+            .iter()
             .map(|cd| self.item_format.replace("%s", &self.format_details(cd)))
             .reduce(|acc, e| acc + "\n" + &e)
             .unwrap()

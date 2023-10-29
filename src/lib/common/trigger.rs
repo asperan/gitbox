@@ -5,8 +5,9 @@ use self::change_nodes::{
 };
 use crate::common::commons::print_error_and_exit;
 use pest::{
+    error::Error,
     iterators::{Pair, Pairs},
-    Parser, error::Error,
+    Parser,
 };
 use pest_derive::Parser;
 
@@ -66,7 +67,8 @@ impl ChangeTriggerParser {
                 Rule::AND_STMT => "AND statement '(_ AND _)'",
                 Rule::EOI => "End Of Input",
                 Rule::START => "Main statement",
-            }.to_string()
+            }
+            .to_string()
         })
     }
 

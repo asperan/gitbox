@@ -5,10 +5,7 @@ use crate::common::{
     cached_values::CachedValues,
     command_issuer::CommandIssuer,
     commons::{ensure_dir_exists, print_cli_error_message_and_exit, print_error_and_exit},
-    git::{
-        DEFAULT_COMMIT_TYPES, EXTRA_DIR_PATH, SCOPES_FILE_PATH,
-        TYPES_FILE_PATH,
-    },
+    git::{DEFAULT_COMMIT_TYPES, EXTRA_DIR_PATH, SCOPES_FILE_PATH, TYPES_FILE_PATH},
 };
 
 #[derive(Args, Clone, Debug)]
@@ -26,13 +23,13 @@ impl RefreshTypesAndScopesSubcommand {
                 match capture.get(1) {
                     Some(m) if !all_types.contains(&m.as_str().to_string()) => {
                         all_types.push(m.as_str().to_string())
-                    },
+                    }
                     _ => {}
                 }
                 match capture.get(3) {
                     Some(m) if !all_scopes.contains(&m.as_str().to_string()) => {
                         all_scopes.push(m.as_str().to_string())
-                    },
+                    }
                     _ => {}
                 }
             });
@@ -66,9 +63,11 @@ impl RefreshTypesAndScopesSubcommand {
             .truncate(true)
             .open(file_path);
         match file {
-            Ok(mut f) => if let Err(e) = writeln!(&mut f, "{}", content) {
-                eprintln!("Failed to update file '{}': {}", file_path, e)
-            },
+            Ok(mut f) => {
+                if let Err(e) = writeln!(&mut f, "{}", content) {
+                    eprintln!("Failed to update file '{}': {}", file_path, e)
+                }
+            }
             Err(e) => eprintln!("Failed to open file {}: {}", file_path, e),
         }
     }

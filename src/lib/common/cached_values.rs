@@ -1,6 +1,12 @@
 use regex::Regex;
 
-use super::{git::{git_dir, last_version, last_stable_version, FULL_SEMANTIC_VERSION_PATTERN, CONVENTIONAL_COMMIT_PATTERN}, semantic_version::SemanticVersion};
+use super::{
+    git::{
+        git_dir, last_stable_version, last_version, CONVENTIONAL_COMMIT_PATTERN,
+        FULL_SEMANTIC_VERSION_PATTERN,
+    },
+    semantic_version::SemanticVersion,
+};
 
 pub struct CachedValues {}
 
@@ -12,7 +18,7 @@ impl CachedValues {
                 None => {
                     GIT_DIR = Some(git_dir());
                     GIT_DIR.as_ref().unwrap()
-                },
+                }
             }
         }
     }
@@ -24,7 +30,7 @@ impl CachedValues {
                 None => {
                     LAST_VERSION = Some(last_version());
                     LAST_VERSION.as_ref().unwrap()
-                },
+                }
             }
         }
     }
@@ -36,7 +42,7 @@ impl CachedValues {
                 None => {
                     LAST_RELEASE = Some(last_stable_version());
                     LAST_RELEASE.as_ref().unwrap()
-                },
+                }
             }
         }
     }
@@ -46,9 +52,10 @@ impl CachedValues {
             match &SEMANTIC_VERSION_REGEX {
                 Some(value) => value,
                 None => {
-                    SEMANTIC_VERSION_REGEX = Some(Regex::new(FULL_SEMANTIC_VERSION_PATTERN).unwrap());
+                    SEMANTIC_VERSION_REGEX =
+                        Some(Regex::new(FULL_SEMANTIC_VERSION_PATTERN).unwrap());
                     SEMANTIC_VERSION_REGEX.as_ref().unwrap()
-                },
+                }
             }
         }
     }
@@ -58,9 +65,10 @@ impl CachedValues {
             match &CONVENTIONAL_COMMIT_REGEX {
                 Some(value) => value,
                 None => {
-                    CONVENTIONAL_COMMIT_REGEX = Some(Regex::new(CONVENTIONAL_COMMIT_PATTERN).unwrap());
+                    CONVENTIONAL_COMMIT_REGEX =
+                        Some(Regex::new(CONVENTIONAL_COMMIT_PATTERN).unwrap());
                     CONVENTIONAL_COMMIT_REGEX.as_ref().unwrap()
-                },
+                }
             }
         }
     }

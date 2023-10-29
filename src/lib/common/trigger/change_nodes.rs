@@ -13,7 +13,12 @@ impl Visitable<'_, String> for TypeNode {
 #[derive(Debug)]
 pub(super) struct ScopeNode {}
 impl<'a> Visitable<'a, &'a Option<String>> for ScopeNode {
-    fn visit(&self, _commit_type: &str, scope: &'a Option<String>, _breaking: bool) -> &'a Option<String> {
+    fn visit(
+        &self,
+        _commit_type: &str,
+        scope: &'a Option<String>,
+        _breaking: bool,
+    ) -> &'a Option<String> {
         scope
     }
 }
@@ -37,7 +42,12 @@ pub(super) struct LiteralNode {
     value: String,
 }
 impl Visitable<'_, String> for LiteralNode {
-    fn visit(&self, _commit_type: &str, _scope: &Option<String>, _breaking: bool) -> std::string::String {
+    fn visit(
+        &self,
+        _commit_type: &str,
+        _scope: &Option<String>,
+        _breaking: bool,
+    ) -> std::string::String {
         self.value.clone()
     }
 }
@@ -60,12 +70,17 @@ pub(super) struct InNode {
 impl Visitable<'_, bool> for InNode {
     fn visit(&self, commit_type: &str, scope: &Option<String>, breaking: bool) -> bool {
         match &self.object {
-            ObjectNode::Type(type_node) => self.array.visit(commit_type, scope, breaking).contains(&type_node.visit(commit_type, scope, breaking)),
+            ObjectNode::Type(type_node) => self
+                .array
+                .visit(commit_type, scope, breaking)
+                .contains(&type_node.visit(commit_type, scope, breaking)),
             ObjectNode::Scope(scope_node) => match scope_node.visit(commit_type, scope, breaking) {
-                Some(this_scope) => self.array.visit(commit_type, scope, breaking).contains(this_scope),
+                Some(this_scope) => self
+                    .array
+                    .visit(commit_type, scope, breaking)
+                    .contains(this_scope),
                 None => false,
             },
-
         }
     }
 }
@@ -125,7 +140,8 @@ pub(super) struct AndStatement {
 
 impl Visitable<'_, bool> for AndStatement {
     fn visit(&self, commit_type: &str, scope: &Option<String>, breaking: bool) -> bool {
-        self.left.visit(commit_type, scope, breaking) && self.right.visit(commit_type, scope, breaking)
+        self.left.visit(commit_type, scope, breaking)
+            && self.right.visit(commit_type, scope, breaking)
     }
 }
 
@@ -169,7 +185,8 @@ pub(super) struct OrStatement {
 
 impl Visitable<'_, bool> for OrStatement {
     fn visit(&self, commit_type: &str, scope: &Option<String>, breaking: bool) -> bool {
-        self.left.visit(commit_type, scope, breaking) || self.right.visit(commit_type, scope, breaking)
+        self.left.visit(commit_type, scope, breaking)
+            || self.right.visit(commit_type, scope, breaking)
     }
 }
 
@@ -200,4 +217,3 @@ impl Visitable<'_, bool> for Start {
         }
     }
 }
-

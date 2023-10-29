@@ -44,7 +44,9 @@ pub struct CommitSubCommand {
 
 #[derive(Subcommand, Clone, Debug)]
 enum CommitSubCommands {
-    #[command(about = "Refresh the lists of already used types and scopes (best result is after a fetch)")]
+    #[command(
+        about = "Refresh the lists of already used types and scopes (best result is after a fetch)"
+    )]
     Refresh(RefreshTypesAndScopesSubcommand),
 }
 
@@ -116,4 +118,3 @@ impl CommitSubCommand {
         self.message.clone().unwrap_or_else(Prompt::ask_body)
     }
 }
-

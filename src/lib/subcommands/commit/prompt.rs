@@ -4,8 +4,8 @@ use std::path::Path;
 
 use crate::common::{
     cached_values::CachedValues,
-    commons::{append_line, print_error_and_exit, read_lines, ensure_dir_exists},
-    git::{DEFAULT_COMMIT_TYPES, EXTRA_DIR_PATH, TYPES_FILE_PATH, SCOPES_FILE_PATH},
+    commons::{append_line, ensure_dir_exists, print_error_and_exit, read_lines},
+    git::{DEFAULT_COMMIT_TYPES, EXTRA_DIR_PATH, SCOPES_FILE_PATH, TYPES_FILE_PATH},
 };
 
 pub struct Prompt {}
@@ -134,7 +134,9 @@ impl Prompt {
                         default_values.join("\n")
                     };
                     let write_result = std::fs::write(file_absolute_path, content);
-                    if let Err(e) = write_result { eprintln!("Failed to write '{}': {}", path, e) }
+                    if let Err(e) = write_result {
+                        eprintln!("Failed to write '{}': {}", path, e)
+                    }
                     default_values
                 } else {
                     match read_lines(file_absolute_path) {

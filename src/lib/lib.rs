@@ -1,10 +1,10 @@
-mod subcommands;
 mod common;
+mod subcommands;
 
-use clap::{Parser, CommandFactory};
-use crate::{subcommands::Commands, common::commons::print_error_and_exit};
+use crate::{common::commons::print_error_and_exit, subcommands::Commands};
+use clap::{CommandFactory, Parser};
 
-#[derive(Parser,Debug)]
+#[derive(Parser, Debug)]
 #[command(name = "gb")]
 #[command(author = "Alex Speranza")]
 #[command(version = "0.1.0")]
@@ -29,7 +29,8 @@ pub fn run() {
         Commands::License(c) => c.create_license(),
         Commands::Tree(c) => c.print_tree(),
         // Catch-all branch for hidden commands
-        _ => print_error_and_exit("Unknown command. See '--help' or subcommand 'help' for available commands")
+        _ => print_error_and_exit(
+            "Unknown command. See '--help' or subcommand 'help' for available commands",
+        ),
     }
 }
-
