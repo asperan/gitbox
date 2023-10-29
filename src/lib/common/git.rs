@@ -17,7 +17,6 @@ pub fn is_in_git_repository() -> bool {
         .success()
 }
 
-// TODO: Commit list should returns an iterator
 pub fn commit_list(from: Option<&SemanticVersion>) -> Vec<String> {
     let result = match from {
         Some(value) => CommandIssuer::git(&[
