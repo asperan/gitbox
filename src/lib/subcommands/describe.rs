@@ -5,7 +5,7 @@ mod prerelease;
 
 use clap::{Args, Subcommand};
 
-use crate::{subcommands::describe::{stable::StableVersionCalculator, metadata::MetadataGenerator, prerelease::PrereleaseUpdater}, common::{cached_values::CachedValues, semantic_version::SemanticVersion, commons::print_error_and_exit}};
+use crate::{subcommands::describe::{stable::StableVersionCalculator, metadata::MetadataGenerator, prerelease::PrereleaseUpdater}, common::{cached_values::CachedValues, semantic_version::SemanticVersion, commons::{print_error_and_exit, print_cli_error_message_and_exit}, command_issuer::CommandIssuer}};
 
 use self::{docker::DescribeDockerSubCommand, metadata::MetadataSpecs};
 
@@ -37,10 +37,12 @@ pub struct DescribeSubCommand {
     #[arg(long, help = "Set the expression which triggers a patch change (Default behaviou is equivalent to 'type IN [ fix ]'). For more informations about the grammar, run 'help grammar'")]
     patch_trigger: Option<String>,
 
-    #[arg(short = 't', long, help = "Create a new signed tag with the computed version")]
+    #[arg(short = 't', long, help = "Create a new tag with the computed version")]
     create_tag: bool,
     #[arg(short = 'M', long, help = "Set the additional message for the created tag", requires("create_tag"))]
     tag_message: Option<String>,
+    #[arg(short = 's', long, help = "If set, the created tag is signed", requires("create_tag"))]
+    sign_tag: bool,
 }
 
 impl DescribeSubCommand {
@@ -50,7 +52,12 @@ impl DescribeSubCommand {
             Some(c) => match c {
                 DescribeSubCommands::Docker(cc) => {cc.describe_docker(&new_version);},
             },
-            None => self.print_version(&new_version, CachedValues::last_version().as_ref()),
+            None => {
+                self.print_version(&new_version, CachedValues::last_version().as_ref());
+                if self.create_tag {
+                    self.create_tag(&new_version, &self.tag_message);
+                }
+            },
         }
     }
 
@@ -80,6 +87,22 @@ impl DescribeSubCommand {
             String::from("")
         };
         println!("{}{}", left_part, new_version);
+    }
+
+    fn create_tag(&self, version: &SemanticVersion, message: &Option<String>) {
+        let mut command = vec!["tag"];
+        if self.sign_tag {
+            command.push("-s");
+        }
+        if let Some(m) = message { command.push("-m"); command.push(m); }
+        let version_string = &version.to_string();
+        command.push(version_string);
+        let tag_result = CommandIssuer::git(&command);
+        if !tag_result.status.success() {
+            print_cli_error_message_and_exit(&tag_result.stderr, "create a new tag");
+        } else {
+            println!("Tag for version '{}' created", version_string);
+        }
     }
 }
 
