@@ -1,4 +1,4 @@
-use crate::common::command_issuer::CommandIssuer;
+use crate::common::{command_issuer::CommandIssuer, commons::print_cli_error_message_and_exit};
 
 use super::{commons::print_error_and_exit, cached_values::CachedValues, semantic_version::SemanticVersion};
 
@@ -83,7 +83,7 @@ pub(super) fn last_stable_version() -> Option<SemanticVersion> {
 // TODO: Commit list should returns an iterator
 pub fn commit_list(from: Option<&SemanticVersion>) -> Vec<String> {
     let result = match from {
-        Some(value) => CommandIssuer::git(&[ "--no-pager", "log", "--oneline", "--pretty=format:%s", &format!("^{} HEAD", value)]),
+        Some(value) => CommandIssuer::git(&[ "--no-pager", "log", "--oneline", "--pretty=format:%s", &format!("^{}", value), "HEAD"]),
         None => CommandIssuer::git(&[ "--no-pager", "log", "--oneline", "--pretty=format:%s"]),
     };
     if result.status.success() {
@@ -94,6 +94,6 @@ pub fn commit_list(from: Option<&SemanticVersion>) -> Vec<String> {
             Err(e) => print_error_and_exit(&e.to_string())
         }
     } else {
-        print_error_and_exit("Failed to retrieve commit list")
+        print_cli_error_message_and_exit(&result.stderr, "retrieve commit list");
     }
 }
