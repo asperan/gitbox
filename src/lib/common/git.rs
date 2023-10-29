@@ -4,10 +4,40 @@ use super::{
     cached_values::CachedValues, commons::print_error_and_exit, semantic_version::SemanticVersion,
 };
 
+pub const EXTRA_DIR_PATH: &str = "/extra";
+pub const TYPES_FILE_PATH: &str = "/types.txt";
+pub const SCOPES_FILE_PATH: &str = "/scopes.txt";
+pub const DEFAULT_COMMIT_TYPES: [&str; 10] = [
+    "feat", "fix", "build", "chore", "ci", "docs", "style", "refactor", "perf", "test",
+];
+
 pub fn is_in_git_repository() -> bool {
     CommandIssuer::git(&["rev-parse", "--is-inside-work-tree"])
         .status
         .success()
+}
+
+// TODO: Commit list should returns an iterator
+pub fn commit_list(from: Option<&SemanticVersion>) -> Vec<String> {
+    let result = match from {
+        Some(value) => CommandIssuer::git(&[
+            "--no-pager",
+            "log",
+            "--oneline",
+            "--pretty=format:%s",
+            &format!("^{}", value),
+            "HEAD",
+        ]),
+        None => CommandIssuer::git(&["--no-pager", "log", "--oneline", "--pretty=format:%s"]),
+    };
+    if result.status.success() {
+        match std::str::from_utf8(&result.stdout) {
+            Ok(lines) => lines.split('\n').map(|s| s.to_string()).collect(),
+            Err(e) => print_error_and_exit(&e.to_string()),
+        }
+    } else {
+        print_cli_error_message_and_exit(&result.stderr, "retrieve commit list");
+    }
 }
 
 pub(super) fn git_dir() -> String {
@@ -17,16 +47,8 @@ pub(super) fn git_dir() -> String {
     }
 }
 
-pub const EXTRA_DIR_PATH: &str = "/extra";
-pub const TYPES_FILE_PATH: &str = "/types.txt";
-pub const SCOPES_FILE_PATH: &str = "/scopes.txt";
-
 // Groups: 1 = type, 2 = scope with (), 3 = scope, 4 = breaking change, 5 = summary
 pub(super) const CONVENTIONAL_COMMIT_PATTERN: &str = r"^(\w+)(\(([\w/-]+)\))?(!)?:(.+)$";
-
-pub const DEFAULT_COMMIT_TYPES: [&str; 10] = [
-    "feat", "fix", "build", "chore", "ci", "docs", "style", "refactor", "perf", "test",
-];
 
 pub(super) const FULL_SEMANTIC_VERSION_PATTERN: &str = concat!(
     // GROUPS:
@@ -81,25 +103,3 @@ pub(super) fn last_stable_version() -> Option<SemanticVersion> {
     }
 }
 
-// TODO: Commit list should returns an iterator
-pub fn commit_list(from: Option<&SemanticVersion>) -> Vec<String> {
-    let result = match from {
-        Some(value) => CommandIssuer::git(&[
-            "--no-pager",
-            "log",
-            "--oneline",
-            "--pretty=format:%s",
-            &format!("^{}", value),
-            "HEAD",
-        ]),
-        None => CommandIssuer::git(&["--no-pager", "log", "--oneline", "--pretty=format:%s"]),
-    };
-    if result.status.success() {
-        match std::str::from_utf8(&result.stdout) {
-            Ok(lines) => lines.split('\n').map(|s| s.to_string()).collect(),
-            Err(e) => print_error_and_exit(&e.to_string()),
-        }
-    } else {
-        print_cli_error_message_and_exit(&result.stderr, "retrieve commit list");
-    }
-}
