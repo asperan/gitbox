@@ -1,9 +1,13 @@
 use crate::common::{command_issuer::CommandIssuer, commons::print_cli_error_message_and_exit};
 
-use super::{commons::print_error_and_exit, cached_values::CachedValues, semantic_version::SemanticVersion};
+use super::{
+    cached_values::CachedValues, commons::print_error_and_exit, semantic_version::SemanticVersion,
+};
 
 pub fn is_in_git_repository() -> bool {
-    CommandIssuer::git(&["rev-parse", "--is-inside-work-tree"]).status.success()
+    CommandIssuer::git(&["rev-parse", "--is-inside-work-tree"])
+        .status
+        .success()
 }
 
 pub(super) fn git_dir() -> String {
@@ -21,16 +25,7 @@ pub const SCOPES_FILE_PATH: &str = "/scopes.txt";
 pub(super) const CONVENTIONAL_COMMIT_PATTERN: &str = r"^(\w+)(\(([\w/-]+)\))?(!)?:(.+)$";
 
 pub const DEFAULT_COMMIT_TYPES: [&str; 10] = [
-    "feat",
-    "fix",
-    "build",
-    "chore",
-    "ci",
-    "docs",
-    "style",
-    "refactor",
-    "perf",
-    "test",
+    "feat", "fix", "build", "chore", "ci", "docs", "style", "refactor", "perf", "test",
 ];
 
 pub(super) const FULL_SEMANTIC_VERSION_PATTERN: &str = concat!(
@@ -63,16 +58,22 @@ pub(super) fn last_stable_version() -> Option<SemanticVersion> {
                 if text.trim().is_empty() {
                     None
                 } else {
-                    let mut to_sort_versions: Vec<String> = text.trim()
+                    let mut to_sort_versions: Vec<String> = text
+                        .trim()
                         .split('\n')
-                        .filter(|version|
-                            CachedValues::semantic_version_regex().captures(version).is_some_and(|captures| captures.get(5).is_none())
-                        ).map(|version| version.replace('+', "_"))
+                        .filter(|version| {
+                            CachedValues::semantic_version_regex()
+                                .captures(version)
+                                .is_some_and(|captures| captures.get(5).is_none())
+                        })
+                        .map(|version| version.replace('+', "_"))
                         .collect();
                     to_sort_versions.sort_unstable();
-                    to_sort_versions.last().map(|s| SemanticVersion::from_str(&s.replace('_', "+")))
+                    to_sort_versions
+                        .last()
+                        .map(|s| SemanticVersion::from_str(&s.replace('_', "+")))
                 }
-            },
+            }
             Err(e) => print_error_and_exit(&e.to_string()),
         }
     } else {
@@ -83,15 +84,20 @@ pub(super) fn last_stable_version() -> Option<SemanticVersion> {
 // TODO: Commit list should returns an iterator
 pub fn commit_list(from: Option<&SemanticVersion>) -> Vec<String> {
     let result = match from {
-        Some(value) => CommandIssuer::git(&[ "--no-pager", "log", "--oneline", "--pretty=format:%s", &format!("^{}", value), "HEAD"]),
-        None => CommandIssuer::git(&[ "--no-pager", "log", "--oneline", "--pretty=format:%s"]),
+        Some(value) => CommandIssuer::git(&[
+            "--no-pager",
+            "log",
+            "--oneline",
+            "--pretty=format:%s",
+            &format!("^{}", value),
+            "HEAD",
+        ]),
+        None => CommandIssuer::git(&["--no-pager", "log", "--oneline", "--pretty=format:%s"]),
     };
     if result.status.success() {
         match std::str::from_utf8(&result.stdout) {
-            Ok(lines) => {
-                lines.split('\n').map(|s| s.to_string()).collect()
-            },
-            Err(e) => print_error_and_exit(&e.to_string())
+            Ok(lines) => lines.split('\n').map(|s| s.to_string()).collect(),
+            Err(e) => print_error_and_exit(&e.to_string()),
         }
     } else {
         print_cli_error_message_and_exit(&result.stderr, "retrieve commit list");
