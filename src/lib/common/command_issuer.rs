@@ -13,7 +13,8 @@ impl<'a> CommandIssuer {
                 print_error_and_exit(&format!(
                     "Failed to run command '{} {}': {}",
                     executable,
-                    args.into_iter().fold(String::from(""), |acc, x| acc.to_string() + " " + x),
+                    args.into_iter()
+                        .fold(String::from(""), |acc, x| acc.to_string() + " " + x),
                     e
                 ));
             })
