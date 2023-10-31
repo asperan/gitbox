@@ -2,8 +2,11 @@ use ahash::AHashMap;
 use clap::Args;
 
 use crate::common::{
-    cached_values::CachedValues, commons::print_error_and_exit, git::commit_list,
-    semantic_version::SemanticVersion, trigger::Trigger,
+    cached_values::CachedValues,
+    commons::print_error_and_exit,
+    git::{commit_list, CommitBranch},
+    semantic_version::SemanticVersion,
+    trigger::Trigger,
 };
 
 const NO_SCOPE_TITLE: &str = "General";
@@ -91,7 +94,7 @@ impl ChangelogSubCommand {
 
     fn categorize_commits_from(&self, version: &Option<SemanticVersion>) -> TypeMap {
         let exclude_trigger = self.exclude_trigger.as_ref().map(|s| Trigger::from(s));
-        let commit_list = commit_list(version.as_ref());
+        let commit_list = commit_list(version.as_ref(), CommitBranch::Single);
         let mut types_map: TypeMap = AHashMap::new();
         commit_list.iter().for_each(|c| {
             let captures = CachedValues::conventional_commit_regex().captures(c);

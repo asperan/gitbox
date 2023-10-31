@@ -3,9 +3,11 @@ use std::io::Write;
 
 use crate::common::{
     cached_values::CachedValues,
-    command_issuer::CommandIssuer,
-    commons::{ensure_dir_exists, print_cli_error_message_and_exit, print_error_and_exit},
-    git::{DEFAULT_COMMIT_TYPES, EXTRA_DIR_PATH, SCOPES_FILE_PATH, TYPES_FILE_PATH},
+    commons::ensure_dir_exists,
+    git::{
+        commit_list, CommitBranch, DEFAULT_COMMIT_TYPES, EXTRA_DIR_PATH, SCOPES_FILE_PATH,
+        TYPES_FILE_PATH,
+    },
 };
 
 #[derive(Args, Clone, Debug)]
@@ -16,9 +18,10 @@ impl RefreshTypesAndScopesSubcommand {
         let conventional_commit_regex = CachedValues::conventional_commit_regex();
         let mut all_types = DEFAULT_COMMIT_TYPES.map(|t| t.to_string()).to_vec();
         let mut all_scopes: Vec<String> = vec![];
-        self.full_commit_list()
+        commit_list(None, CommitBranch::All)
             .iter()
             .filter_map(|commit| conventional_commit_regex.captures(commit))
+            .rev()
             .for_each(|capture| {
                 match capture.get(1) {
                     Some(m) if !all_types.contains(&m.as_str().to_string()) => {
@@ -42,18 +45,6 @@ impl RefreshTypesAndScopesSubcommand {
             &(CachedValues::git_dir().to_owned() + EXTRA_DIR_PATH + SCOPES_FILE_PATH),
             &all_scopes.join("\n"),
         );
-    }
-
-    fn full_commit_list(&self) -> Vec<String> {
-        let result = CommandIssuer::git(["log", "--all", "--reverse", "--pretty=format:%s"]);
-        if result.status.success() {
-            match std::str::from_utf8(&result.stdout) {
-                Ok(s) => s.split('\n').map(|s| s.to_string()).collect(),
-                Err(e) => print_error_and_exit(&e.to_string()),
-            }
-        } else {
-            print_cli_error_message_and_exit(&result.stderr, "obtain commit list")
-        }
     }
 
     fn rewrite_file(&self, file_path: &str, content: &str) {

@@ -17,17 +17,24 @@ pub fn is_in_git_repository() -> bool {
         .success()
 }
 
-pub fn commit_list(from: Option<&SemanticVersion>) -> Vec<String> {
-    let result = match from {
-        Some(value) => CommandIssuer::git([
-            "--no-pager",
-            "log",
-            "--oneline",
-            "--pretty=format:%s",
-            &format!("^{}", value),
-            "HEAD",
-        ]),
-        None => CommandIssuer::git(["--no-pager", "log", "--oneline", "--pretty=format:%s"]),
+pub enum CommitBranch {
+    All,
+    Single,
+}
+
+pub fn commit_list(from: Option<&SemanticVersion>, branch: CommitBranch) -> Vec<String> {
+    let result = {
+        let mut command_args = vec!["log", "--pretty=format:%s"];
+        if let CommitBranch::All = branch {
+            command_args.push("--all")
+        };
+        let mut _s = String::new();
+        if let Some(value) = from {
+            _s = format!("^{}", value);
+            command_args.push(&_s);
+            command_args.push("HEAD");
+        }
+        CommandIssuer::git(command_args)
     };
     if result.status.success() {
         match std::str::from_utf8(&result.stdout) {
@@ -101,4 +108,3 @@ pub(super) fn last_stable_version() -> Option<SemanticVersion> {
         None
     }
 }
-

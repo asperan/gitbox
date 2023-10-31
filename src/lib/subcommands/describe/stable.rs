@@ -1,5 +1,7 @@
 use crate::common::{
-    cached_values::CachedValues, git::commit_list, semantic_version::SemanticVersion,
+    cached_values::CachedValues,
+    git::{commit_list, CommitBranch},
+    semantic_version::SemanticVersion,
     trigger::Trigger,
 };
 
@@ -56,7 +58,7 @@ impl StableVersionCalculator {
     pub fn next_stable(&self, last_stable: &Option<SemanticVersion>) -> SemanticVersion {
         match last_stable {
             Some(version) => {
-                let commit_list = commit_list(Some(version));
+                let commit_list = commit_list(Some(version), CommitBranch::Single);
                 let max_change = commit_list
                     .iter()
                     .filter_map(|c| self.message_to_change(c))
