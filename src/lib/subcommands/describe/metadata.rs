@@ -52,7 +52,7 @@ impl MetadataGenerator {
             }
             MetadataSpecs::Sha => {
                 let last_commit_sha =
-                    CommandIssuer::git(&["--no-pager", "log", "-n", "1", "--pretty=%h"]);
+                    CommandIssuer::git(["--no-pager", "log", "-n", "1", "--pretty=%h"]);
                 if last_commit_sha.status.success() {
                     std::str::from_utf8(&last_commit_sha.stdout)
                         .unwrap()

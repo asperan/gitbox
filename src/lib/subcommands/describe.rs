@@ -155,7 +155,7 @@ impl DescribeSubCommand {
         }
         let version_string = &version.to_string();
         command.push(version_string);
-        let tag_result = CommandIssuer::git(&command);
+        let tag_result = CommandIssuer::git(command);
         if !tag_result.status.success() {
             print_cli_error_message_and_exit(&tag_result.stderr, "create a new tag");
         } else {

@@ -21,7 +21,7 @@ impl TreeSubCommand {
         if !is_in_git_repository() {
             print_error_and_exit("tree must be run inside a git repository");
         }
-        let git_log_result = CommandIssuer::git(&[
+        let git_log_result = CommandIssuer::git([
             "log",
             "--all",
             "--graph",

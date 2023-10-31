@@ -12,14 +12,14 @@ pub const DEFAULT_COMMIT_TYPES: [&str; 10] = [
 ];
 
 pub fn is_in_git_repository() -> bool {
-    CommandIssuer::git(&["rev-parse", "--is-inside-work-tree"])
+    CommandIssuer::git(["rev-parse", "--is-inside-work-tree"])
         .status
         .success()
 }
 
 pub fn commit_list(from: Option<&SemanticVersion>) -> Vec<String> {
     let result = match from {
-        Some(value) => CommandIssuer::git(&[
+        Some(value) => CommandIssuer::git([
             "--no-pager",
             "log",
             "--oneline",
@@ -27,7 +27,7 @@ pub fn commit_list(from: Option<&SemanticVersion>) -> Vec<String> {
             &format!("^{}", value),
             "HEAD",
         ]),
-        None => CommandIssuer::git(&["--no-pager", "log", "--oneline", "--pretty=format:%s"]),
+        None => CommandIssuer::git(["--no-pager", "log", "--oneline", "--pretty=format:%s"]),
     };
     if result.status.success() {
         match std::str::from_utf8(&result.stdout) {
@@ -40,7 +40,7 @@ pub fn commit_list(from: Option<&SemanticVersion>) -> Vec<String> {
 }
 
 pub(super) fn git_dir() -> String {
-    match std::str::from_utf8(&CommandIssuer::git(&["rev-parse", "--absolute-git-dir"]).stdout) {
+    match std::str::from_utf8(&CommandIssuer::git(["rev-parse", "--absolute-git-dir"]).stdout) {
         Ok(path) => path.trim().to_string(),
         Err(e) => print_error_and_exit(&e.to_string()),
     }
@@ -60,7 +60,7 @@ pub(super) const FULL_SEMANTIC_VERSION_PATTERN: &str = concat!(
 );
 
 pub(super) fn last_version() -> Option<SemanticVersion> {
-    let result = CommandIssuer::git(&["describe", "--tags", "--abbrev=0"]);
+    let result = CommandIssuer::git(["describe", "--tags", "--abbrev=0"]);
     if result.status.success() {
         match std::str::from_utf8(&result.stdout) {
             Ok(version) => Some(SemanticVersion::from_str(version.trim())),
@@ -72,7 +72,7 @@ pub(super) fn last_version() -> Option<SemanticVersion> {
 }
 
 pub(super) fn last_stable_version() -> Option<SemanticVersion> {
-    let result = CommandIssuer::git(&["--no-pager", "tag", "--list", "--merged"]);
+    let result = CommandIssuer::git(["--no-pager", "tag", "--list", "--merged"]);
     if result.status.success() {
         match std::str::from_utf8(&result.stdout) {
             Ok(text) => {

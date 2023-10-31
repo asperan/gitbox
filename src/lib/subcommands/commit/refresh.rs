@@ -45,7 +45,7 @@ impl RefreshTypesAndScopesSubcommand {
     }
 
     fn full_commit_list(&self) -> Vec<String> {
-        let result = CommandIssuer::git(&["log", "--all", "--reverse", "--pretty=format:%s"]);
+        let result = CommandIssuer::git(["log", "--all", "--reverse", "--pretty=format:%s"]);
         if result.status.success() {
             match std::str::from_utf8(&result.stdout) {
                 Ok(s) => s.split('\n').map(|s| s.to_string()).collect(),
