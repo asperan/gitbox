@@ -136,15 +136,15 @@ impl ChangelogSubCommand {
     fn format_types(&self, types_map: &TypeMap) -> String {
         let feat_scopes = types_map.get("feat").map_or(String::from(""), |scope_map| {
             format!(
-                "{}\n{}\n",
+                "{}\n{}\n\n",
                 self.type_format.replace("%s", "feat"),
                 self.format_scopes(scope_map)
             )
         });
         let fix_scopes = types_map.get("fix").map_or(String::from(""), |scope_map| {
             format!(
-                "{}\n{}\n",
-                self.scope_format.replace("%s", "fix"),
+                "{}\n{}\n\n",
+                self.type_format.replace("%s", "fix"),
                 self.format_scopes(scope_map)
             )
         });
