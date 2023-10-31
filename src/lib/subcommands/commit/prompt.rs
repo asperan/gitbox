@@ -35,9 +35,9 @@ impl Prompt {
         let available_scopes = Prompt::read_scopes();
         let raw_select = Question::raw_select("scope")
             .message("Choose the scope:")
+            .choice("None")
             .choices(&available_scopes)
             .choice("Create new scope")
-            .choice("None")
             .build();
         let answer = prompt_one(raw_select);
         let answer_index = match answer {
@@ -45,12 +45,12 @@ impl Prompt {
             Ok(_) => panic!("Obtained a non ListItem from a raw_select"),
             Err(e) => print_error_and_exit(&e.to_string()),
         };
-        if answer_index == available_scopes.len() {
+        if answer_index == available_scopes.len() + 1 {
             Prompt::ask_new_scope()
-        } else if answer_index == available_scopes.len() + 1 {
+        } else if answer_index == 0 {
             String::from("")
         } else {
-            available_scopes[answer_index].clone()
+            available_scopes[answer_index - 1].clone()
         }
     }
 
