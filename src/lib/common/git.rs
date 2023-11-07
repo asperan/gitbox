@@ -38,7 +38,11 @@ pub fn commit_list(from: Option<&SemanticVersion>, branch: CommitBranch) -> Vec<
     };
     if result.status.success() {
         match std::str::from_utf8(&result.stdout) {
-            Ok(lines) => lines.split('\n').map(|s| s.to_string()).collect(),
+            Ok(lines) => lines
+                .split('\n')
+                .filter(|s| !s.is_empty())
+                .map(|s| s.to_string())
+                .collect(),
             Err(e) => print_error_and_exit(&e.to_string()),
         }
     } else {
