@@ -1,4 +1,4 @@
-use ahash::AHashMap;
+use ahash::{AHashMap, RandomState};
 use clap::Args;
 
 use crate::common::{
@@ -11,6 +11,7 @@ use crate::common::{
 
 const NO_SCOPE_TITLE: &str = "General";
 const NON_CONVENTIONAL_TYPE: &str = "Non conventional";
+const HASH_RANDOM_STATE: RandomState = RandomState::with_seeds(0, 0, 0, 0);
 
 // CommitDetails contains the message and the breakingness of the commit
 type CommitDetails = (String, bool);
@@ -95,7 +96,7 @@ impl ChangelogSubCommand {
     fn categorize_commits_from(&self, version: &Option<SemanticVersion>) -> TypeMap {
         let exclude_trigger = self.exclude_trigger.as_ref().map(|s| Trigger::from(s));
         let commit_list = commit_list(version.as_ref(), CommitBranch::Single);
-        let mut types_map: TypeMap = AHashMap::new();
+        let mut types_map: TypeMap = AHashMap::with_hasher(HASH_RANDOM_STATE);
         commit_list.iter().for_each(|c| {
             let captures = CachedValues::conventional_commit_regex().captures(c);
             match captures {
@@ -220,7 +221,7 @@ impl ChangelogSubCommand {
 
     fn ensure_inner_map_exists(commit_map: &mut TypeMap, key: &String) {
         if !commit_map.contains_key(key) {
-            commit_map.insert(key.to_owned(), AHashMap::new());
+            commit_map.insert(key.to_owned(), AHashMap::with_hasher(HASH_RANDOM_STATE));
         }
     }
 
