@@ -10,6 +10,7 @@ use crate::{
         cached_values::CachedValues,
         command_issuer::CommandIssuer,
         commons::print_cli_error_message_and_exit,
+        git::{commit_list, CommitBranch},
         semantic_version::SemanticVersion,
     },
     subcommands::describe::{
@@ -89,7 +90,16 @@ pub struct DescribeSubCommand {
 
 impl DescribeSubCommand {
     pub fn describe(&self) {
-        let new_version = self.update_version();
+        let new_version = if commit_list(
+            CachedValues::last_version().as_ref(),
+            CommitBranch::Single,
+        )
+        .is_empty()
+        {
+            CachedValues::last_version().clone().unwrap()
+        } else {
+            self.update_version()
+        };
         match &self.subcommand {
             Some(c) => match c {
                 DescribeSubCommands::Docker(cc) => {
