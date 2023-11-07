@@ -9,7 +9,7 @@ use crate::{
     common::{
         cached_values::CachedValues,
         command_issuer::CommandIssuer,
-        commons::{print_cli_error_message_and_exit, print_error_and_exit},
+        commons::print_cli_error_message_and_exit,
         semantic_version::SemanticVersion,
     },
     subcommands::describe::{
@@ -112,13 +112,6 @@ impl DescribeSubCommand {
             &self.patch_trigger,
         );
         let mut new_version = stable_updater.next_stable(CachedValues::last_stable_release());
-        if CachedValues::last_stable_release()
-            .as_ref()
-            .is_some_and(|v| new_version == *v)
-        {
-            print_error_and_exit("There are no relevant changes since the last stable version. Change triggers or commit some relevant changes to describe a new version.")
-        }
-
         let prerelease = if self.prerelease {
             let prerelease_updater =
                 PrereleaseUpdater::new(&self.prerelease_pattern, &self.old_prerelease_pattern);

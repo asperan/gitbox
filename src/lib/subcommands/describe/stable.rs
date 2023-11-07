@@ -2,7 +2,7 @@ use crate::common::{
     cached_values::CachedValues,
     git::{commit_list, CommitBranch},
     semantic_version::SemanticVersion,
-    trigger::Trigger,
+    trigger::Trigger, commons::print_error_and_exit,
 };
 
 type DefaultChangeAcceptor = Box<dyn Fn(&str, &Option<String>, bool) -> bool>;
@@ -77,13 +77,7 @@ impl StableVersionCalculator {
                         None,
                         None,
                     ),
-                    _ => SemanticVersion::new(
-                        version.major(),
-                        version.minor(),
-                        version.patch(),
-                        None,
-                        None,
-                    ),
+                    _ => print_error_and_exit("There are no relevant changes since the last stable version. Change triggers or commit some relevant changes to describe a new version."),
                 }
             }
             None => SemanticVersion::first_release(),
