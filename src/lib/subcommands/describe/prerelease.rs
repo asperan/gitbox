@@ -30,8 +30,8 @@ impl PrereleaseUpdater {
         let stable_updated = match &old_version {
             Some(old) => {
                 new_version.major() != old.major()
-                    || new_version.minor() != new_version.minor()
-                    || new_version.patch() != new_version.patch()
+                    || new_version.minor() != old.minor()
+                    || new_version.patch() != old.patch()
             }
             None => true,
         };
