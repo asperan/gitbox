@@ -45,23 +45,18 @@ impl PrereleaseUpdater {
         } else {
             let old_pattern_regex = Regex::new(&self.old_pattern.replace("%d", "(\\d+)")).unwrap();
             let prerelease = old_version.as_ref().unwrap().prerelease().as_ref().unwrap();
-            match old_pattern_regex
-                .captures(prerelease) {
-                    Some(caps) => {
-                        let number: u16 = caps
-                            .get(1)
-                            .unwrap()
-                            .as_str()
-                            .parse::<u16>()
-                            .unwrap()
-                            + 1;
-                        self.new_pattern.replace("%d", &number.to_string())
-
-                    },
-                    None => {
-                        print_error_and_exit(&format!("Failed to match prerelease '{}' with pattern '{}'", prerelease, self.new_pattern));
-                    }
+            match old_pattern_regex.captures(prerelease) {
+                Some(caps) => {
+                    let number: u16 = caps.get(1).unwrap().as_str().parse::<u16>().unwrap() + 1;
+                    self.new_pattern.replace("%d", &number.to_string())
                 }
+                None => {
+                    print_error_and_exit(&format!(
+                        "Failed to match prerelease '{}' with pattern '{}'",
+                        prerelease, self.new_pattern
+                    ));
+                }
+            }
         }
     }
 }
