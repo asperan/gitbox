@@ -165,7 +165,7 @@ impl ChangelogSubCommand {
                     )
                 })
                 .reduce(|acc, e| acc + "\n" + &e)
-                .unwrap()
+                .unwrap_or_else(|| String::from(""))
     }
 
     fn format_scopes(&self, scope_map: &ScopeMap) -> String {
@@ -179,7 +179,7 @@ impl ChangelogSubCommand {
                 )
             })
             .reduce(|acc, e| acc + "\n" + &e)
-            .unwrap()
+            .unwrap_or_else(|| String::from(""))
     }
 
     fn format_list(&self, commit_list: &[CommitDetails]) -> String {
@@ -187,7 +187,7 @@ impl ChangelogSubCommand {
             .iter()
             .map(|cd| self.item_format.replace("%s", &self.format_details(cd)))
             .reduce(|acc, e| acc + "\n" + &e)
-            .unwrap()
+            .unwrap_or_else(|| String::from(""))
     }
 
     fn format_details(&self, details: &CommitDetails) -> String {
