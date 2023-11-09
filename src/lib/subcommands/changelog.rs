@@ -90,7 +90,11 @@ impl ChangelogSubCommand {
         } else {
             CachedValues::last_stable_release()
         });
-        println!("{}", self.format_types(&types_map).trim());
+        if types_map.len() == 0usize {
+            println!("No changes since last {}", if self.from_latest_version { "version" } else { "stable release" });
+        } else {
+            println!("{}", self.format_types(&types_map).trim());
+        }
     }
 
     fn categorize_commits_from(&self, version: &Option<SemanticVersion>) -> TypeMap {
