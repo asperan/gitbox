@@ -2,7 +2,7 @@ use std::{cmp::Ordering, fmt::Display};
 
 use super::{cached_values::CachedValues, commons::print_error_and_exit};
 
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone, Hash)]
 pub struct SemanticVersion {
     major: u16,
     minor: u16,
