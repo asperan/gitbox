@@ -22,7 +22,7 @@ pub enum CommitBranch {
     Single,
 }
 
-pub fn commit_list(from: Option<&SemanticVersion>, branch: CommitBranch) -> Vec<String> {
+pub(super) fn commit_list(from: Option<&SemanticVersion>, branch: CommitBranch) -> Vec<String> {
     let result = {
         let mut command_args = vec!["log", "--pretty=format:%s"];
         if let CommitBranch::All = branch {
