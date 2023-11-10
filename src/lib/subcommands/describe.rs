@@ -39,7 +39,7 @@ pub struct DescribeSubCommand {
     #[arg(
         long,
         help = "Set the pattern of the old prerelease. Uses the same placeholder as '--prerelease-pattern'. Use this option when changing prerelease pattern. Defaults to the prerelease pattern",
-        requires("prerelease"),
+        requires("prerelease")
     )]
     old_prerelease_pattern: Option<String>,
 
@@ -96,7 +96,9 @@ impl DescribeSubCommand {
         .is_empty()
         {
             CachedValues::last_stable_release().clone().unwrap()
-        } else if self.prerelease && commit_list(CachedValues::last_version().as_ref(), CommitBranch::Single).is_empty() {
+        } else if self.prerelease
+            && commit_list(CachedValues::last_version().as_ref(), CommitBranch::Single).is_empty()
+        {
             CachedValues::last_version().clone().unwrap()
         } else {
             self.update_version()
@@ -124,8 +126,12 @@ impl DescribeSubCommand {
         );
         let mut new_version = stable_updater.next_stable(CachedValues::last_stable_release());
         let prerelease = if self.prerelease {
-            let prerelease_updater =
-                PrereleaseUpdater::new(&self.prerelease_pattern, self.old_prerelease_pattern.as_ref().unwrap_or(&self.prerelease_pattern));
+            let prerelease_updater = PrereleaseUpdater::new(
+                &self.prerelease_pattern,
+                self.old_prerelease_pattern
+                    .as_ref()
+                    .unwrap_or(&self.prerelease_pattern),
+            );
             Some(prerelease_updater.update_prerelease(&new_version, CachedValues::last_version()))
         } else {
             None
