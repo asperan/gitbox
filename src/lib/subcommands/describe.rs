@@ -90,11 +90,13 @@ pub struct DescribeSubCommand {
 impl DescribeSubCommand {
     pub fn describe(&self) {
         let new_version = if commit_list(
-            CachedValues::last_version().as_ref(),
+            CachedValues::last_stable_release().as_ref(),
             CommitBranch::Single,
         )
         .is_empty()
         {
+            CachedValues::last_stable_release().clone().unwrap()
+        } else if self.prerelease && commit_list(CachedValues::last_version().as_ref(), CommitBranch::Single).is_empty() {
             CachedValues::last_version().clone().unwrap()
         } else {
             self.update_version()
