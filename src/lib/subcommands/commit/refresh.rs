@@ -5,7 +5,7 @@ use crate::common::{
     cached_values::CachedValues,
     commons::ensure_dir_exists,
     git::{
-        commit_list, CommitBranch, DEFAULT_COMMIT_TYPES, EXTRA_DIR_PATH, SCOPES_FILE_PATH,
+        DEFAULT_COMMIT_TYPES, EXTRA_DIR_PATH, SCOPES_FILE_PATH,
         TYPES_FILE_PATH,
     },
 };
@@ -18,7 +18,7 @@ impl RefreshTypesAndScopesSubcommand {
         let conventional_commit_regex = CachedValues::conventional_commit_regex();
         let mut all_types = DEFAULT_COMMIT_TYPES.map(|t| t.to_string()).to_vec();
         let mut all_scopes: Vec<String> = vec![];
-        commit_list(None, CommitBranch::All)
+        CachedValues::all_branches_commit_list(None)
             .iter()
             .filter_map(|commit| conventional_commit_regex.captures(commit))
             .rev()

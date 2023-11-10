@@ -10,7 +10,6 @@ use crate::{
         cached_values::CachedValues,
         command_issuer::CommandIssuer,
         commons::print_cli_error_message_and_exit,
-        git::{commit_list, CommitBranch},
         semantic_version::SemanticVersion,
     },
     subcommands::describe::{
@@ -89,15 +88,14 @@ pub struct DescribeSubCommand {
 
 impl DescribeSubCommand {
     pub fn describe(&self) {
-        let new_version = if commit_list(
-            CachedValues::last_stable_release().as_ref(),
-            CommitBranch::Single,
+        let new_version = if CachedValues::single_branch_commit_list(
+            CachedValues::last_stable_release().as_ref()
         )
         .is_empty()
         {
             CachedValues::last_stable_release().clone().unwrap()
         } else if self.prerelease
-            && commit_list(CachedValues::last_version().as_ref(), CommitBranch::Single).is_empty()
+            && CachedValues::single_branch_commit_list(CachedValues::last_version().as_ref()).is_empty()
         {
             CachedValues::last_version().clone().unwrap()
         } else {

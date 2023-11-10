@@ -4,7 +4,6 @@ use clap::Args;
 use crate::common::{
     cached_values::CachedValues,
     commons::print_error_and_exit,
-    git::{commit_list, CommitBranch},
     semantic_version::SemanticVersion,
     trigger::Trigger,
 };
@@ -97,9 +96,9 @@ impl ChangelogSubCommand {
         }
     }
 
-    fn categorize_commits_from(&self, version: &Option<SemanticVersion>) -> TypeMap {
+    fn categorize_commits_from(&self, version: &'static Option<SemanticVersion>) -> TypeMap {
         let exclude_trigger = self.exclude_trigger.as_ref().map(|s| Trigger::from(s));
-        let commit_list = commit_list(version.as_ref(), CommitBranch::Single);
+        let commit_list = CachedValues::single_branch_commit_list(version.as_ref());
         let mut types_map: TypeMap = AHashMap::with_hasher(HASH_RANDOM_STATE);
         commit_list.iter().for_each(|c| {
             let captures = CachedValues::conventional_commit_regex().captures(c);
