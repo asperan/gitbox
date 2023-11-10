@@ -1,9 +1,10 @@
+use ahash::AHashMap;
 use regex::Regex;
 
 use super::{
     git::{
-        git_dir, last_stable_version, last_version, CONVENTIONAL_COMMIT_PATTERN,
-        FULL_SEMANTIC_VERSION_PATTERN,
+        commit_list, git_dir, last_stable_version, last_version, CommitBranch,
+        CONVENTIONAL_COMMIT_PATTERN, FULL_SEMANTIC_VERSION_PATTERN,
     },
     semantic_version::SemanticVersion,
 };
@@ -72,6 +73,36 @@ impl CachedValues {
             }
         }
     }
+
+    pub fn single_branch_commit_list(from: Option<&'static SemanticVersion>) -> &Vec<String> {
+        unsafe {
+            if SINGLE_BRANCH_COMMIT_LISTS.is_none() {
+                SINGLE_BRANCH_COMMIT_LISTS = Some(AHashMap::new())
+            }
+            let map = SINGLE_BRANCH_COMMIT_LISTS.as_mut().expect(
+                "This option should always be Some, as if it wasn't, it has been crea ed now",
+            );
+            if !map.contains_key(&from) {
+                map.insert(from, commit_list(from, CommitBranch::Single));
+            }
+            map.get(&from).as_ref().expect("The map always contains the key requested, as if it wasn't in the map, it has justs been added")
+        }
+    }
+
+    pub fn all_branches_commit_list(from: Option<&'static SemanticVersion>) -> &Vec<String> {
+        unsafe {
+            if ALL_BRANCHES_COMMIT_LISTS.is_none() {
+                ALL_BRANCHES_COMMIT_LISTS = Some(AHashMap::new())
+            }
+            let map = ALL_BRANCHES_COMMIT_LISTS.as_mut().expect(
+                "This option should always be Some, as if it wasn't, it has been crea ed now",
+            );
+            if !map.contains_key(&from) {
+                map.insert(from, commit_list(from, CommitBranch::All));
+            }
+            map.get(&from).as_ref().expect("The map always contains the key requested, as if it wasn't in the map, it has justs been added")
+        }
+    }
 }
 
 static mut GIT_DIR: Option<String> = None;
@@ -79,3 +110,7 @@ static mut LAST_VERSION: Option<Option<SemanticVersion>> = None;
 static mut LAST_RELEASE: Option<Option<SemanticVersion>> = None;
 static mut CONVENTIONAL_COMMIT_REGEX: Option<Regex> = None;
 static mut SEMANTIC_VERSION_REGEX: Option<Regex> = None;
+static mut SINGLE_BRANCH_COMMIT_LISTS: Option<AHashMap<Option<&SemanticVersion>, Vec<String>>> =
+    None;
+static mut ALL_BRANCHES_COMMIT_LISTS: Option<AHashMap<Option<&SemanticVersion>, Vec<String>>> =
+    None;
