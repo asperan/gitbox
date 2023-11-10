@@ -9,7 +9,6 @@ repository = "https://github.com/asperan/gitbox"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [profile.release]
-codegen-units = 1
 lto = "fat"
 strip = "symbols"
 panic = "abort"
