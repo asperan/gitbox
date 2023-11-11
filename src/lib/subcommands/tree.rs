@@ -77,15 +77,21 @@ impl TreeSubCommand {
                     } else {
                         0
                     };
-                format!(
-                    "{date:>width$} {tree_mark} {pointers} {commit_text}\n",
-                    date = if line[1].is_empty() { "" } else { line[1] },
-                    width = left_padding,
-                    tree_mark = line[0],
-                    pointers = line[2],
-                    commit_text = line[3]
-                )
+                Self::format_line(line, left_padding)
             })
             .collect()
+    }
+
+    #[inline(always)]
+    fn format_line(line: &Vec<&str>, left_padding: usize) -> String {
+        let line_len = line.len();
+        format!(
+            "{date:>width$} {tree_mark} {pointers} {commit_text}\n",
+            date = if line_len < 2 { "" } else { &line[1] },
+            width = left_padding,
+            tree_mark = line[0],
+            pointers = if line_len < 3 { "" } else { &line[2] },
+            commit_text = if line_len < 4 { "" } else { &line[3] },
+        )
     }
 }
