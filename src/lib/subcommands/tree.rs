@@ -62,7 +62,7 @@ impl TreeSubCommand {
 
         let time_padding = lines
             .iter()
-            .filter(|line| !line[1].is_empty())
+            .filter(|line| line.len() > 1 && !line[1].is_empty())
             .map(|line| line[1].len() - time_color_length)
             .max()
             .expect("The calculation of the time color escape sequence is after the length check.");
@@ -72,7 +72,7 @@ impl TreeSubCommand {
             .map(|line| {
                 let left_padding = TIME_MINIMUM_PADDING
                     + time_padding
-                    + if !line[1].is_empty() && time_regex.is_match(line[1]) {
+                    + if line.len() > 1 && time_regex.is_match(line[1]) {
                         time_color_length
                     } else {
                         0
