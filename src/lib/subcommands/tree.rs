@@ -48,7 +48,6 @@ impl TreeSubCommand {
             .split('\n')
             .map(|line| line.split('§').collect())
             .collect();
-
         let time_color_length = {
             let first_line_time = &lines[0][1];
             first_line_time.len()
