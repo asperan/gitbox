@@ -86,11 +86,11 @@ impl TreeSubCommand {
         let line_len = line.len();
         format!(
             "{date:>width$} {tree_mark} {pointers} {commit_text}\n",
-            date = if line_len < 2 { "" } else { &line[1] },
+            date = if line_len < 2 { "" } else { line[1] },
             width = left_padding,
             tree_mark = line[0],
-            pointers = if line_len < 3 { "" } else { &line[2] },
-            commit_text = if line_len < 4 { "" } else { &line[3] },
+            pointers = if line_len < 3 { "" } else { line[2] },
+            commit_text = if line_len < 4 { "" } else { line[3] },
         )
     }
 }
