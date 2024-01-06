@@ -27,7 +27,7 @@ impl InitSubCommand {
                 "commit",
                 "--allow-empty",
                 "-m",
-                "chore: initialize repository",
+                "chore(init): initialize repository",
             ]);
             if !commit_output.status.success() {
                 print_cli_error_message_and_exit(&commit_output.stderr, "create the first commit");
