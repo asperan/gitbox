@@ -22,5 +22,5 @@ TYPE_OBJECT = { "type" }
 
 SCOPE_OBJECT = { "scope" }
 
-LITERAL = @{ ASCII_ALPHA_LOWER ~ (ASCII_ALPHA_LOWER | "-")* }
+LITERAL = @{ ASCII_ALPHA_LOWER ~ (ASCII_ALPHA_LOWER | "-")* | "General" }
 
