@@ -101,7 +101,7 @@ impl StableVersionCalculator {
         match captures {
             Some(caps) => {
                 let commit_type = caps.get(1).unwrap().as_str();
-                let scope = caps.get(3).map(|t| t.as_str().to_string());
+                let scope = caps.get(3).map(|t| t.as_str().to_string()).or_else(|| Some("General".to_string()));
                 let breaking = caps.get(4).is_some();
                 if self.major_trigger.accept(commit_type, &scope, breaking) {
                     Some(Change::Major)
