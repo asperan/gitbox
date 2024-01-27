@@ -107,6 +107,8 @@ mod tests {
 
     use super::SemanticVersion;
 
+    /// Ordering tests
+
     #[test]
     fn equal_versions_ordering() {
         let v1 = SemanticVersion::first_release();
@@ -135,10 +137,18 @@ mod tests {
         let v3 = SemanticVersion::first_release();
 
         let partial_cmp_result = v1.partial_cmp(&v2);
-        assert_eq!(partial_cmp_result == Some(Ordering::Less) || partial_cmp_result == Some(Ordering::Equal), v1 <= v2);
+        assert_eq!(
+            partial_cmp_result == Some(Ordering::Less)
+                || partial_cmp_result == Some(Ordering::Equal),
+            v1 <= v2
+        );
 
         let partial_cmp_result = v1.partial_cmp(&v3);
-        assert_eq!(partial_cmp_result == Some(Ordering::Less) || partial_cmp_result == Some(Ordering::Equal), v1 <= v3);
+        assert_eq!(
+            partial_cmp_result == Some(Ordering::Less)
+                || partial_cmp_result == Some(Ordering::Equal),
+            v1 <= v3
+        );
     }
 
     #[test]
@@ -147,15 +157,57 @@ mod tests {
         let v2 = SemanticVersion::first_release();
         let v3 = SemanticVersion::new(0, 1, 1, None, None);
         let partial_cmp_result = v1.partial_cmp(&v2);
-        assert_eq!(partial_cmp_result == Some(Ordering::Greater) || partial_cmp_result == Some(Ordering::Equal), v1 >= v2);
+        assert_eq!(
+            partial_cmp_result == Some(Ordering::Greater)
+                || partial_cmp_result == Some(Ordering::Equal),
+            v1 >= v2
+        );
 
         let partial_cmp_result = v1.partial_cmp(&v3);
-        assert_eq!(partial_cmp_result == Some(Ordering::Greater) || partial_cmp_result == Some(Ordering::Equal), v1 >= v3);
+        assert_eq!(
+            partial_cmp_result == Some(Ordering::Greater)
+                || partial_cmp_result == Some(Ordering::Equal),
+            v1 >= v3
+        );
     }
 
     #[test]
-    fn format () {
+    fn prerelease_is_less_than_version() {
+        let v1 = SemanticVersion::first_release();
+        let v2 = SemanticVersion::new(0, 1, 0, Some("dev1".to_string()), None);
+        assert!(v1 > v2);
+    }
+
+    #[test]
+    fn prereleases_are_ordered_lexicographically() {
+        let v1 = SemanticVersion::new(0, 1, 0, Some("beta1".to_string()), None);
+        let v2 = SemanticVersion::new(0, 1, 0, Some("alpha3".to_string()), None);
+        assert!(v2 < v1);
+    }
+
+    /// Format tests
+
+    #[test]
+    fn simple_version_format() {
         let v1 = SemanticVersion::first_release();
         assert_eq!(v1.to_string(), String::from("0.1.0"));
+    }
+
+    #[test]
+    fn prerelease_version_format() {
+        let v1 = SemanticVersion::new(0, 1, 0, Some("dev1".to_string()), None);
+        assert_eq!(v1.to_string(), String::from("0.1.0-dev1"));
+    }
+
+    #[test]
+    fn version_with_metadata_format() {
+        let v1 = SemanticVersion::new(0, 1, 0, None, Some("test".to_string()));
+        assert_eq!(v1.to_string(), String::from("0.1.0+test"));
+    }
+
+    #[test]
+    fn prerelease_version_with_metadata_format() {
+        let v1 = SemanticVersion::new(0, 1, 0, Some("dev1".to_string()), Some("test".to_string()));
+        assert_eq!(v1.to_string(), String::from("0.1.0-dev1+test"));
     }
 }
