@@ -1,6 +1,6 @@
 use std::{cmp::Ordering, fmt::Display};
 
-#[derive(Debug, PartialEq, Eq, Clone, Hash, PartialOrd)]
+#[derive(Debug, PartialEq, Eq, Clone, Hash)]
 pub struct SemanticVersion {
     major: u32,
     minor: u32,
@@ -74,6 +74,12 @@ impl Ord for SemanticVersion {
         } else {
             major_cmp_result
         }
+    }
+}
+
+impl PartialOrd<SemanticVersion> for SemanticVersion {
+    fn partial_cmp(&self, other: &SemanticVersion) -> Option<Ordering> {
+        Some(self.cmp(other))
     }
 }
 
