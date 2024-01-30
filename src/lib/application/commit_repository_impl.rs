@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{rc::Rc, str::FromStr};
 
 use crate::{
     application::retriever::commit_retriever::CommitRetriever,
@@ -6,12 +6,12 @@ use crate::{
     usecases::repository::commit_repository::CommitRepository,
 };
 
-struct CommitRepositoryImpl {
-    commit_retriever: Box<dyn CommitRetriever>,
+pub struct CommitRepositoryImpl {
+    commit_retriever: Rc<dyn CommitRetriever>,
 }
 
 impl CommitRepositoryImpl {
-    fn new(commit_retriever: Box<dyn CommitRetriever>) -> CommitRepositoryImpl {
+    pub fn new(commit_retriever: Rc<dyn CommitRetriever>) -> CommitRepositoryImpl {
         CommitRepositoryImpl { commit_retriever }
     }
 }
@@ -38,6 +38,8 @@ impl CommitRepository for CommitRepositoryImpl {
 #[cfg(test)]
 mod tests {
 
+    use std::rc::Rc;
+
     use crate::{
         application::retriever::commit_retriever::CommitRetriever,
         domain::{commit::Commit, semantic_version::SemanticVersion, type_aliases::AnyError},
@@ -63,7 +65,7 @@ mod tests {
 
     #[test]
     fn get_all_commits_basic() {
-        let repository = CommitRepositoryImpl::new(Box::new(MockCommitRetriever {}));
+        let repository = CommitRepositoryImpl::new(Rc::new(MockCommitRetriever {}));
         let commit_list = repository.get_all_commits();
         assert!(commit_list.is_ok());
         assert!(
@@ -76,7 +78,7 @@ mod tests {
 
     #[test]
     fn get_commits_from_basic() {
-        let repository = CommitRepositoryImpl::new(Box::new(MockCommitRetriever {}));
+        let repository = CommitRepositoryImpl::new(Rc::new(MockCommitRetriever {}));
         let commit_list = repository.get_commits_from(&None);
         assert!(commit_list.is_ok());
         assert!(commit_list
