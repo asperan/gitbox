@@ -1,7 +1,7 @@
-use crate::domain::{commit::Commit, semantic_version::SemanticVersion};
+use crate::domain::{commit::Commit, semantic_version::SemanticVersion, type_aliases::AnyError};
 
-trait CommitRetriever {
-    fn get_all_commits(&self) -> impl DoubleEndedIterator<Item = Commit>;
+pub trait CommitRetriever {
+    fn get_all_commits(&self) -> Result<Box<dyn DoubleEndedIterator<Item = String>>, AnyError>;
 
-    fn get_commits_from(&self, version: &Option<SemanticVersion>) -> impl DoubleEndedIterator<Item = Commit>;
+    fn get_commits_from(&self, version: &Option<SemanticVersion>) -> Result<Box<dyn DoubleEndedIterator<Item = String>>, AnyError>;
 }
