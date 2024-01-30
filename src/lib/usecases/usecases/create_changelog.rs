@@ -48,7 +48,7 @@ impl UseCase<String> for CreateChangelogUseCase {
 
 fn format_title(format: &ChangelogFormat, version: &Option<SemanticVersion>) -> String {
     let title = match version {
-        Some(v) => format!("Changes from version {}", v.to_string()),
+        Some(v) => format!("Changes from version {}", v),
         None => "Latest changes".to_string(),
     };
     format.title()(&title)
@@ -84,7 +84,7 @@ fn categorize_commit_list(
             let scopes_map = types_map
                 .get_mut(surely_conventional.typ())
                 .expect("The map is ensured to exist");
-            let scope = scope_or_general(&surely_conventional.scope());
+            let scope = scope_or_general(surely_conventional.scope());
             ensure_inner_vector_exists(scopes_map, &scope);
             scopes_map
                 .get_mut(&scope)
