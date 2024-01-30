@@ -1,3 +1,5 @@
+use crate::domain::type_aliases::AnyError;
+
 pub trait UseCase<T> {
-    fn execute(&self) -> T;
+    fn execute(&self) -> Result<T, AnyError>;
 }
