@@ -1,1 +1,1 @@
-mod commit_retriever;
+pub mod commit_retriever;
