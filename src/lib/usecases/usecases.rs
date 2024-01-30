@@ -1,2 +1,2 @@
 mod usecase;
-mod create_changelog;
+pub mod create_changelog;
