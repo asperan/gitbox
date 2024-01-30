@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct Trigger {
     start_node: Start,
 }
@@ -17,7 +17,7 @@ trait Visitable<'a, T> {
     fn visit(&self, commit_type: &str, scope: &'a Option<String>, breaking: bool) -> T;
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct TypeNode {}
 impl Visitable<'_, String> for TypeNode {
     fn visit(&self, commit_type: &str, _scope: &Option<String>, _breaking: bool) -> String {
@@ -25,7 +25,7 @@ impl Visitable<'_, String> for TypeNode {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct ScopeNode {}
 impl<'a> Visitable<'a, &'a Option<String>> for ScopeNode {
     fn visit(
@@ -38,13 +38,13 @@ impl<'a> Visitable<'a, &'a Option<String>> for ScopeNode {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum ObjectNode {
     Scope(ScopeNode),
     Type(TypeNode),
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct BreakingNode {}
 impl Visitable<'_, bool> for BreakingNode {
     fn visit(&self, _commit_type: &str, _scope: &Option<String>, breaking: bool) -> bool {
@@ -52,7 +52,7 @@ impl Visitable<'_, bool> for BreakingNode {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct LiteralNode {
     value: String,
 }
@@ -67,7 +67,7 @@ impl Visitable<'_, String> for LiteralNode {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct ArrayNode {
     pub values: Vec<String>,
 }
@@ -77,7 +77,7 @@ impl Visitable<'_, Vec<String>> for ArrayNode {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct InNode {
     pub object: ObjectNode,
     pub array: ArrayNode,
@@ -100,7 +100,7 @@ impl Visitable<'_, bool> for InNode {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum BasicStatement {
     In(InNode),
     Breaking(BreakingNode),
@@ -115,7 +115,7 @@ impl Visitable<'_, bool> for BasicStatement {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum FirstAndValue {
     Basic(BasicStatement),
     Priority(Box<PriorityStatement>),
@@ -130,7 +130,7 @@ impl Visitable<'_, bool> for FirstAndValue {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum SecondAndValue {
     Basic(BasicStatement),
     Priority(Box<PriorityStatement>),
@@ -147,7 +147,7 @@ impl Visitable<'_, bool> for SecondAndValue {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct AndStatement {
     pub left: FirstAndValue,
     pub right: SecondAndValue,
@@ -160,7 +160,7 @@ impl Visitable<'_, bool> for AndStatement {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum FirstOrValue {
     And(AndStatement),
     Basic(BasicStatement),
@@ -175,7 +175,7 @@ impl Visitable<'_, bool> for FirstOrValue {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum SecondOrValue {
     And(AndStatement),
     Basic(BasicStatement),
@@ -192,7 +192,7 @@ impl Visitable<'_, bool> for SecondOrValue {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct OrStatement {
     pub left: FirstOrValue,
     pub right: SecondOrValue,
@@ -205,7 +205,7 @@ impl Visitable<'_, bool> for OrStatement {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct PriorityStatement {
     pub internal_node: OrStatement,
 }
@@ -216,7 +216,7 @@ impl Visitable<'_, bool> for PriorityStatement {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum Start {
     And(AndStatement),
     Or(OrStatement),
