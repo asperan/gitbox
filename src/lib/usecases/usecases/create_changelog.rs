@@ -2,11 +2,7 @@ use ahash::{AHashMap, RandomState};
 
 use crate::{
     domain::{
-        commit::Commit,
-        configuration::changelog::{ChangelogConfiguration, ChangelogFormat},
-        conventional_commit::ConventionalCommit,
-        semantic_version::SemanticVersion,
-        trigger::Trigger,
+        commit::Commit, configuration::changelog::{ChangelogConfiguration, ChangelogFormat}, conventional_commit::ConventionalCommit, semantic_version::SemanticVersion, trigger::Trigger, type_aliases::AnyError
     },
     usecases::{
         repository::{commit_repository::CommitRepository, version_repository::VersionRepository},
@@ -35,18 +31,18 @@ impl CreateChangelogUseCase {
 }
 
 impl UseCase<String> for CreateChangelogUseCase {
-    fn execute(&self) -> String {
+    fn execute(&self) -> Result<String, AnyError> {
         let from_version = if self.configuration.generate_from_latest_version() {
-            self.version_repository.last_version()
+            self.version_repository.last_version()?
         } else {
-            self.version_repository.last_stable_version()
+            self.version_repository.last_stable_version()?
         };
-        let commit_list = self.commit_repository.get_commits_from(&from_version);
+        let commit_list = self.commit_repository.get_commits_from(&from_version)?;
 
         let type_map = categorize_commit_list(commit_list, self.configuration.exclude_trigger());
         let text = format_types(self.configuration.format(), &type_map);
         let title = format_title(self.configuration.format(), &from_version);
-        format!("{}\n{}", title, text)
+        Ok(format!("{}\n{}", title, text))
     }
 }
 
@@ -206,11 +202,7 @@ mod tests {
 
     use crate::{
         domain::{
-            commit::Commit,
-            configuration::changelog::{ChangelogConfiguration, ChangelogFormat},
-            conventional_commit::ConventionalCommit,
-            semantic_version::SemanticVersion,
-            trigger::{BasicStatement, Trigger},
+            commit::Commit, configuration::changelog::{ChangelogConfiguration, ChangelogFormat}, conventional_commit::ConventionalCommit, semantic_version::SemanticVersion, trigger::{BasicStatement, Trigger}, type_aliases::AnyError
         },
         usecases::{
             repository::{
@@ -601,41 +593,41 @@ mod tests {
     struct MockCommitRepository {}
 
     impl CommitRepository for MockCommitRepository {
-        fn get_all_commits(&self) -> Box<dyn DoubleEndedIterator<Item = Commit>> {
-            Box::new(
+        fn get_all_commits(&self) -> Result<Box<dyn DoubleEndedIterator<Item = Commit>>, AnyError> {
+            Ok(Box::new(
                 commit_list()
                     .into_iter()
                     .map(|c| Commit::Conventional(c.clone())),
-            )
+            ))
         }
 
         fn get_commits_from(
             &self,
             _version: &Option<SemanticVersion>,
-        ) -> Box<dyn DoubleEndedIterator<Item = Commit>> {
-            Box::new(
+        ) -> Result<Box<dyn DoubleEndedIterator<Item = Commit>>, AnyError> {
+            Ok(Box::new(
                 commit_list()
                     .into_iter()
                     .map(|c| Commit::Conventional(c.clone())),
-            )
+            ))
         }
     }
 
     struct MockVersionRepository {}
 
     impl VersionRepository for MockVersionRepository {
-        fn last_version(&self) -> Option<SemanticVersion> {
-            Some(SemanticVersion::new(
+        fn last_version(&self) -> Result<Option<SemanticVersion>, AnyError> {
+            Ok(Some(SemanticVersion::new(
                 0,
                 1,
                 0,
                 Some("dev1".to_string()),
                 None,
-            ))
+            )))
         }
 
-        fn last_stable_version(&self) -> Option<SemanticVersion> {
-            Some(SemanticVersion::first_release())
+        fn last_stable_version(&self) -> Result<Option<SemanticVersion>, AnyError> {
+            Ok(Some(SemanticVersion::first_release()))
         }
     }
 
@@ -650,7 +642,8 @@ mod tests {
             Box::new(version_repository),
         );
         let changelog = usecase.execute();
-        assert_eq!(changelog, "# Changes from version 0.1.0\n## feat\n### API\n:\n* test message #1\n### General\n:\n* test message #6\n\n## fix\n### API\n:\n* test message #2\n\n## docs\n### General\n:\n* test message #5\n\n## test\n### API\n:\n* test message #7\n### General\n:\n* test message #3\n\n## refactor\n### exclude\n:\n* test message #4\n");
+        assert!(changelog.is_ok());
+        assert_eq!(changelog.expect("Just asserted it OK-ness"), "# Changes from version 0.1.0\n## feat\n### API\n:\n* test message #1\n### General\n:\n* test message #6\n\n## fix\n### API\n:\n* test message #2\n\n## docs\n### General\n:\n* test message #5\n\n## test\n### API\n:\n* test message #7\n### General\n:\n* test message #3\n\n## refactor\n### exclude\n:\n* test message #4\n");
     }
 
     #[test]
@@ -664,7 +657,8 @@ mod tests {
             Box::new(version_repository),
         );
         let changelog = usecase.execute();
-        assert_eq!(changelog, "# Changes from version 0.1.0-dev1\n## feat\n### API\n:\n* test message #1\n### General\n:\n* test message #6\n\n## fix\n### API\n:\n* test message #2\n\n## docs\n### General\n:\n* test message #5\n\n## test\n### API\n:\n* test message #7\n### General\n:\n* test message #3\n\n## refactor\n### exclude\n:\n* test message #4\n");
+        assert!(changelog.is_ok());
+        assert_eq!(changelog.expect("Just asserted its OK-ness"), "# Changes from version 0.1.0-dev1\n## feat\n### API\n:\n* test message #1\n### General\n:\n* test message #6\n\n## fix\n### API\n:\n* test message #2\n\n## docs\n### General\n:\n* test message #5\n\n## test\n### API\n:\n* test message #7\n### General\n:\n* test message #3\n\n## refactor\n### exclude\n:\n* test message #4\n");
     }
 
     #[test]
@@ -688,7 +682,8 @@ mod tests {
             Box::new(version_repository),
         );
         let changelog = usecase.execute();
-        assert_eq!(changelog, "# Changes from version 0.1.0\n## feat\n### API\n:\n* test message #1\n### General\n:\n* test message #6\n\n## fix\n### API\n:\n* test message #2\n\n## docs\n### General\n:\n* test message #5\n\n## test\n### API\n:\n* test message #7\n### General\n:\n* test message #3\n");
+        assert!(changelog.is_ok());
+        assert_eq!(changelog.expect("Just asserted its OK-ness"), "# Changes from version 0.1.0\n## feat\n### API\n:\n* test message #1\n### General\n:\n* test message #6\n\n## fix\n### API\n:\n* test message #2\n\n## docs\n### General\n:\n* test message #5\n\n## test\n### API\n:\n* test message #7\n### General\n:\n* test message #3\n");
     }
 
     #[test]
@@ -712,6 +707,7 @@ mod tests {
             Box::new(version_repository),
         );
         let changelog = usecase.execute();
-        assert_eq!(changelog, "# Changes from version 0.1.0-dev1\n## feat\n### API\n:\n* test message #1\n### General\n:\n* test message #6\n\n## fix\n### API\n:\n* test message #2\n\n## docs\n### General\n:\n* test message #5\n\n## test\n### API\n:\n* test message #7\n### General\n:\n* test message #3\n");
+        assert!(changelog.is_ok());
+        assert_eq!(changelog.expect("Just asserted its OK-ness"), "# Changes from version 0.1.0-dev1\n## feat\n### API\n:\n* test message #1\n### General\n:\n* test message #6\n\n## fix\n### API\n:\n* test message #2\n\n## docs\n### General\n:\n* test message #5\n\n## test\n### API\n:\n* test message #7\n### General\n:\n* test message #3\n");
     }
 }
