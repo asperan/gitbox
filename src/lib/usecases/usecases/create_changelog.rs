@@ -2,7 +2,12 @@ use ahash::{AHashMap, RandomState};
 
 use crate::{
     domain::{
-        commit::Commit, configuration::changelog::{ChangelogConfiguration, ChangelogFormat}, conventional_commit::ConventionalCommit, semantic_version::SemanticVersion, trigger::Trigger, type_aliases::AnyError
+        commit::Commit,
+        configuration::changelog::{ChangelogConfiguration, ChangelogFormat},
+        conventional_commit::ConventionalCommit,
+        semantic_version::SemanticVersion,
+        trigger::Trigger,
+        type_aliases::AnyError,
     },
     usecases::{
         repository::{commit_repository::CommitRepository, version_repository::VersionRepository},
@@ -202,7 +207,12 @@ mod tests {
 
     use crate::{
         domain::{
-            commit::Commit, configuration::changelog::{ChangelogConfiguration, ChangelogFormat}, conventional_commit::ConventionalCommit, semantic_version::SemanticVersion, trigger::{BasicStatement, Trigger}, type_aliases::AnyError
+            commit::Commit,
+            configuration::changelog::{ChangelogConfiguration, ChangelogFormat},
+            conventional_commit::ConventionalCommit,
+            semantic_version::SemanticVersion,
+            trigger::{BasicStatement, Trigger},
+            type_aliases::AnyError,
         },
         usecases::{
             repository::{
