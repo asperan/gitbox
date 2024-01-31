@@ -1,6 +1,8 @@
 use std::{path::Path, rc::Rc};
 
-use crate::{domain::type_aliases::AnyError, usecases::repository::gitinfo_repository::GitInfoRepository};
+use crate::{
+    domain::type_aliases::AnyError, usecases::repository::gitinfo_repository::GitInfoRepository,
+};
 
 use super::retriever::gitinfo_retriever::GitInfoRetriever;
 
@@ -26,7 +28,10 @@ impl GitInfoRepository for GitInfoRepositoryImpl {
 mod tests {
     use std::rc::Rc;
 
-    use crate::{application::retriever::gitinfo_retriever::GitInfoRetriever, usecases::repository::gitinfo_repository::GitInfoRepository};
+    use crate::{
+        application::retriever::gitinfo_retriever::GitInfoRetriever,
+        usecases::repository::gitinfo_repository::GitInfoRepository,
+    };
 
     use super::GitInfoRepositoryImpl;
 
@@ -42,6 +47,12 @@ mod tests {
         let repository = GitInfoRepositoryImpl::new(Rc::new(MockGitInfoRetriever {}));
         let git_dir = repository.git_dir();
         assert!(git_dir.is_ok());
-        assert_eq!(git_dir.expect("Just asserted its OK-ness").to_str().expect("The inner path contains only ASCII characters"), "/absolute/path/to/a/git/dir");
+        assert_eq!(
+            git_dir
+                .expect("Just asserted its OK-ness")
+                .to_str()
+                .expect("The inner path contains only ASCII characters"),
+            "/absolute/path/to/a/git/dir"
+        );
     }
 }
