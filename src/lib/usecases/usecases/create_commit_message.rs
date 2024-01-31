@@ -1,4 +1,4 @@
-use crate::domain::{configuration::commit::CommitConfiguration, type_aliases::AnyError};
+use crate::{domain::type_aliases::AnyError, usecases::configuration::commit::CommitConfiguration};
 
 use super::usecase::UseCase;
 
@@ -50,9 +50,9 @@ impl UseCase<String> for CreateCommitMessageUseCase {
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        domain::configuration::commit::CommitConfiguration,
-        usecases::usecases::{create_commit_message::CreateCommitMessageUseCase, usecase::UseCase},
+    use crate::usecases::{
+        configuration::commit::CommitConfiguration,
+        usecases::{create_commit_message::CreateCommitMessageUseCase, usecase::UseCase},
     };
 
     fn simple_configuration() -> CommitConfiguration {

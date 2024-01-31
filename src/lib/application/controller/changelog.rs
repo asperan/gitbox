@@ -8,11 +8,11 @@ use crate::{
         retriever::{commit_retriever::CommitRetriever, version_retriever::VersionRetriever},
         version_repository_impl::VersionRepositoryImpl,
     },
-    domain::{
+    domain::trigger::Trigger,
+    usecases::{
         configuration::changelog::{ChangelogConfiguration, ChangelogFormat},
-        trigger::Trigger,
+        usecases::{create_changelog::CreateChangelogUseCase, usecase::UseCase},
     },
-    usecases::usecases::{create_changelog::CreateChangelogUseCase, usecase::UseCase},
 };
 
 use super::exit_code::ControllerExitCode;
