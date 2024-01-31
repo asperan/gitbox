@@ -1,7 +1,10 @@
-use std::{error::Error, fmt::Display, str::FromStr};
 use regex::Regex;
+use std::{fmt::Display, str::FromStr};
 
-use crate::domain::semantic_version::SemanticVersion;
+use crate::{
+    application::error::semantic_version_parsing_error::SemanticVersionParsingError,
+    domain::semantic_version::SemanticVersion,
+};
 
 const FULL_SEMANTIC_VERSION_PATTERN: &str = concat!(
     // GROUPS:
@@ -17,7 +20,8 @@ impl FromStr for SemanticVersion {
     type Err = SemanticVersionParsingError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let regex = Regex::new(FULL_SEMANTIC_VERSION_PATTERN).expect("The constant semantic version pattern should be correct");
+        let regex = Regex::new(FULL_SEMANTIC_VERSION_PATTERN)
+            .expect("The constant semantic version pattern should be correct");
         let captures = regex.captures(s);
         match captures {
             Some(caps) => {
@@ -26,7 +30,9 @@ impl FromStr for SemanticVersion {
                 let patch = caps.get(4).unwrap().as_str().parse().unwrap();
                 let prerelease = caps.get(5).map(|m| m.as_str().to_owned());
                 let metadata = caps.get(6).map(|m| m.as_str().to_owned());
-                Ok(SemanticVersion::new(major, minor, patch, prerelease, metadata))
+                Ok(SemanticVersion::new(
+                    major, minor, patch, prerelease, metadata,
+                ))
             }
             None => Err(SemanticVersionParsingError::new(s)),
         }
@@ -46,39 +52,12 @@ impl Display for SemanticVersion {
         write!(
             f,
             "{}.{}.{}{}{}",
-            self.major(), self.minor(), self.patch(), prerelease_str, metadata_str
+            self.major(),
+            self.minor(),
+            self.patch(),
+            prerelease_str,
+            metadata_str
         )
-    }
-}
-
-#[derive(Debug)]
-pub struct SemanticVersionParsingError {
-    wrong_version: String,
-}
-
-impl SemanticVersionParsingError {
-    fn new(wrong_version: &str) -> SemanticVersionParsingError {
-        SemanticVersionParsingError { wrong_version: wrong_version.to_string() }
-    }
-}
-
-impl Display for SemanticVersionParsingError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Version '{}' is not semantic", self.wrong_version)
-    }
-}
-
-impl Error for SemanticVersionParsingError {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        None
-    }
-
-    fn description(&self) -> &str {
-        "description() is deprecated; use Display"
-    }
-
-    fn cause(&self) -> Option<&dyn Error> {
-        self.source()
     }
 }
 
@@ -99,7 +78,7 @@ mod tests {
                 assert_eq!(version.patch(), 15);
                 assert_eq!(version.prerelease(), &None);
                 assert_eq!(version.metadata(), &None);
-            },
+            }
             Err(_) => assert!(false, "The version should be parsable correctly"),
         }
     }
@@ -115,7 +94,7 @@ mod tests {
                 assert_eq!(version.patch(), 15);
                 assert_eq!(version.prerelease(), &Some("alpha1".to_string()));
                 assert_eq!(version.metadata(), &None);
-            },
+            }
             Err(_) => assert!(false, "The version should be parsable correctly"),
         }
     }
@@ -131,10 +110,9 @@ mod tests {
                 assert_eq!(version.patch(), 15);
                 assert_eq!(version.prerelease(), &None);
                 assert_eq!(version.metadata(), &Some("test".to_string()));
-            },
+            }
             Err(_) => assert!(false, "The version should be parsable correctly"),
         }
-
     }
 
     #[test]
@@ -148,17 +126,16 @@ mod tests {
                 assert_eq!(version.patch(), 15);
                 assert_eq!(version.prerelease(), &Some("alpha1".to_string()));
                 assert_eq!(version.metadata(), &Some("test".to_string()));
-            },
+            }
             Err(_) => assert!(false, "The version should be parsable correctly"),
         }
-
     }
 
     #[test]
     fn try_parse_non_semantic_version() {
         let s = "1970-01-01";
         let v = SemanticVersion::from_str(s);
-        assert!(v.is_err() && v.unwrap_err().wrong_version == s.to_string());
+        assert!(v.is_err() && v.unwrap_err().wrong_version() == s.to_string());
     }
 
     #[test]
