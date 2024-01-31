@@ -17,13 +17,13 @@ use crate::{
     },
 };
 
-pub struct CreateChangelogUseCase {
-    configuration: ChangelogConfiguration,
+pub struct CreateChangelogUseCase<'a> {
+    configuration: ChangelogConfiguration<'a>,
     commit_repository: Rc<dyn CommitRepository>,
     version_repository: Rc<dyn VersionRepository>,
 }
 
-impl CreateChangelogUseCase {
+impl<'a> CreateChangelogUseCase<'a> {
     pub fn new(
         configuration: ChangelogConfiguration,
         commit_repository: Rc<dyn CommitRepository>,
@@ -37,7 +37,7 @@ impl CreateChangelogUseCase {
     }
 }
 
-impl UseCase<String> for CreateChangelogUseCase {
+impl UseCase<String> for CreateChangelogUseCase<'_> {
     fn execute(&self) -> Result<String, AnyError> {
         let from_version = if self.configuration.generate_from_latest_version() {
             self.version_repository.last_version()?
@@ -299,7 +299,7 @@ mod tests {
         ]
     }
 
-    fn format() -> ChangelogFormat {
+    fn format() -> ChangelogFormat<'static> {
         ChangelogFormat::new(
             Box::new(|t| format!("# {}", t)),
             Box::new(|t| format!("## {}", t)),
