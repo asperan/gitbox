@@ -71,8 +71,7 @@ mod tests {
         application::{
             controller::{exit_code::ControllerExitCode, init::InitController},
             manager::{
-                commit_manager::CommitManager,
-                init_manager::InitManager,
+                commit_manager::CommitManager, init_manager::InitManager,
                 output_manager::OutputManager,
             },
             options::init::InitOptions,

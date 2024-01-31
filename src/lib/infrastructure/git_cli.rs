@@ -1,10 +1,13 @@
 use std::{process::Command, str::FromStr};
 
 use crate::{
-    application::{manager::{commit_manager::CommitManager, init_manager::InitManager}, retriever::{
-        commit_retriever::CommitRetriever, gitinfo_retriever::GitInfoRetriever,
-        version_retriever::VersionRetriever,
-    }},
+    application::{
+        manager::{commit_manager::CommitManager, init_manager::InitManager},
+        retriever::{
+            commit_retriever::CommitRetriever, gitinfo_retriever::GitInfoRetriever,
+            version_retriever::VersionRetriever,
+        },
+    },
     domain::{semantic_version::SemanticVersion, type_aliases::AnyError},
 };
 
@@ -111,12 +114,20 @@ impl GitInfoRetriever for GitCli {
 }
 
 impl CommitManager for GitCli {
-    fn create_commit(&self, commit: crate::domain::conventional_commit::ConventionalCommit) -> Result<(), AnyError> {
-        self.run_git_command(vec!["commit", "-m", &commit.to_string()].into_iter()).map(|_| ())
+    fn create_commit(
+        &self,
+        commit: crate::domain::conventional_commit::ConventionalCommit,
+    ) -> Result<(), AnyError> {
+        self.run_git_command(vec!["commit", "-m", &commit.to_string()].into_iter())
+            .map(|_| ())
     }
 
-    fn create_empty_commit(&self, commit: crate::domain::conventional_commit::ConventionalCommit) -> Result<(), AnyError> {
-        self.run_git_command(vec!["commit", "--allow-empty", "-m", &commit.to_string()].into_iter()).map(|_| ())
+    fn create_empty_commit(
+        &self,
+        commit: crate::domain::conventional_commit::ConventionalCommit,
+    ) -> Result<(), AnyError> {
+        self.run_git_command(vec!["commit", "--allow-empty", "-m", &commit.to_string()].into_iter())
+            .map(|_| ())
     }
 }
 

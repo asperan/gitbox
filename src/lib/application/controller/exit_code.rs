@@ -3,4 +3,3 @@ pub enum ControllerExitCode {
     Ok,
     Error(i32),
 }
-

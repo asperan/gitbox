@@ -37,4 +37,3 @@ impl ConventionalCommit {
         &self.summary
     }
 }
-

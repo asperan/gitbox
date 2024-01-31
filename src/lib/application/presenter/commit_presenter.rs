@@ -159,4 +159,3 @@ mod tests {
         assert_eq!(&commit.to_string(), "feat(domain)!: test format");
     }
 }
-
