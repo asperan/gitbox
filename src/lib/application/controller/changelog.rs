@@ -3,6 +3,7 @@ use std::{rc::Rc, str::FromStr};
 use crate::{
     application::{
         commit_repository_impl::CommitRepositoryImpl,
+        manager::output_manager::OutputManager,
         options::changelog::{ChangelogOptions, FORMAT_PLACEHOLDER},
         retriever::{commit_retriever::CommitRetriever, version_retriever::VersionRetriever},
         version_repository_impl::VersionRepositoryImpl,
@@ -10,15 +11,17 @@ use crate::{
     domain::{
         configuration::changelog::{ChangelogConfiguration, ChangelogFormat},
         trigger::Trigger,
-        type_aliases::AnyError,
     },
     usecases::usecases::{create_changelog::CreateChangelogUseCase, usecase::UseCase},
 };
+
+use super::exit_code::ControllerExitCode;
 
 pub struct ChangelogController {
     options: ChangelogOptions,
     commit_retriever: Rc<dyn CommitRetriever>,
     version_retriever: Rc<dyn VersionRetriever>,
+    output_manager: Rc<dyn OutputManager>,
 }
 
 impl ChangelogController {
@@ -26,17 +29,25 @@ impl ChangelogController {
         options: ChangelogOptions,
         commit_retriever: Rc<dyn CommitRetriever>,
         version_retriever: Rc<dyn VersionRetriever>,
+        output_manager: Rc<dyn OutputManager>,
     ) -> ChangelogController {
         ChangelogController {
             options,
             commit_retriever,
             version_retriever,
+            output_manager,
         }
     }
 
-    pub fn changelog(&self) -> Result<String, AnyError> {
+    pub fn changelog(&self) -> ControllerExitCode {
         let trigger: Option<Trigger> = match self.options.exclude_trigger() {
-            Some(t) => Some(Trigger::from_str(t)?),
+            Some(t) => match Trigger::from_str(t) {
+                Ok(v) => Some(v),
+                Err(e) => {
+                    self.output_manager.error(&e.to_string());
+                    return ControllerExitCode::Error(1);
+                }
+            },
             None => None,
         };
         let configuration = ChangelogConfiguration::new(
@@ -60,6 +71,15 @@ impl ChangelogController {
             Rc::new(CommitRepositoryImpl::new(self.commit_retriever.clone())),
             Rc::new(VersionRepositoryImpl::new(self.version_retriever.clone())),
         );
-        usecase.execute()
+        match usecase.execute() {
+            Ok(c) => {
+                self.output_manager.output(&c);
+                ControllerExitCode::Ok
+            }
+            Err(e) => {
+                self.output_manager.error(&e.to_string());
+                ControllerExitCode::Error(1)
+            }
+        }
     }
 }
