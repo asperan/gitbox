@@ -1,6 +1,7 @@
-use std::{error::Error, fmt::Display};
-
-use crate::domain::type_aliases::AnyError;
+use crate::{
+    application::error::changelog_options_invariant_error::ChangelogOptionsInvariantError,
+    domain::type_aliases::AnyError,
+};
 
 pub const FORMAT_PLACEHOLDER: &str = "%s";
 
@@ -87,39 +88,6 @@ impl ChangelogOptions {
             )));
         }
         Ok(())
-    }
-}
-
-#[derive(Debug)]
-struct ChangelogOptionsInvariantError {
-    message: String,
-}
-
-impl ChangelogOptionsInvariantError {
-    fn new(message: &str) -> ChangelogOptionsInvariantError {
-        ChangelogOptionsInvariantError {
-            message: message.to_owned(),
-        }
-    }
-}
-
-impl Display for ChangelogOptionsInvariantError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "ChangelogOptions invariant error: {}", &self.message)
-    }
-}
-
-impl Error for ChangelogOptionsInvariantError {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        None
-    }
-
-    fn description(&self) -> &str {
-        "description() is deprecated; use Display"
-    }
-
-    fn cause(&self) -> Option<&dyn Error> {
-        self.source()
     }
 }
 
