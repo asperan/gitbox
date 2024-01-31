@@ -1,4 +1,7 @@
-use crate::domain::{commit::Commit, semantic_version::SemanticVersion, type_aliases::AnyError};
+use crate::{
+    domain::{commit::Commit, semantic_version::SemanticVersion},
+    usecases::type_aliases::AnyError,
+};
 
 pub trait CommitRepository {
     fn get_all_commits(&self) -> Result<Box<dyn DoubleEndedIterator<Item = Commit>>, AnyError>;

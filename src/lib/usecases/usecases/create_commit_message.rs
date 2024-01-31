@@ -1,4 +1,4 @@
-use crate::{domain::type_aliases::AnyError, usecases::configuration::commit::CommitConfiguration};
+use crate::usecases::{configuration::commit::CommitConfiguration, type_aliases::AnyError};
 
 use super::usecase::UseCase;
 

@@ -95,7 +95,8 @@ mod tests {
             options::changelog::ChangelogOptions,
             retriever::{commit_retriever::CommitRetriever, version_retriever::VersionRetriever},
         },
-        domain::{semantic_version::SemanticVersion, type_aliases::AnyError},
+        domain::semantic_version::SemanticVersion,
+        usecases::type_aliases::AnyError,
     };
 
     use super::ChangelogController;

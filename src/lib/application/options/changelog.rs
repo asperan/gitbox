@@ -1,6 +1,6 @@
 use crate::{
     application::error::changelog_options_invariant_error::ChangelogOptionsInvariantError,
-    domain::type_aliases::AnyError,
+    usecases::type_aliases::AnyError,
 };
 
 pub const FORMAT_PLACEHOLDER: &str = "%s";

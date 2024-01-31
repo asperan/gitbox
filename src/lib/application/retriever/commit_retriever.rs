@@ -1,4 +1,4 @@
-use crate::domain::{semantic_version::SemanticVersion, type_aliases::AnyError};
+use crate::{domain::semantic_version::SemanticVersion, usecases::type_aliases::AnyError};
 
 pub trait CommitRetriever {
     fn get_all_commits(&self) -> Result<Box<dyn DoubleEndedIterator<Item = String>>, AnyError>;

@@ -1,8 +1,6 @@
 use std::{path::Path, rc::Rc};
 
-use crate::{
-    domain::type_aliases::AnyError, usecases::repository::gitinfo_repository::GitInfoRepository,
-};
+use crate::usecases::{repository::gitinfo_repository::GitInfoRepository, type_aliases::AnyError};
 
 use super::retriever::gitinfo_retriever::GitInfoRetriever;
 
@@ -30,14 +28,14 @@ mod tests {
 
     use crate::{
         application::retriever::gitinfo_retriever::GitInfoRetriever,
-        usecases::repository::gitinfo_repository::GitInfoRepository,
+        usecases::{repository::gitinfo_repository::GitInfoRepository, type_aliases::AnyError},
     };
 
     use super::GitInfoRepositoryImpl;
 
     struct MockGitInfoRetriever {}
     impl GitInfoRetriever for MockGitInfoRetriever {
-        fn git_dir(&self) -> Result<String, crate::domain::type_aliases::AnyError> {
+        fn git_dir(&self) -> Result<String, AnyError> {
             Ok(String::from("/absolute/path/to/a/git/dir"))
         }
     }

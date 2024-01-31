@@ -2,8 +2,8 @@ use std::{rc::Rc, str::FromStr};
 
 use crate::{
     application::retriever::commit_retriever::CommitRetriever,
-    domain::{commit::Commit, semantic_version::SemanticVersion, type_aliases::AnyError},
-    usecases::repository::commit_repository::CommitRepository,
+    domain::{commit::Commit, semantic_version::SemanticVersion},
+    usecases::{repository::commit_repository::CommitRepository, type_aliases::AnyError},
 };
 
 pub struct CommitRepositoryImpl {
@@ -42,8 +42,8 @@ mod tests {
 
     use crate::{
         application::retriever::commit_retriever::CommitRetriever,
-        domain::{commit::Commit, semantic_version::SemanticVersion, type_aliases::AnyError},
-        usecases::repository::commit_repository::CommitRepository,
+        domain::{commit::Commit, semantic_version::SemanticVersion},
+        usecases::{repository::commit_repository::CommitRepository, type_aliases::AnyError},
     };
 
     use super::CommitRepositoryImpl;

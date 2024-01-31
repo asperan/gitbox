@@ -1,6 +1,6 @@
-use crate::{
-    domain::type_aliases::AnyError,
-    usecases::error::commit_configuration_invariant_error::CommitConfigurationInvariantError,
+use crate::usecases::{
+    error::commit_configuration_invariant_error::CommitConfigurationInvariantError,
+    type_aliases::AnyError,
 };
 
 #[derive(Debug)]

@@ -8,7 +8,8 @@ use crate::{
             version_retriever::VersionRetriever,
         },
     },
-    domain::{semantic_version::SemanticVersion, type_aliases::AnyError},
+    domain::semantic_version::SemanticVersion,
+    usecases::type_aliases::AnyError,
 };
 
 use super::error::{command_execution_error::CommandExecutionError, generic_cli_error::CliError};

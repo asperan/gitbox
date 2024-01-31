@@ -76,7 +76,8 @@ mod tests {
             },
             options::init::InitOptions,
         },
-        domain::{conventional_commit::ConventionalCommit, type_aliases::AnyError},
+        domain::conventional_commit::ConventionalCommit,
+        usecases::type_aliases::AnyError,
     };
 
     #[derive(Debug)]

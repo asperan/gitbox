@@ -1,8 +1,8 @@
 use std::{rc::Rc, str::FromStr};
 
 use crate::{
-    domain::{semantic_version::SemanticVersion, type_aliases::AnyError},
-    usecases::repository::version_repository::VersionRepository,
+    domain::semantic_version::SemanticVersion,
+    usecases::{repository::version_repository::VersionRepository, type_aliases::AnyError},
 };
 
 use super::retriever::version_retriever::VersionRetriever;
@@ -44,8 +44,8 @@ mod tests {
             retriever::version_retriever::VersionRetriever,
             version_repository_impl::VersionRepositoryImpl,
         },
-        domain::{semantic_version::SemanticVersion, type_aliases::AnyError},
-        usecases::repository::version_repository::VersionRepository,
+        domain::semantic_version::SemanticVersion,
+        usecases::{repository::version_repository::VersionRepository, type_aliases::AnyError},
     };
 
     struct MockEmptyVersionRetriever {}
