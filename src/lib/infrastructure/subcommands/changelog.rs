@@ -7,6 +7,7 @@ use crate::{
         controller::{changelog::ChangelogController, exit_code::ControllerExitCode},
         manager::output_manager::OutputManager,
         options::changelog::ChangelogOptions,
+        retriever::gitinfo_retriever::GitInfoRetriever,
     },
     infrastructure::{
         git_cli::GitCli, output_manager_impl::OutputManagerImpl, subcommand::Subcommand,
@@ -80,6 +81,12 @@ pub struct ChangelogSubCommand {
 impl Subcommand for ChangelogSubCommand {
     fn execute(&self) -> i32 {
         let output_manager = Rc::new(OutputManagerImpl::new());
+        let git_cli = Rc::new(GitCli::new());
+        if let Err(e) = git_cli.git_dir() {
+            output_manager.error(&format!("Failed to retrieve git dir: {}", e.to_string()));
+            output_manager.error("changelog subcommand cannot be called outside of a git dir");
+            return 1;
+        }
         match ChangelogOptions::new(
             self.from_latest_version,
             self.title_format.clone(),
@@ -91,7 +98,6 @@ impl Subcommand for ChangelogSubCommand {
             self.exclude_trigger.clone(),
         ) {
             Ok(options) => {
-                let git_cli = Rc::new(GitCli::new());
                 let controller = ChangelogController::new(
                     options,
                     git_cli.clone(),
