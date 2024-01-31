@@ -1,1 +1,1 @@
-mod changelog;
+pub mod changelog;
