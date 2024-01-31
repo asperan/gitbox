@@ -1,6 +1,7 @@
-use std::{error::Error, fmt::Display};
-
-use crate::domain::type_aliases::AnyError;
+use crate::domain::{
+    error::commit_configuration_invariant_error::CommitConfigurationInvariantError,
+    type_aliases::AnyError,
+};
 
 #[derive(Debug)]
 pub struct CommitConfiguration {
@@ -86,39 +87,6 @@ impl CommitConfiguration {
             ));
         }
         Ok(())
-    }
-}
-
-#[derive(Debug)]
-struct CommitConfigurationInvariantError {
-    message: String,
-}
-
-impl CommitConfigurationInvariantError {
-    fn new(message: &str) -> CommitConfigurationInvariantError {
-        CommitConfigurationInvariantError {
-            message: message.to_string(),
-        }
-    }
-}
-
-impl Error for CommitConfigurationInvariantError {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        None
-    }
-
-    fn description(&self) -> &str {
-        "description() is deprecated; use Display"
-    }
-
-    fn cause(&self) -> Option<&dyn Error> {
-        self.source()
-    }
-}
-
-impl Display for CommitConfigurationInvariantError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "CommitConfiguration invariant error: {}", self.message)
     }
 }
 
