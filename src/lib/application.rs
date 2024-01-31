@@ -1,5 +1,6 @@
 pub mod commit_repository_impl;
 pub mod controller;
+pub mod error;
 pub mod gitinfo_repository_impl;
 pub mod options;
 pub mod manager;
