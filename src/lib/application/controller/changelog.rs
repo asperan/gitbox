@@ -129,19 +129,7 @@ mod tests {
         }
     }
 
-    impl Error for MockVersionError {
-        fn source(&self) -> Option<&(dyn Error + 'static)> {
-            None
-        }
-
-        fn description(&self) -> &str {
-            "description() is deprecated; use Display"
-        }
-
-        fn cause(&self) -> Option<&dyn Error> {
-            self.source()
-        }
-    }
+    impl Error for MockVersionError {}
 
     struct MockVersionRetriever {}
     impl VersionRetriever for MockVersionRetriever {

@@ -19,16 +19,4 @@ impl Display for CliError {
     }
 }
 
-impl Error for CliError {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        None
-    }
-
-    fn description(&self) -> &str {
-        "description() is deprecated; use Display"
-    }
-
-    fn cause(&self) -> Option<&dyn Error> {
-        None
-    }
-}
+impl Error for CliError {}

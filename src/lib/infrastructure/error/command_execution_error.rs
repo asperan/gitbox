@@ -29,12 +29,4 @@ impl Error for CommandExecutionError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         Some(self.cause.as_ref())
     }
-
-    fn description(&self) -> &str {
-        "description() is deprecated; use Display"
-    }
-
-    fn cause(&self) -> Option<&dyn Error> {
-        self.source()
-    }
 }
