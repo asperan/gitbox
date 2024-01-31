@@ -1,4 +1,4 @@
-use std::{fmt::Display, str::FromStr};
+use std::{error::Error, fmt::Display, str::FromStr};
 use regex::Regex;
 
 use crate::domain::semantic_version::SemanticVersion;
@@ -14,7 +14,7 @@ const FULL_SEMANTIC_VERSION_PATTERN: &str = concat!(
 );
 
 impl FromStr for SemanticVersion {
-    type Err = String;
+    type Err = SemanticVersionParsingError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let regex = Regex::new(FULL_SEMANTIC_VERSION_PATTERN).expect("The constant semantic version pattern should be correct");
@@ -28,7 +28,7 @@ impl FromStr for SemanticVersion {
                 let metadata = caps.get(6).map(|m| m.as_str().to_owned());
                 Ok(SemanticVersion::new(major, minor, patch, prerelease, metadata))
             }
-            None => Err(s.to_string()),
+            None => Err(SemanticVersionParsingError::new(s)),
         }
     }
 }
@@ -48,6 +48,37 @@ impl Display for SemanticVersion {
             "{}.{}.{}{}{}",
             self.major(), self.minor(), self.patch(), prerelease_str, metadata_str
         )
+    }
+}
+
+#[derive(Debug)]
+pub struct SemanticVersionParsingError {
+    wrong_version: String,
+}
+
+impl SemanticVersionParsingError {
+    fn new(wrong_version: &str) -> SemanticVersionParsingError {
+        SemanticVersionParsingError { wrong_version: wrong_version.to_string() }
+    }
+}
+
+impl Display for SemanticVersionParsingError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Version '{}' is not semantic", self.wrong_version)
+    }
+}
+
+impl Error for SemanticVersionParsingError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        None
+    }
+
+    fn description(&self) -> &str {
+        "description() is deprecated; use Display"
+    }
+
+    fn cause(&self) -> Option<&dyn Error> {
+        self.source()
     }
 }
 
@@ -127,7 +158,7 @@ mod tests {
     fn try_parse_non_semantic_version() {
         let s = "1970-01-01";
         let v = SemanticVersion::from_str(s);
-        assert!(v.is_err() && v.unwrap_err() == s.to_string());
+        assert!(v.is_err() && v.unwrap_err().wrong_version == s.to_string());
     }
 
     #[test]
