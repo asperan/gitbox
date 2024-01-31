@@ -57,7 +57,7 @@ mod tests {
 
         fn get_commits_from(
             &self,
-            version: &Option<SemanticVersion>,
+            _version: &Option<SemanticVersion>,
         ) -> Result<Box<dyn DoubleEndedIterator<Item = String>>, AnyError> {
             Ok(Box::new(vec![""].into_iter().map(|it| it.to_string())))
         }
