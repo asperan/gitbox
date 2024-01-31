@@ -1,12 +1,12 @@
 use crate::domain::trigger::Trigger;
 
-pub struct ChangelogConfiguration {
+pub struct ChangelogConfiguration<'a> {
     generate_from_latest_version: bool,
-    format: ChangelogFormat,
+    format: ChangelogFormat<'a>,
     exclude_trigger: Option<Trigger>,
 }
 
-impl ChangelogConfiguration {
+impl<'a> ChangelogConfiguration<'a> {
     pub fn new(
         from_latest_version: bool,
         format: ChangelogFormat,
@@ -32,26 +32,26 @@ impl ChangelogConfiguration {
     }
 }
 
-pub type ChangelogTransformer = Box<dyn Fn(&String) -> String>;
+pub type ChangelogTransformer<'a> = Box<dyn Fn(&String) -> String + 'a>;
 
-pub struct ChangelogFormat {
-    title: ChangelogTransformer,
-    typ: ChangelogTransformer,
-    scope: ChangelogTransformer,
-    list: ChangelogTransformer,
-    item: ChangelogTransformer,
-    breaking: ChangelogTransformer,
+pub struct ChangelogFormat<'a> {
+    title: ChangelogTransformer<'a>,
+    typ: ChangelogTransformer<'a>,
+    scope: ChangelogTransformer<'a>,
+    list: ChangelogTransformer<'a>,
+    item: ChangelogTransformer<'a>,
+    breaking: ChangelogTransformer<'a>,
 }
 
-impl ChangelogFormat {
+impl<'a> ChangelogFormat<'a> {
     pub fn new(
-        title: ChangelogTransformer,
-        typ: ChangelogTransformer,
-        scope: ChangelogTransformer,
-        list: ChangelogTransformer,
-        item: ChangelogTransformer,
-        breaking: ChangelogTransformer,
-    ) -> ChangelogFormat {
+        title: ChangelogTransformer<'a>,
+        typ: ChangelogTransformer<'a>,
+        scope: ChangelogTransformer<'a>,
+        list: ChangelogTransformer<'a>,
+        item: ChangelogTransformer<'a>,
+        breaking: ChangelogTransformer<'a>,
+    ) -> ChangelogFormat<'a> {
         ChangelogFormat {
             title,
             typ,
