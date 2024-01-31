@@ -1,4 +1,4 @@
-use std::{cmp::Ordering, fmt::Display};
+use std::cmp::Ordering;
 
 #[derive(Debug, PartialEq, Eq, Clone, Hash)]
 pub struct SemanticVersion {
@@ -80,24 +80,6 @@ impl Ord for SemanticVersion {
 impl PartialOrd<SemanticVersion> for SemanticVersion {
     fn partial_cmp(&self, other: &SemanticVersion) -> Option<Ordering> {
         Some(self.cmp(other))
-    }
-}
-
-impl Display for SemanticVersion {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let prerelease_str = self
-            .prerelease
-            .as_ref()
-            .map_or(String::new(), |p| format!("-{}", &p));
-        let metadata_str = self
-            .metadata
-            .as_ref()
-            .map_or(String::new(), |m| format!("+{}", &m));
-        write!(
-            f,
-            "{}.{}.{}{}{}",
-            self.major, self.minor, self.patch, prerelease_str, metadata_str
-        )
     }
 }
 
@@ -183,31 +165,5 @@ mod tests {
         let v1 = SemanticVersion::new(0, 1, 0, Some("beta1".to_string()), None);
         let v2 = SemanticVersion::new(0, 1, 0, Some("alpha3".to_string()), None);
         assert!(v2 < v1);
-    }
-
-    /// Format tests
-
-    #[test]
-    fn simple_version_format() {
-        let v1 = SemanticVersion::first_release();
-        assert_eq!(v1.to_string(), String::from("0.1.0"));
-    }
-
-    #[test]
-    fn prerelease_version_format() {
-        let v1 = SemanticVersion::new(0, 1, 0, Some("dev1".to_string()), None);
-        assert_eq!(v1.to_string(), String::from("0.1.0-dev1"));
-    }
-
-    #[test]
-    fn version_with_metadata_format() {
-        let v1 = SemanticVersion::new(0, 1, 0, None, Some("test".to_string()));
-        assert_eq!(v1.to_string(), String::from("0.1.0+test"));
-    }
-
-    #[test]
-    fn prerelease_version_with_metadata_format() {
-        let v1 = SemanticVersion::new(0, 1, 0, Some("dev1".to_string()), Some("test".to_string()));
-        assert_eq!(v1.to_string(), String::from("0.1.0-dev1+test"));
     }
 }

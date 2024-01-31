@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{fmt::Display, str::FromStr};
 use regex::Regex;
 
 use crate::domain::semantic_version::SemanticVersion;
@@ -30,6 +30,24 @@ impl FromStr for SemanticVersion {
             }
             None => Err(s.to_string()),
         }
+    }
+}
+
+impl Display for SemanticVersion {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let prerelease_str = self
+            .prerelease()
+            .as_ref()
+            .map_or(String::new(), |p| format!("-{}", &p));
+        let metadata_str = self
+            .metadata()
+            .as_ref()
+            .map_or(String::new(), |m| format!("+{}", &m));
+        write!(
+            f,
+            "{}.{}.{}{}{}",
+            self.major(), self.minor(), self.patch(), prerelease_str, metadata_str
+        )
     }
 }
 
@@ -110,5 +128,29 @@ mod tests {
         let s = "1970-01-01";
         let v = SemanticVersion::from_str(s);
         assert!(v.is_err() && v.unwrap_err() == s.to_string());
+    }
+
+    #[test]
+    fn simple_version_format() {
+        let v1 = SemanticVersion::first_release();
+        assert_eq!(v1.to_string(), String::from("0.1.0"));
+    }
+
+    #[test]
+    fn prerelease_version_format() {
+        let v1 = SemanticVersion::new(0, 1, 0, Some("dev1".to_string()), None);
+        assert_eq!(v1.to_string(), String::from("0.1.0-dev1"));
+    }
+
+    #[test]
+    fn version_with_metadata_format() {
+        let v1 = SemanticVersion::new(0, 1, 0, None, Some("test".to_string()));
+        assert_eq!(v1.to_string(), String::from("0.1.0+test"));
+    }
+
+    #[test]
+    fn prerelease_version_with_metadata_format() {
+        let v1 = SemanticVersion::new(0, 1, 0, Some("dev1".to_string()), Some("test".to_string()));
+        assert_eq!(v1.to_string(), String::from("0.1.0-dev1+test"));
     }
 }
