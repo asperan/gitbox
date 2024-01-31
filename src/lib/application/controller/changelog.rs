@@ -35,8 +35,6 @@ impl ChangelogController {
     }
 
     pub fn changelog(&self) -> Result<String, AnyError> {
-        unimplemented!()
-        /*
         let trigger: Option<Trigger> = match self.options.exclude_trigger() {
             Some(t) => Some(Trigger::from_str(t)?),
             None => None,
@@ -63,6 +61,5 @@ impl ChangelogController {
             Rc::new(VersionRepositoryImpl::new(self.version_retriever.clone())),
         );
         usecase.execute()
-        */
     }
 }
