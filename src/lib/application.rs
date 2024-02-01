@@ -1,3 +1,4 @@
+pub mod commit_repository_impl;
 pub mod commit_summary_repository_impl;
 pub mod controller;
 pub mod error;
