@@ -115,19 +115,13 @@ impl GitInfoRetriever for GitCli {
 }
 
 impl CommitManager for GitCli {
-    fn create_commit(
-        &self,
-        commit: crate::domain::conventional_commit::ConventionalCommit,
-    ) -> Result<(), AnyError> {
-        self.run_git_command(vec!["commit", "-m", &commit.to_string()].into_iter())
+    fn create_commit(&self, commit: &str) -> Result<(), AnyError> {
+        self.run_git_command(vec!["commit", "-m", commit].into_iter())
             .map(|_| ())
     }
 
-    fn create_empty_commit(
-        &self,
-        commit: crate::domain::conventional_commit::ConventionalCommit,
-    ) -> Result<(), AnyError> {
-        self.run_git_command(vec!["commit", "--allow-empty", "-m", &commit.to_string()].into_iter())
+    fn create_empty_commit(&self, commit: &str) -> Result<(), AnyError> {
+        self.run_git_command(vec!["commit", "--allow-empty", "-m", commit].into_iter())
             .map(|_| ())
     }
 }
