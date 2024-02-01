@@ -39,7 +39,9 @@ impl GitCli {
                 )
             })?;
         if execution_output.status.success() {
-            Ok(std::str::from_utf8(&execution_output.stdout)?.to_string())
+            Ok(std::str::from_utf8(&execution_output.stdout)?
+                .trim()
+                .to_string())
         } else {
             Err(Box::new(CliError::new(std::str::from_utf8(
                 &execution_output.stderr,
