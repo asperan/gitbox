@@ -2,13 +2,20 @@ use std::{fmt::Display, str::FromStr};
 
 use regex::Regex;
 
-use crate::domain::{commit::Commit, conventional_commit::ConventionalCommit};
+use crate::{
+    application::error::commit_summary_parsing_error::CommitSummaryParsingError,
+    domain::{
+        commit::CommitSummary, conventional_commit::ConventionalCommit,
+        conventional_commit_summary::ConventionalCommitSummary,
+    },
+    usecases::type_aliases::AnyError,
+};
 
 // Groups: 1 = type, 2 = scope with (), 3 = scope, 4 = breaking change, 5 = summary
 const CONVENTIONAL_COMMIT_PATTERN: &str = r"^(\w+)(\(([\w/-]+)\))?(!)?: (.+)$";
 
-impl FromStr for Commit {
-    type Err = String;
+impl FromStr for CommitSummary {
+    type Err = AnyError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let regex = Regex::new(CONVENTIONAL_COMMIT_PATTERN)
@@ -20,19 +27,27 @@ impl FromStr for Commit {
                 let scope = caps.get(3).map(|it| it.as_str());
                 let breaking = caps.get(4).is_some();
                 let summary = caps.get(5).expect("summary is expected").as_str();
-                Ok(Commit::Conventional(ConventionalCommit::new(
+                Ok(CommitSummary::Conventional(ConventionalCommitSummary::new(
                     commit_type.to_owned(),
                     scope.map(|it| it.to_owned()),
                     breaking,
                     summary.to_owned(),
                 )))
             }
-            None => Ok(Commit::FreeForm(s.to_owned())),
+            None => {
+                if s.is_empty() {
+                    Err(Box::new(CommitSummaryParsingError::new(
+                        "Free form commit message cannot be empty",
+                    )))
+                } else {
+                    Ok(CommitSummary::FreeForm(s.to_owned()))
+                }
+            }
         }
     }
 }
 
-impl Display for ConventionalCommit {
+impl Display for ConventionalCommitSummary {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
@@ -48,31 +63,55 @@ impl Display for ConventionalCommit {
     }
 }
 
+impl Display for ConventionalCommit {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}{}",
+            self.summary().to_string(),
+            self.message()
+                .as_ref()
+                .map_or_else(String::new, |it| format!("\n\n{}", it))
+        )
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::str::FromStr;
 
-    use crate::domain::{commit::Commit, conventional_commit::ConventionalCommit};
+    use crate::domain::{
+        commit::CommitSummary, conventional_commit::ConventionalCommit,
+        conventional_commit_summary::ConventionalCommitSummary,
+    };
 
     #[test]
-    fn freeform_commit() {
+    fn freeform_commit_correct() {
         let free_form_commit = "Test update #1";
-        let c = Commit::from_str(free_form_commit);
+        let c = CommitSummary::from_str(free_form_commit);
         assert!(c.is_ok());
         assert!(match c.expect("Just asserted its OK-ness") {
-            Commit::FreeForm(s) if s == free_form_commit.to_owned() => true,
+            CommitSummary::FreeForm(s) if s == free_form_commit.to_owned() => true,
             _ => false,
         });
     }
 
     #[test]
+    fn freeform_commit_empty() {
+        let free_form_commit = "";
+        let c = CommitSummary::from_str(free_form_commit);
+        assert!(c.is_err());
+    }
+
+    #[test]
     fn conventional_commit_basic() {
         let basic_commit = "feat: test";
-        let c = Commit::from_str(basic_commit);
-        let expected = ConventionalCommit::new("feat".to_string(), None, false, "test".to_string());
+        let c = CommitSummary::from_str(basic_commit);
+        let expected =
+            ConventionalCommitSummary::new("feat".to_string(), None, false, "test".to_string());
         assert!(c.is_ok());
         assert!(match c.expect("Just asserted its OK-ness") {
-            Commit::Conventional(conv) => conv == expected,
+            CommitSummary::Conventional(conv) => conv == expected,
             _ => false,
         });
     }
@@ -80,8 +119,8 @@ mod tests {
     #[test]
     fn conventional_commit_scoped() {
         let scoped_commit = "feat(scope): test";
-        let c = Commit::from_str(scoped_commit);
-        let expected = ConventionalCommit::new(
+        let c = CommitSummary::from_str(scoped_commit);
+        let expected = ConventionalCommitSummary::new(
             "feat".to_string(),
             Some("scope".to_string()),
             false,
@@ -89,7 +128,7 @@ mod tests {
         );
         assert!(c.is_ok());
         assert!(match c.expect("Just asserted its OK-ness") {
-            Commit::Conventional(conv) => conv == expected,
+            CommitSummary::Conventional(conv) => conv == expected,
             _ => false,
         });
     }
@@ -97,11 +136,12 @@ mod tests {
     #[test]
     fn conventional_commit_breaking() {
         let breaking_commit = "feat!: test";
-        let c = Commit::from_str(breaking_commit);
-        let expected = ConventionalCommit::new("feat".to_string(), None, true, "test".to_string());
+        let c = CommitSummary::from_str(breaking_commit);
+        let expected =
+            ConventionalCommitSummary::new("feat".to_string(), None, true, "test".to_string());
         assert!(c.is_ok());
         assert!(match c.expect("Just asserted its OK-ness") {
-            Commit::Conventional(conv) => conv == expected,
+            CommitSummary::Conventional(conv) => conv == expected,
             _ => false,
         });
     }
@@ -109,8 +149,8 @@ mod tests {
     #[test]
     fn conventional_commit_scoped_and_breaking() {
         let breaking_scoped_commit = "feat(scope)!: test";
-        let c = Commit::from_str(breaking_scoped_commit);
-        let expected = ConventionalCommit::new(
+        let c = CommitSummary::from_str(breaking_scoped_commit);
+        let expected = ConventionalCommitSummary::new(
             "feat".to_string(),
             Some("scope".to_string()),
             true,
@@ -118,21 +158,25 @@ mod tests {
         );
         assert!(c.is_ok());
         assert!(match c.expect("Just asserted its OK-ness") {
-            Commit::Conventional(conv) => conv == expected,
+            CommitSummary::Conventional(conv) => conv == expected,
             _ => false,
         });
     }
 
     #[test]
     fn simple_commit_format() {
-        let commit =
-            ConventionalCommit::new("feat".to_string(), None, false, "test format".to_string());
+        let commit = ConventionalCommitSummary::new(
+            "feat".to_string(),
+            None,
+            false,
+            "test format".to_string(),
+        );
         assert_eq!(&commit.to_string(), "feat: test format");
     }
 
     #[test]
     fn scoped_commit_format() {
-        let commit = ConventionalCommit::new(
+        let commit = ConventionalCommitSummary::new(
             "feat".to_string(),
             Some("domain".to_string()),
             false,
@@ -143,19 +187,50 @@ mod tests {
 
     #[test]
     fn breaking_commit_format() {
-        let commit =
-            ConventionalCommit::new("feat".to_string(), None, true, "test format".to_string());
+        let commit = ConventionalCommitSummary::new(
+            "feat".to_string(),
+            None,
+            true,
+            "test format".to_string(),
+        );
         assert_eq!(&commit.to_string(), "feat!: test format");
     }
 
     #[test]
     fn breaking_and_scoped_commit_format() {
-        let commit = ConventionalCommit::new(
+        let commit = ConventionalCommitSummary::new(
             "feat".to_string(),
             Some("domain".to_string()),
             true,
             "test format".to_string(),
         );
         assert_eq!(&commit.to_string(), "feat(domain)!: test format");
+    }
+
+    #[test]
+    fn full_conventional_commit_without_message() {
+        let commit = ConventionalCommit::new(
+            "feat".to_string(),
+            Some("domain".to_string()),
+            true,
+            "test format".to_string(),
+            None,
+        );
+        assert_eq!(&commit.to_string(), "feat(domain)!: test format");
+    }
+
+    #[test]
+    fn full_conventional_commit_with_message() {
+        let commit = ConventionalCommit::new(
+            "feat".to_string(),
+            Some("domain".to_string()),
+            true,
+            "test format".to_string(),
+            Some("Message body".to_string()),
+        );
+        assert_eq!(
+            &commit.to_string(),
+            "feat(domain)!: test format\n\nMessage body"
+        );
     }
 }
