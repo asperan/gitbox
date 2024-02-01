@@ -27,8 +27,8 @@ impl CreateConventionalCommitUseCase {
     }
 }
 
-impl UseCase<()> for CreateConventionalCommitUseCase {
-    fn execute(&self) -> Result<(), AnyError> {
+impl UseCase<ConventionalCommit> for CreateConventionalCommitUseCase {
+    fn execute(&self) -> Result<ConventionalCommit, AnyError> {
         let commit = ConventionalCommit::new(
             self.configuration.typ().to_owned(),
             self.configuration.scope().clone(),
@@ -36,7 +36,8 @@ impl UseCase<()> for CreateConventionalCommitUseCase {
             self.configuration.summary().to_owned(),
             self.configuration.message().clone(),
         );
-        self.commit_repository.create_commit(commit)
+        self.commit_repository.create_commit(&commit)?;
+        Ok(commit)
     }
 }
 
@@ -70,7 +71,7 @@ mod tests {
     struct MockCommitRepository {}
 
     impl CommitRepository for MockCommitRepository {
-        fn create_commit(&self, commit: ConventionalCommit) -> Result<(), AnyError> {
+        fn create_commit(&self, commit: &ConventionalCommit) -> Result<(), AnyError> {
             if commit.summary().breaking() {
                 Err(Box::new(MockError {}))
             } else {
@@ -78,7 +79,7 @@ mod tests {
             }
         }
 
-        fn create_empty_commit(&self, _commit: ConventionalCommit) -> Result<(), AnyError> {
+        fn create_empty_commit(&self, _commit: &ConventionalCommit) -> Result<(), AnyError> {
             unreachable!()
         }
     }
