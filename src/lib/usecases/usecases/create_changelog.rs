@@ -4,12 +4,15 @@ use ahash::{AHashMap, RandomState};
 
 use crate::{
     domain::{
-        commit::Commit, conventional_commit::ConventionalCommit, semantic_version::SemanticVersion,
-        trigger::Trigger,
+        commit::CommitSummary, conventional_commit_summary::ConventionalCommitSummary,
+        semantic_version::SemanticVersion, trigger::Trigger,
     },
     usecases::{
         configuration::changelog::{ChangelogConfiguration, ChangelogFormat},
-        repository::{commit_repository::CommitRepository, version_repository::VersionRepository},
+        repository::{
+            commit_summary_repository::CommitSummaryRepository,
+            version_repository::VersionRepository,
+        },
         type_aliases::AnyError,
         usecases::usecase::UseCase,
     },
@@ -17,14 +20,14 @@ use crate::{
 
 pub struct CreateChangelogUseCase<'a> {
     configuration: ChangelogConfiguration<'a>,
-    commit_repository: Rc<dyn CommitRepository>,
+    commit_repository: Rc<dyn CommitSummaryRepository>,
     version_repository: Rc<dyn VersionRepository>,
 }
 
 impl<'a> CreateChangelogUseCase<'a> {
     pub fn new(
         configuration: ChangelogConfiguration,
-        commit_repository: Rc<dyn CommitRepository>,
+        commit_repository: Rc<dyn CommitSummaryRepository>,
         version_repository: Rc<dyn VersionRepository>,
     ) -> CreateChangelogUseCase {
         CreateChangelogUseCase {
@@ -63,20 +66,23 @@ const NO_SCOPE_TITLE: &str = "General";
 const NON_CONVENTIONAL_TYPE: &str = "NON CONVENTIONAL";
 
 const HASH_RANDOM_STATE: RandomState = RandomState::with_seeds(0, 0, 0, 0);
-type ScopeMap = AHashMap<String, Vec<ConventionalCommit>>;
+type ScopeMap = AHashMap<String, Vec<ConventionalCommitSummary>>;
 type TypeMap = AHashMap<String, ScopeMap>;
 
 fn categorize_commit_list(
-    list: impl Iterator<Item = Commit>,
+    list: impl Iterator<Item = CommitSummary>,
     exclude_trigger: &Option<Trigger>,
 ) -> TypeMap {
     let mut types_map: TypeMap = AHashMap::with_hasher(HASH_RANDOM_STATE);
     list.for_each(|c| {
         let surely_conventional = match c {
-            Commit::Conventional(commit) => commit,
-            Commit::FreeForm(free_form) => {
-                ConventionalCommit::new(NON_CONVENTIONAL_TYPE.to_owned(), None, false, free_form)
-            }
+            CommitSummary::Conventional(commit) => commit,
+            CommitSummary::FreeForm(free_form) => ConventionalCommitSummary::new(
+                NON_CONVENTIONAL_TYPE.to_owned(),
+                None,
+                false,
+                free_form,
+            ),
         };
         if !exclude_trigger.as_ref().is_some_and(|it| {
             it.accept(
@@ -171,7 +177,7 @@ fn format_scopes(format: &ChangelogFormat, scope_map: &ScopeMap) -> String {
 
 fn format_list<'a>(
     format: &ChangelogFormat,
-    commit_list: impl Iterator<Item = &'a ConventionalCommit>,
+    commit_list: impl Iterator<Item = &'a ConventionalCommitSummary>,
 ) -> String {
     format.list()(
         &commit_list
@@ -181,11 +187,11 @@ fn format_list<'a>(
     )
 }
 
-fn format_item(format: &ChangelogFormat, commit: &ConventionalCommit) -> String {
+fn format_item(format: &ChangelogFormat, commit: &ConventionalCommitSummary) -> String {
     format.item()(&format_details(format, commit))
 }
 
-fn format_details(format: &ChangelogFormat, commit: &ConventionalCommit) -> String {
+fn format_details(format: &ChangelogFormat, commit: &ConventionalCommitSummary) -> String {
     if commit.breaking() {
         format.breaking()(commit.summary())
     } else {
@@ -209,15 +215,16 @@ mod tests {
 
     use crate::{
         domain::{
-            commit::Commit,
-            conventional_commit::ConventionalCommit,
+            commit::CommitSummary,
+            conventional_commit_summary::ConventionalCommitSummary,
             semantic_version::SemanticVersion,
             trigger::{BasicStatement, Trigger},
         },
         usecases::{
             configuration::changelog::{ChangelogConfiguration, ChangelogFormat},
             repository::{
-                commit_repository::CommitRepository, version_repository::VersionRepository,
+                commit_summary_repository::CommitSummaryRepository,
+                version_repository::VersionRepository,
             },
             type_aliases::AnyError,
             usecases::{
@@ -232,8 +239,8 @@ mod tests {
         },
     };
 
-    fn complete_commit() -> ConventionalCommit {
-        ConventionalCommit::new(
+    fn complete_commit() -> ConventionalCommitSummary {
+        ConventionalCommitSummary::new(
             "feat".to_string(),
             Some("API".to_string()),
             false,
@@ -241,8 +248,8 @@ mod tests {
         )
     }
 
-    fn breaking_commit() -> ConventionalCommit {
-        ConventionalCommit::new(
+    fn breaking_commit() -> ConventionalCommitSummary {
+        ConventionalCommitSummary::new(
             "feat".to_string(),
             Some("API".to_string()),
             true,
@@ -250,45 +257,45 @@ mod tests {
         )
     }
 
-    fn commit_list() -> Vec<ConventionalCommit> {
+    fn commit_list() -> Vec<ConventionalCommitSummary> {
         vec![
-            ConventionalCommit::new(
+            ConventionalCommitSummary::new(
                 "feat".to_string(),
                 Some("API".to_string()),
                 false,
                 "test message #1".to_string(),
             ),
-            ConventionalCommit::new(
+            ConventionalCommitSummary::new(
                 "fix".to_string(),
                 Some("API".to_string()),
                 false,
                 "test message #2".to_string(),
             ),
-            ConventionalCommit::new(
+            ConventionalCommitSummary::new(
                 "test".to_string(),
                 None,
                 false,
                 "test message #3".to_string(),
             ),
-            ConventionalCommit::new(
+            ConventionalCommitSummary::new(
                 "refactor".to_string(),
                 Some("exclude".to_string()),
                 false,
                 "test message #4".to_string(),
             ),
-            ConventionalCommit::new(
+            ConventionalCommitSummary::new(
                 "docs".to_string(),
                 None,
                 false,
                 "test message #5".to_string(),
             ),
-            ConventionalCommit::new(
+            ConventionalCommitSummary::new(
                 "feat".to_string(),
                 None,
                 false,
                 "test message #6".to_string(),
             ),
-            ConventionalCommit::new(
+            ConventionalCommitSummary::new(
                 "test".to_string(),
                 Some("API".to_string()),
                 false,
@@ -387,7 +394,7 @@ mod tests {
         let m = categorize_commit_list(
             commit_list()
                 .iter()
-                .map(|it| Commit::Conventional(it.clone())),
+                .map(|it| CommitSummary::Conventional(it.clone())),
             &None,
         );
         let expected = {
@@ -399,7 +406,7 @@ mod tests {
             feat_commits
                 .get_mut("API")
                 .expect("Vector just created")
-                .push(ConventionalCommit::new(
+                .push(ConventionalCommitSummary::new(
                     "feat".to_string(),
                     Some("API".to_string()),
                     false,
@@ -409,7 +416,7 @@ mod tests {
             feat_commits
                 .get_mut(NO_SCOPE_TITLE)
                 .expect("Vector just created")
-                .push(ConventionalCommit::new(
+                .push(ConventionalCommitSummary::new(
                     "feat".to_string(),
                     None,
                     false,
@@ -422,7 +429,7 @@ mod tests {
             fix_commits
                 .get_mut("API")
                 .expect("Vector just created")
-                .push(ConventionalCommit::new(
+                .push(ConventionalCommitSummary::new(
                     "fix".to_string(),
                     Some("API".to_string()),
                     false,
@@ -435,7 +442,7 @@ mod tests {
             test_commits
                 .get_mut("API")
                 .expect("Vector just created")
-                .push(ConventionalCommit::new(
+                .push(ConventionalCommitSummary::new(
                     "test".to_string(),
                     Some("API".to_string()),
                     false,
@@ -445,7 +452,7 @@ mod tests {
             test_commits
                 .get_mut(NO_SCOPE_TITLE)
                 .expect("Vector just created")
-                .push(ConventionalCommit::new(
+                .push(ConventionalCommitSummary::new(
                     "test".to_string(),
                     None,
                     false,
@@ -458,7 +465,7 @@ mod tests {
             refactor_commits
                 .get_mut("exclude")
                 .expect("Vector just created")
-                .push(ConventionalCommit::new(
+                .push(ConventionalCommitSummary::new(
                     "refactor".to_string(),
                     Some("exclude".to_string()),
                     false,
@@ -471,7 +478,7 @@ mod tests {
             docs_commits
                 .get_mut(NO_SCOPE_TITLE)
                 .expect("Vector just created")
-                .push(ConventionalCommit::new(
+                .push(ConventionalCommitSummary::new(
                     "docs".to_string(),
                     None,
                     false,
@@ -487,7 +494,7 @@ mod tests {
         let m = categorize_commit_list(
             commit_list()
                 .iter()
-                .map(|it| Commit::Conventional(it.clone())),
+                .map(|it| CommitSummary::Conventional(it.clone())),
             &Some(Trigger::new(crate::domain::trigger::Start::Basic(
                 BasicStatement::In(crate::domain::trigger::InNode {
                     object: crate::domain::trigger::ObjectNode::Scope(
@@ -508,7 +515,7 @@ mod tests {
             feat_commits
                 .get_mut("API")
                 .expect("Vector just created")
-                .push(ConventionalCommit::new(
+                .push(ConventionalCommitSummary::new(
                     "feat".to_string(),
                     Some("API".to_string()),
                     false,
@@ -518,7 +525,7 @@ mod tests {
             feat_commits
                 .get_mut(NO_SCOPE_TITLE)
                 .expect("Vector just created")
-                .push(ConventionalCommit::new(
+                .push(ConventionalCommitSummary::new(
                     "feat".to_string(),
                     None,
                     false,
@@ -531,7 +538,7 @@ mod tests {
             fix_commits
                 .get_mut("API")
                 .expect("Vector just created")
-                .push(ConventionalCommit::new(
+                .push(ConventionalCommitSummary::new(
                     "fix".to_string(),
                     Some("API".to_string()),
                     false,
@@ -544,7 +551,7 @@ mod tests {
             test_commits
                 .get_mut("API")
                 .expect("Vector just created")
-                .push(ConventionalCommit::new(
+                .push(ConventionalCommitSummary::new(
                     "test".to_string(),
                     Some("API".to_string()),
                     false,
@@ -554,7 +561,7 @@ mod tests {
             test_commits
                 .get_mut(NO_SCOPE_TITLE)
                 .expect("Vector just created")
-                .push(ConventionalCommit::new(
+                .push(ConventionalCommitSummary::new(
                     "test".to_string(),
                     None,
                     false,
@@ -567,7 +574,7 @@ mod tests {
             docs_commits
                 .get_mut(NO_SCOPE_TITLE)
                 .expect("Vector just created")
-                .push(ConventionalCommit::new(
+                .push(ConventionalCommitSummary::new(
                     "docs".to_string(),
                     None,
                     false,
@@ -583,7 +590,10 @@ mod tests {
         let c = commit_list();
         let s = format_types(
             &format(),
-            &categorize_commit_list(c.iter().map(|it| Commit::Conventional(it.clone())), &None),
+            &categorize_commit_list(
+                c.iter().map(|it| CommitSummary::Conventional(it.clone())),
+                &None,
+            ),
         );
         assert_eq!(s, "## feat\n### API\n:\n* test message #1\n### General\n:\n* test message #6\n\n## fix\n### API\n:\n* test message #2\n\n## docs\n### General\n:\n* test message #5\n\n## test\n### API\n:\n* test message #7\n### General\n:\n* test message #3\n\n## refactor\n### exclude\n:\n* test message #4\n");
     }
@@ -604,23 +614,25 @@ mod tests {
 
     struct MockCommitRepository {}
 
-    impl CommitRepository for MockCommitRepository {
-        fn get_all_commits(&self) -> Result<Box<dyn DoubleEndedIterator<Item = Commit>>, AnyError> {
+    impl CommitSummaryRepository for MockCommitRepository {
+        fn get_all_commits(
+            &self,
+        ) -> Result<Box<dyn DoubleEndedIterator<Item = CommitSummary>>, AnyError> {
             Ok(Box::new(
                 commit_list()
                     .into_iter()
-                    .map(|c| Commit::Conventional(c.clone())),
+                    .map(|c| CommitSummary::Conventional(c.clone())),
             ))
         }
 
         fn get_commits_from(
             &self,
             _version: &Option<SemanticVersion>,
-        ) -> Result<Box<dyn DoubleEndedIterator<Item = Commit>>, AnyError> {
+        ) -> Result<Box<dyn DoubleEndedIterator<Item = CommitSummary>>, AnyError> {
             Ok(Box::new(
                 commit_list()
                     .into_iter()
-                    .map(|c| Commit::Conventional(c.clone())),
+                    .map(|c| CommitSummary::Conventional(c.clone())),
             ))
         }
     }
