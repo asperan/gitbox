@@ -19,7 +19,7 @@ use crate::{
 #[derive(Args, Debug)]
 #[command(about = "Create a commit with a conventional message")]
 pub struct CommitSubCommand {
-    #[arg(short = 't', long = "type", help = "Set the type of the commit")]
+    #[arg(short = 't', long = "type", help = "Set the type of the commit", value_parser = NonEmptyStringValueParser::new())]
     commit_type: Option<String>,
 
     #[arg(short = 'S', long, help = "Set the scope of the commit")]
