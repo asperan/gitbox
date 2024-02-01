@@ -1,11 +1,21 @@
-use std::{fs::create_dir_all, io::Write, path::Path, rc::Rc};
+use std::{
+    fs::{create_dir_all, read_to_string},
+    io::Write,
+    path::Path,
+    rc::Rc,
+};
 
+use crate::domain::constant::DEFAULT_COMMIT_TYPES;
 use crate::{
     application::{
         manager::gitextra_write_manager::GitExtraWriteManager,
         retriever::gitinfo_retriever::GitInfoRetriever,
     },
     usecases::type_aliases::AnyError,
+};
+
+use super::{
+    gitextra_append_manager::GitExtraAppendManager, gitextra_read_manager::GitExtraReadManager,
 };
 
 const EXTRA_DIR_PATH: &str = "extra";
@@ -33,6 +43,12 @@ impl GitExtraManagerImpl {
         writeln!(&mut file, "{}", content.trim())?;
         Ok(())
     }
+
+    fn append_to_file(&self, path: &Path, content: &str) -> Result<(), AnyError> {
+        let mut f = std::fs::File::options().append(true).open(path).unwrap();
+        write!(f, "\n{}", content)?;
+        Ok(())
+    }
 }
 
 impl GitExtraWriteManager for GitExtraManagerImpl {
@@ -50,5 +66,46 @@ impl GitExtraWriteManager for GitExtraManagerImpl {
             .join(EXTRA_DIR_PATH)
             .join(SCOPES_FILE_PATH);
         self.write_file(&path, content)
+    }
+}
+
+impl GitExtraReadManager for GitExtraManagerImpl {
+    fn get_types(&self) -> Result<Vec<String>, AnyError> {
+        let path = Path::new(&self.gitinfo_manager.git_dir()?)
+            .join(EXTRA_DIR_PATH)
+            .join(TYPES_FILE_PATH);
+        Ok(read_to_string(path)?
+            .split('\n')
+            .filter(|it| !it.is_empty() && !DEFAULT_COMMIT_TYPES.contains(it))
+            .chain(DEFAULT_COMMIT_TYPES.into_iter())
+            .map(|it| it.to_string())
+            .collect())
+    }
+
+    fn get_scopes(&self) -> Result<Vec<String>, AnyError> {
+        let path = Path::new(&self.gitinfo_manager.git_dir()?)
+            .join(EXTRA_DIR_PATH)
+            .join(SCOPES_FILE_PATH);
+        Ok(read_to_string(path)?
+            .split('\n')
+            .filter(|it| !it.is_empty())
+            .map(|it| it.to_string())
+            .collect())
+    }
+}
+
+impl GitExtraAppendManager for GitExtraManagerImpl {
+    fn append_type(&self, new_type: &str) -> Result<(), AnyError> {
+        let path = Path::new(&self.gitinfo_manager.git_dir()?)
+            .join(EXTRA_DIR_PATH)
+            .join(TYPES_FILE_PATH);
+        self.append_to_file(&path, new_type)
+    }
+
+    fn append_scope(&self, new_scope: &str) -> Result<(), AnyError> {
+        let path = Path::new(&self.gitinfo_manager.git_dir()?)
+            .join(EXTRA_DIR_PATH)
+            .join(SCOPES_FILE_PATH);
+        self.append_to_file(&path, new_scope)
     }
 }
