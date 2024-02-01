@@ -1,7 +1,7 @@
-use super::conventional_commit::ConventionalCommit;
+use super::conventional_commit_summary::ConventionalCommitSummary;
 
 #[derive(Debug)]
-pub enum Commit {
-    Conventional(ConventionalCommit),
+pub enum CommitSummary {
+    Conventional(ConventionalCommitSummary),
     FreeForm(String),
 }
