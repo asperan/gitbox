@@ -1,19 +1,19 @@
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ConventionalCommit {
+pub struct ConventionalCommitSummary {
     typ: String,
     scope: Option<String>,
     breaking: bool,
     summary: String,
 }
 
-impl ConventionalCommit {
+impl ConventionalCommitSummary {
     pub fn new(
         typ: String,
         scope: Option<String>,
         breaking: bool,
         summary: String,
-    ) -> ConventionalCommit {
-        ConventionalCommit {
+    ) -> ConventionalCommitSummary {
+        ConventionalCommitSummary {
             typ,
             scope,
             breaking,
