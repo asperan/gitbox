@@ -18,11 +18,11 @@ impl CommitRepositoryImpl {
 }
 
 impl CommitRepository for CommitRepositoryImpl {
-    fn create_commit(&self, commit: ConventionalCommit) -> Result<(), AnyError> {
+    fn create_commit(&self, commit: &ConventionalCommit) -> Result<(), AnyError> {
         self.commit_manager.create_commit(&commit.to_string())
     }
 
-    fn create_empty_commit(&self, commit: ConventionalCommit) -> Result<(), AnyError> {
+    fn create_empty_commit(&self, commit: &ConventionalCommit) -> Result<(), AnyError> {
         self.commit_manager.create_empty_commit(&commit.to_string())
     }
 }
@@ -33,8 +33,7 @@ mod tests {
 
     use crate::{
         application::{
-            commit_repository_impl::CommitRepositoryImpl,
-            manager::commit_manager::{self, CommitManager},
+            commit_repository_impl::CommitRepositoryImpl, manager::commit_manager::CommitManager,
         },
         domain::conventional_commit::ConventionalCommit,
         usecases::{repository::commit_repository::CommitRepository, type_aliases::AnyError},
@@ -78,7 +77,7 @@ mod tests {
             ConventionalCommit::new("feat".to_string(), None, false, "test".to_string(), None);
         let commit_manager = Rc::new(MockCommitManager { fail: false });
         let commit_repository = CommitRepositoryImpl::new(commit_manager);
-        let result = commit_repository.create_commit(commit);
+        let result = commit_repository.create_commit(&commit);
         assert!(result.is_ok());
     }
 
@@ -88,7 +87,7 @@ mod tests {
             ConventionalCommit::new("feat".to_string(), None, false, "test".to_string(), None);
         let commit_manager = Rc::new(MockCommitManager { fail: true });
         let commit_repository = CommitRepositoryImpl::new(commit_manager);
-        let result = commit_repository.create_commit(commit);
+        let result = commit_repository.create_commit(&commit);
         assert!(result.is_err());
     }
 
@@ -98,7 +97,7 @@ mod tests {
             ConventionalCommit::new("feat".to_string(), None, false, "test".to_string(), None);
         let commit_manager = Rc::new(MockCommitManager { fail: false });
         let commit_repository = CommitRepositoryImpl::new(commit_manager);
-        let result = commit_repository.create_empty_commit(commit);
+        let result = commit_repository.create_empty_commit(&commit);
         assert!(result.is_ok());
     }
 
@@ -108,7 +107,7 @@ mod tests {
             ConventionalCommit::new("feat".to_string(), None, false, "test".to_string(), None);
         let commit_manager = Rc::new(MockCommitManager { fail: true });
         let commit_repository = CommitRepositoryImpl::new(commit_manager);
-        let result = commit_repository.create_empty_commit(commit);
+        let result = commit_repository.create_empty_commit(&commit);
         assert!(result.is_err());
     }
 }
