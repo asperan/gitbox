@@ -2,12 +2,16 @@ use std::rc::Rc;
 
 use crate::{
     application::{
+        commit_repository_impl::CommitRepositoryImpl,
         manager::{
             commit_manager::CommitManager, init_manager::InitManager, output_manager::OutputManager,
         },
         options::init::InitOptions,
     },
-    domain::conventional_commit::ConventionalCommit,
+    usecases::{
+        configuration::commit::CommitConfiguration,
+        usecases::{create_conventional_commit::CreateConventionalCommitUseCase, usecase::UseCase},
+    },
 };
 
 use super::exit_code::ControllerExitCode;
@@ -41,21 +45,20 @@ impl InitController {
             return ControllerExitCode::Error(1);
         }
         if !self.options.empty() {
-            let init_commit = ConventionalCommit::new(
+            let configuration = CommitConfiguration::new(
                 "chore".to_string(),
                 Some("init".to_string()),
                 false,
-                "initial commit".to_string(),
-            );
-            if let Err(e) = self.commit_manager.create_empty_commit(init_commit) {
-                self.output_manager.error(&format!(
-                    "Failed to create initial commit: {}",
-                    e.to_string()
-                ));
+                "initialize empty repository".to_string(),
+                None,
+            )
+            .expect("Init commit configuration is hand-made");
+            let commit_repository = Rc::new(CommitRepositoryImpl::new(self.commit_manager.clone()));
+            let usecase = CreateConventionalCommitUseCase::new(configuration, commit_repository);
+            if let Err(e) = usecase.execute() {
+                self.output_manager.error(&e.to_string());
                 return ControllerExitCode::Error(1);
             }
-            self.output_manager
-                .output("Empty init commit created successfully");
         }
         self.output_manager
             .output("Repository initialized successfully");
@@ -76,7 +79,6 @@ mod tests {
             },
             options::init::InitOptions,
         },
-        domain::conventional_commit::ConventionalCommit,
         usecases::type_aliases::AnyError,
     };
 
@@ -110,7 +112,7 @@ mod tests {
     }
 
     impl CommitManager for MockCommitManager {
-        fn create_commit(&self, _commit: ConventionalCommit) -> Result<(), AnyError> {
+        fn create_commit(&self, _commit: &str) -> Result<(), AnyError> {
             if self.fail {
                 Err(Box::new(MockError {}))
             } else {
@@ -118,7 +120,7 @@ mod tests {
             }
         }
 
-        fn create_empty_commit(&self, _commit: ConventionalCommit) -> Result<(), AnyError> {
+        fn create_empty_commit(&self, _commit: &str) -> Result<(), AnyError> {
             if self.fail {
                 Err(Box::new(MockError {}))
             } else {
