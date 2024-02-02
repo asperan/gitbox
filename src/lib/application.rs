@@ -4,7 +4,6 @@ pub mod commit_summary_repository_impl;
 pub mod controller;
 pub mod error;
 pub mod gitextra_write_repository_impl;
-pub mod gitinfo_repository_impl;
 pub mod manager;
 pub mod options;
 pub mod presenter;
