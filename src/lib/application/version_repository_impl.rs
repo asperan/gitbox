@@ -2,7 +2,7 @@ use std::{rc::Rc, str::FromStr};
 
 use crate::{
     domain::semantic_version::SemanticVersion,
-    usecases::{repository::version_repository::SemanticVersionIngressRepository, type_aliases::AnyError},
+    usecases::{repository::semantic_version_ingress_repository::SemanticVersionIngressRepository, type_aliases::AnyError},
 };
 
 use super::retriever::version_retriever::VersionRetriever;
@@ -45,7 +45,7 @@ mod tests {
             version_repository_impl::VersionRepositoryImpl,
         },
         domain::semantic_version::SemanticVersion,
-        usecases::{repository::version_repository::SemanticVersionIngressRepository, type_aliases::AnyError},
+        usecases::{repository::semantic_version_ingress_repository::SemanticVersionIngressRepository, type_aliases::AnyError},
     };
 
     struct MockEmptyVersionRetriever {}

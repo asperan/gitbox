@@ -8,7 +8,7 @@ use crate::{
         repository::{
             commit_metadata_ingress_repository::CommitMetadataIngressRepository,
             bounded_commit_summary_ingress_repository::BoundedCommitSummaryIngressRepository,
-            version_repository::SemanticVersionIngressRepository,
+            semantic_version_ingress_repository::SemanticVersionIngressRepository,
         },
         type_aliases::AnyError,
     },
@@ -227,7 +227,7 @@ mod tests {
             repository::{
                 commit_metadata_ingress_repository::CommitMetadataIngressRepository,
                 bounded_commit_summary_ingress_repository::BoundedCommitSummaryIngressRepository,
-                version_repository::SemanticVersionIngressRepository,
+                semantic_version_ingress_repository::SemanticVersionIngressRepository,
             },
             type_aliases::AnyError,
             usecases::{

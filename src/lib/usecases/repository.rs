@@ -4,4 +4,4 @@ pub mod bounded_commit_summary_ingress_repository;
 pub mod full_commit_summary_history_ingress_repository;
 pub mod git_extra_egress_repository;
 pub mod tag_egress_repository;
-pub mod version_repository;
+pub mod semantic_version_ingress_repository;
