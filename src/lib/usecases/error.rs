@@ -1,2 +1,3 @@
 pub mod commit_configuration_invariant_error;
 pub mod describe_no_relevant_changes_error;
+pub mod tag_configuration_invariant_error;
