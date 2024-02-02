@@ -9,4 +9,5 @@ pub mod manager;
 pub mod options;
 pub mod presenter;
 pub mod retriever;
+pub mod tag_write_repository_impl;
 pub mod version_repository_impl;
