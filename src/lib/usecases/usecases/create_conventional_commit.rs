@@ -4,7 +4,7 @@ use crate::{
     domain::conventional_commit::ConventionalCommit,
     usecases::{
         configuration::commit::CommitConfiguration,
-        repository::commit_repository::ConventionalCommitEgressRepository, type_aliases::AnyError,
+        repository::conventional_commit_egress_repository::ConventionalCommitEgressRepository, type_aliases::AnyError,
     },
 };
 
@@ -49,7 +49,7 @@ mod tests {
         domain::conventional_commit::ConventionalCommit,
         usecases::{
             configuration::commit::CommitConfiguration,
-            repository::commit_repository::ConventionalCommitEgressRepository,
+            repository::conventional_commit_egress_repository::ConventionalCommitEgressRepository,
             type_aliases::AnyError,
             usecases::{
                 create_conventional_commit::CreateConventionalCommitUseCase, usecase::UseCase,

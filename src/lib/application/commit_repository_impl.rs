@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use crate::{
     domain::conventional_commit::ConventionalCommit,
-    usecases::{repository::commit_repository::ConventionalCommitEgressRepository, type_aliases::AnyError},
+    usecases::{repository::conventional_commit_egress_repository::ConventionalCommitEgressRepository, type_aliases::AnyError},
 };
 
 use super::manager::commit_manager::CommitManager;
@@ -36,7 +36,7 @@ mod tests {
             commit_repository_impl::CommitRepositoryImpl, manager::commit_manager::CommitManager,
         },
         domain::conventional_commit::ConventionalCommit,
-        usecases::{repository::commit_repository::ConventionalCommitEgressRepository, type_aliases::AnyError},
+        usecases::{repository::conventional_commit_egress_repository::ConventionalCommitEgressRepository, type_aliases::AnyError},
     };
 
     #[derive(Debug)]
