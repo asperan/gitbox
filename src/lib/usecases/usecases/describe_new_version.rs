@@ -16,14 +16,14 @@ use crate::{
 
 use super::usecase::UseCase;
 
-pub struct CalculateNewVersionUseCase {
-    configuration: DescribeConfiguration,
+pub struct CalculateNewVersionUseCase<'a> {
+    configuration: DescribeConfiguration<'a>,
     commit_summary_repository: Rc<dyn CommitSummaryRepository>,
     commit_metadata_repository: Rc<dyn CommitMetadataRepository>,
     version_repository: Rc<dyn VersionRepository>,
 }
 
-impl UseCase<(SemanticVersion, Option<SemanticVersion>)> for CalculateNewVersionUseCase {
+impl<'a> UseCase<(SemanticVersion, Option<SemanticVersion>)> for CalculateNewVersionUseCase<'a> {
     fn execute(&self) -> Result<(SemanticVersion, Option<SemanticVersion>), AnyError> {
         let base_version = if self.configuration.prerelease() {
             self.version_repository.last_version()
@@ -79,7 +79,7 @@ impl UseCase<(SemanticVersion, Option<SemanticVersion>)> for CalculateNewVersion
     }
 }
 
-impl CalculateNewVersionUseCase {
+impl<'a> CalculateNewVersionUseCase<'a> {
     pub fn new(
         configuration: DescribeConfiguration,
         commit_summary_repository: Rc<dyn CommitSummaryRepository>,
