@@ -600,7 +600,7 @@ mod tests {
 
     #[test]
     fn format_title_basic() {
-        let v = Some(SemanticVersion::first_release());
+        let v = Some(SemanticVersion::new(0, 1, 0, None, None));
         let s = format_title(&format(), &v);
         assert_eq!(s, "# Changes from version 0.1.0");
     }
@@ -651,7 +651,7 @@ mod tests {
         }
 
         fn last_stable_version(&self) -> Result<Option<SemanticVersion>, AnyError> {
-            Ok(Some(SemanticVersion::first_release()))
+            Ok(Some(SemanticVersion::new(0, 1, 0, None, None)))
         }
     }
 

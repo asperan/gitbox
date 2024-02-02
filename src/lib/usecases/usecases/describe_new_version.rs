@@ -372,7 +372,7 @@ mod tests {
             version_repository,
         );
         let result = usecase
-            .greatest_change_from(&Some(SemanticVersion::first_release()))
+            .greatest_change_from(&Some(SemanticVersion::new(0, 1, 0, None, None)))
             .expect(
                 "greatest_change_from can only fail during commit list retrieval, which is mocked",
             );
@@ -404,7 +404,7 @@ mod tests {
             version_repository,
         );
         let result = usecase
-            .greatest_change_from(&Some(SemanticVersion::first_release()))
+            .greatest_change_from(&Some(SemanticVersion::new(0, 1, 0, None, None)))
             .expect(
                 "greatest_change_from can only fail during commit list retrieval, which is mocked",
             );
@@ -604,7 +604,7 @@ mod tests {
         let result = usecase
             .execute()
             .expect("The first release should not have an error");
-        assert_eq!(result.0, SemanticVersion::first_release());
+        assert_eq!(result.0, SemanticVersion::new(0, 1, 0, None, None));
     }
 
     #[test]

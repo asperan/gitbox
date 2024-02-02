@@ -140,7 +140,7 @@ mod tests {
 
     #[test]
     fn simple_version_format() {
-        let v1 = SemanticVersion::first_release();
+        let v1 = SemanticVersion::new(0, 1, 0, None, None);
         assert_eq!(v1.to_string(), String::from("0.1.0"));
     }
 

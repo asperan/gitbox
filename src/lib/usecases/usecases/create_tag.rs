@@ -58,7 +58,7 @@ mod tests {
     impl MockTagWriteRepository {
         pub fn new() -> MockTagWriteRepository {
             MockTagWriteRepository {
-                version: RefCell::new(SemanticVersion::first_release()),
+                version: RefCell::new(SemanticVersion::new(0, 0, 0, None, None)),
                 message: RefCell::new(None),
                 sign: RefCell::new(false),
             }

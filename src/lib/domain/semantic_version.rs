@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 
-#[derive(Debug, PartialEq, Eq, Clone, Hash)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct SemanticVersion {
     major: u32,
     minor: u32,
@@ -24,10 +24,6 @@ impl SemanticVersion {
             prerelease,
             metadata,
         }
-    }
-
-    pub fn first_release() -> SemanticVersion {
-        SemanticVersion::new(0, 1, 0, None, None)
     }
 
     pub fn major(&self) -> u32 {
@@ -89,18 +85,22 @@ mod tests {
 
     use super::SemanticVersion;
 
+    fn first_release() -> SemanticVersion {
+        SemanticVersion::new(0, 1, 0, None, None)
+    }
+
     /// Ordering tests
 
     #[test]
     fn equal_versions_ordering() {
-        let v1 = SemanticVersion::first_release();
-        let v2 = SemanticVersion::first_release();
+        let v1 = first_release();
+        let v2 = first_release();
         assert_eq!(&v1.partial_cmp(&v2) == &Some(Ordering::Equal), v1 == v2);
     }
 
     #[test]
     fn less_versions_ordering() {
-        let v1 = SemanticVersion::first_release();
+        let v1 = first_release();
         let v2 = SemanticVersion::new(1, 0, 0, None, None);
         assert_eq!(v1.partial_cmp(&v2) == Some(Ordering::Less), v1 < v2);
     }
@@ -108,15 +108,15 @@ mod tests {
     #[test]
     fn greater_versions_ordering() {
         let v1 = SemanticVersion::new(0, 1, 1, None, None);
-        let v2 = SemanticVersion::first_release();
+        let v2 = first_release();
         assert_eq!(v1.partial_cmp(&v2) == Some(Ordering::Greater), v1 > v2);
     }
 
     #[test]
     fn less_or_equal_versions_ordering() {
-        let v1 = SemanticVersion::first_release();
+        let v1 = first_release();
         let v2 = SemanticVersion::new(1, 0, 0, None, None);
-        let v3 = SemanticVersion::first_release();
+        let v3 = first_release();
 
         let partial_cmp_result = v1.partial_cmp(&v2);
         assert_eq!(
@@ -136,7 +136,7 @@ mod tests {
     #[test]
     fn greater_or_equal_versions_ordering() {
         let v1 = SemanticVersion::new(0, 1, 1, None, None);
-        let v2 = SemanticVersion::first_release();
+        let v2 = first_release();
         let v3 = SemanticVersion::new(0, 1, 1, None, None);
         let partial_cmp_result = v1.partial_cmp(&v2);
         assert_eq!(
@@ -155,7 +155,7 @@ mod tests {
 
     #[test]
     fn prerelease_is_less_than_version() {
-        let v1 = SemanticVersion::first_release();
+        let v1 = first_release();
         let v2 = SemanticVersion::new(0, 1, 0, Some("dev1".to_string()), None);
         assert!(v1 > v2);
     }
