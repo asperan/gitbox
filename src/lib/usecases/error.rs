@@ -1,2 +1,2 @@
 pub mod commit_configuration_invariant_error;
-pub mod describe_irrelevant_changes_for_prerelease;
+pub mod describe_no_relevant_changes_error;
