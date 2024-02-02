@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use crate::usecases::{
-    configuration::tag::TagConfiguration, repository::tag_write_repository::TagWriteRepository,
+    configuration::tag::TagConfiguration, repository::tag_write_repository::TagEgressRepository,
     type_aliases::AnyError,
 };
 
@@ -9,13 +9,13 @@ use super::usecase::UseCase;
 
 pub struct CreateTagUseCase {
     configuration: TagConfiguration,
-    tag_write_repository: Rc<dyn TagWriteRepository>,
+    tag_write_repository: Rc<dyn TagEgressRepository>,
 }
 
 impl CreateTagUseCase {
     pub fn new(
         configuration: TagConfiguration,
-        tag_write_repository: Rc<dyn TagWriteRepository>,
+        tag_write_repository: Rc<dyn TagEgressRepository>,
     ) -> CreateTagUseCase {
         CreateTagUseCase {
             configuration,
@@ -42,7 +42,7 @@ mod tests {
         domain::semantic_version::SemanticVersion,
         usecases::{
             configuration::tag::TagConfiguration,
-            repository::tag_write_repository::TagWriteRepository, type_aliases::AnyError,
+            repository::tag_write_repository::TagEgressRepository, type_aliases::AnyError,
             usecases::usecase::UseCase,
         },
     };
@@ -65,7 +65,7 @@ mod tests {
         }
     }
 
-    impl TagWriteRepository for MockTagWriteRepository {
+    impl TagEgressRepository for MockTagWriteRepository {
         fn create_tag(
             &self,
             version: &SemanticVersion,
