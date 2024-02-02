@@ -2,7 +2,7 @@ use std::{rc::Rc, str::FromStr};
 
 use crate::{
     domain::semantic_version::SemanticVersion,
-    usecases::{repository::version_repository::VersionRepository, type_aliases::AnyError},
+    usecases::{repository::version_repository::SemanticVersionIngressRepository, type_aliases::AnyError},
 };
 
 use super::retriever::version_retriever::VersionRetriever;
@@ -17,7 +17,7 @@ impl VersionRepositoryImpl {
     }
 }
 
-impl VersionRepository for VersionRepositoryImpl {
+impl SemanticVersionIngressRepository for VersionRepositoryImpl {
     fn last_version(&self) -> Result<Option<SemanticVersion>, AnyError> {
         let version = self.version_retriever.last_version()?;
         Ok(match version {
@@ -45,7 +45,7 @@ mod tests {
             version_repository_impl::VersionRepositoryImpl,
         },
         domain::semantic_version::SemanticVersion,
-        usecases::{repository::version_repository::VersionRepository, type_aliases::AnyError},
+        usecases::{repository::version_repository::SemanticVersionIngressRepository, type_aliases::AnyError},
     };
 
     struct MockEmptyVersionRetriever {}

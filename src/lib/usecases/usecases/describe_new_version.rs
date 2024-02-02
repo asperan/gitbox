@@ -8,7 +8,7 @@ use crate::{
         repository::{
             commit_metadata_ingress_repository::CommitMetadataIngressRepository,
             bounded_commit_summary_ingress_repository::BoundedCommitSummaryIngressRepository,
-            version_repository::VersionRepository,
+            version_repository::SemanticVersionIngressRepository,
         },
         type_aliases::AnyError,
     },
@@ -20,7 +20,7 @@ pub struct CalculateNewVersionUseCase<'a> {
     configuration: DescribeConfiguration<'a>,
     commit_summary_repository: Rc<dyn BoundedCommitSummaryIngressRepository>,
     commit_metadata_repository: Rc<dyn CommitMetadataIngressRepository>,
-    version_repository: Rc<dyn VersionRepository>,
+    version_repository: Rc<dyn SemanticVersionIngressRepository>,
 }
 
 impl<'a> UseCase<(SemanticVersion, Option<SemanticVersion>)> for CalculateNewVersionUseCase<'a> {
@@ -84,7 +84,7 @@ impl<'a> CalculateNewVersionUseCase<'a> {
         configuration: DescribeConfiguration,
         commit_summary_repository: Rc<dyn BoundedCommitSummaryIngressRepository>,
         commit_metadata_repository: Rc<dyn CommitMetadataIngressRepository>,
-        version_repository: Rc<dyn VersionRepository>,
+        version_repository: Rc<dyn SemanticVersionIngressRepository>,
     ) -> CalculateNewVersionUseCase {
         CalculateNewVersionUseCase {
             configuration,
@@ -227,7 +227,7 @@ mod tests {
             repository::{
                 commit_metadata_ingress_repository::CommitMetadataIngressRepository,
                 bounded_commit_summary_ingress_repository::BoundedCommitSummaryIngressRepository,
-                version_repository::VersionRepository,
+                version_repository::SemanticVersionIngressRepository,
             },
             type_aliases::AnyError,
             usecases::{
@@ -309,7 +309,7 @@ mod tests {
         last_version: Option<SemanticVersion>,
     }
 
-    impl VersionRepository for MockVersionRepository {
+    impl SemanticVersionIngressRepository for MockVersionRepository {
         fn last_version(&self) -> Result<Option<SemanticVersion>, AnyError> {
             Ok(self.last_version.clone())
         }

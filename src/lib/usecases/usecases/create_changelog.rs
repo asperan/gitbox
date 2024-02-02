@@ -11,7 +11,7 @@ use crate::{
         configuration::changelog::{ChangelogConfiguration, ChangelogFormat},
         repository::{
             bounded_commit_summary_ingress_repository::BoundedCommitSummaryIngressRepository,
-            version_repository::VersionRepository,
+            version_repository::SemanticVersionIngressRepository,
         },
         type_aliases::AnyError,
         usecases::usecase::UseCase,
@@ -21,14 +21,14 @@ use crate::{
 pub struct CreateChangelogUseCase<'a> {
     configuration: ChangelogConfiguration<'a>,
     commit_repository: Rc<dyn BoundedCommitSummaryIngressRepository>,
-    version_repository: Rc<dyn VersionRepository>,
+    version_repository: Rc<dyn SemanticVersionIngressRepository>,
 }
 
 impl<'a> CreateChangelogUseCase<'a> {
     pub fn new(
         configuration: ChangelogConfiguration,
         commit_repository: Rc<dyn BoundedCommitSummaryIngressRepository>,
-        version_repository: Rc<dyn VersionRepository>,
+        version_repository: Rc<dyn SemanticVersionIngressRepository>,
     ) -> CreateChangelogUseCase {
         CreateChangelogUseCase {
             configuration,
@@ -224,7 +224,7 @@ mod tests {
             configuration::changelog::{ChangelogConfiguration, ChangelogFormat},
             repository::{
                 bounded_commit_summary_ingress_repository::BoundedCommitSummaryIngressRepository,
-                version_repository::VersionRepository,
+                version_repository::SemanticVersionIngressRepository,
             },
             type_aliases::AnyError,
             usecases::{
@@ -629,7 +629,7 @@ mod tests {
 
     struct MockVersionRepository {}
 
-    impl VersionRepository for MockVersionRepository {
+    impl SemanticVersionIngressRepository for MockVersionRepository {
         fn last_version(&self) -> Result<Option<SemanticVersion>, AnyError> {
             Ok(Some(SemanticVersion::new(
                 0,
