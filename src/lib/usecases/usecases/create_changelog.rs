@@ -615,16 +615,6 @@ mod tests {
     struct MockCommitRepository {}
 
     impl BoundedCommitSummaryIngressRepository for MockCommitRepository {
-        fn get_all_commits(
-            &self,
-        ) -> Result<Box<dyn DoubleEndedIterator<Item = CommitSummary>>, AnyError> {
-            Ok(Box::new(
-                commit_list()
-                    .into_iter()
-                    .map(|c| CommitSummary::Conventional(c.clone())),
-            ))
-        }
-
         fn get_commits_from(
             &self,
             _version: &Option<SemanticVersion>,

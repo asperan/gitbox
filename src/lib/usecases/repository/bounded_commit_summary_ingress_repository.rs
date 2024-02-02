@@ -4,10 +4,6 @@ use crate::{
 };
 
 pub trait BoundedCommitSummaryIngressRepository {
-    fn get_all_commits(
-        &self,
-    ) -> Result<Box<dyn DoubleEndedIterator<Item = CommitSummary>>, AnyError>;
-
     fn get_commits_from(
         &self,
         version: &Option<SemanticVersion>,

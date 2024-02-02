@@ -291,11 +291,6 @@ mod tests {
                 },
             ))
         }
-        fn get_all_commits(
-            &self,
-        ) -> Result<Box<dyn DoubleEndedIterator<Item = CommitSummary>>, AnyError> {
-            unreachable!()
-        }
     }
 
     struct MockCommitMetadataRepository {}
