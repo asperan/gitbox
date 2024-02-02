@@ -4,7 +4,7 @@ use crate::{
     domain::conventional_commit::ConventionalCommit,
     usecases::{
         configuration::commit::CommitConfiguration,
-        repository::commit_repository::CommitRepository, type_aliases::AnyError,
+        repository::commit_repository::ConventionalCommitEgressRepository, type_aliases::AnyError,
     },
 };
 
@@ -12,13 +12,13 @@ use super::usecase::UseCase;
 
 pub struct CreateConventionalCommitUseCase {
     configuration: CommitConfiguration,
-    commit_repository: Rc<dyn CommitRepository>,
+    commit_repository: Rc<dyn ConventionalCommitEgressRepository>,
 }
 
 impl CreateConventionalCommitUseCase {
     pub fn new(
         configuration: CommitConfiguration,
-        commit_repository: Rc<dyn CommitRepository>,
+        commit_repository: Rc<dyn ConventionalCommitEgressRepository>,
     ) -> CreateConventionalCommitUseCase {
         CreateConventionalCommitUseCase {
             configuration,
@@ -49,7 +49,7 @@ mod tests {
         domain::conventional_commit::ConventionalCommit,
         usecases::{
             configuration::commit::CommitConfiguration,
-            repository::commit_repository::CommitRepository,
+            repository::commit_repository::ConventionalCommitEgressRepository,
             type_aliases::AnyError,
             usecases::{
                 create_conventional_commit::CreateConventionalCommitUseCase, usecase::UseCase,
@@ -70,7 +70,7 @@ mod tests {
 
     struct MockCommitRepository {}
 
-    impl CommitRepository for MockCommitRepository {
+    impl ConventionalCommitEgressRepository for MockCommitRepository {
         fn create_commit(&self, commit: &ConventionalCommit) -> Result<(), AnyError> {
             if commit.summary().breaking() {
                 Err(Box::new(MockError {}))

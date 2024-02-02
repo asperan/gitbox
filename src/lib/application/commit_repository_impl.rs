@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use crate::{
     domain::conventional_commit::ConventionalCommit,
-    usecases::{repository::commit_repository::CommitRepository, type_aliases::AnyError},
+    usecases::{repository::commit_repository::ConventionalCommitEgressRepository, type_aliases::AnyError},
 };
 
 use super::manager::commit_manager::CommitManager;
@@ -17,7 +17,7 @@ impl CommitRepositoryImpl {
     }
 }
 
-impl CommitRepository for CommitRepositoryImpl {
+impl ConventionalCommitEgressRepository for CommitRepositoryImpl {
     fn create_commit(&self, commit: &ConventionalCommit) -> Result<(), AnyError> {
         self.commit_manager.create_commit(&commit.to_string())
     }
@@ -36,7 +36,7 @@ mod tests {
             commit_repository_impl::CommitRepositoryImpl, manager::commit_manager::CommitManager,
         },
         domain::conventional_commit::ConventionalCommit,
-        usecases::{repository::commit_repository::CommitRepository, type_aliases::AnyError},
+        usecases::{repository::commit_repository::ConventionalCommitEgressRepository, type_aliases::AnyError},
     };
 
     #[derive(Debug)]
