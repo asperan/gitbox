@@ -65,7 +65,8 @@ pub struct DescribeSubCommand {
         short = 'M',
         long,
         help = "Set the additional message for the created tag",
-        requires("create_tag")
+        requires("create_tag"),
+        value_parser = clap::builder::NonEmptyStringValueParser::new()
     )]
     tag_message: Option<String>,
     #[arg(
