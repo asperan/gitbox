@@ -5,7 +5,7 @@ use crate::{
     usecases::{
         repository::{
             full_commit_summary_history_ingress_repository::FullCommitSummaryHistoryIngressRepository,
-            gitextra_write_repository::GitExtraEgressRepository,
+            git_extra_egress_repository::GitExtraEgressRepository,
         },
         type_aliases::AnyError,
     },
@@ -70,7 +70,7 @@ mod tests {
         usecases::{
             repository::{
                 full_commit_summary_history_ingress_repository::FullCommitSummaryHistoryIngressRepository,
-                gitextra_write_repository::GitExtraEgressRepository,
+                git_extra_egress_repository::GitExtraEgressRepository,
             },
             type_aliases::AnyError,
             usecases::usecase::UseCase,
