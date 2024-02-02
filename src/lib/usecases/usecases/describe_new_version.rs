@@ -7,7 +7,7 @@ use crate::{
         error::describe_no_relevant_changes_error::DescribeNoRelevantChangesError,
         repository::{
             commit_metadata_ingress_repository::CommitMetadataIngressRepository,
-            commit_summary_repository::BoundedCommitSummaryIngressRepository,
+            bounded_commit_summary_ingress_repository::BoundedCommitSummaryIngressRepository,
             version_repository::VersionRepository,
         },
         type_aliases::AnyError,
@@ -226,7 +226,7 @@ mod tests {
             metadata_spec::MetadataSpec,
             repository::{
                 commit_metadata_ingress_repository::CommitMetadataIngressRepository,
-                commit_summary_repository::BoundedCommitSummaryIngressRepository,
+                bounded_commit_summary_ingress_repository::BoundedCommitSummaryIngressRepository,
                 version_repository::VersionRepository,
             },
             type_aliases::AnyError,

@@ -4,7 +4,7 @@ use crate::{
     application::retriever::commit_retriever::CommitRetriever,
     domain::{commit_summary::CommitSummary, semantic_version::SemanticVersion},
     usecases::{
-        repository::commit_summary_repository::BoundedCommitSummaryIngressRepository, type_aliases::AnyError,
+        repository::bounded_commit_summary_ingress_repository::BoundedCommitSummaryIngressRepository, type_aliases::AnyError,
     },
 };
 
@@ -48,7 +48,7 @@ mod tests {
         application::retriever::commit_retriever::CommitRetriever,
         domain::{commit_summary::CommitSummary, semantic_version::SemanticVersion},
         usecases::{
-            repository::commit_summary_repository::BoundedCommitSummaryIngressRepository, type_aliases::AnyError,
+            repository::bounded_commit_summary_ingress_repository::BoundedCommitSummaryIngressRepository, type_aliases::AnyError,
         },
     };
 

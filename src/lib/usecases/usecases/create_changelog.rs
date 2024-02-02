@@ -10,7 +10,7 @@ use crate::{
     usecases::{
         configuration::changelog::{ChangelogConfiguration, ChangelogFormat},
         repository::{
-            commit_summary_repository::BoundedCommitSummaryIngressRepository,
+            bounded_commit_summary_ingress_repository::BoundedCommitSummaryIngressRepository,
             version_repository::VersionRepository,
         },
         type_aliases::AnyError,
@@ -223,7 +223,7 @@ mod tests {
         usecases::{
             configuration::changelog::{ChangelogConfiguration, ChangelogFormat},
             repository::{
-                commit_summary_repository::BoundedCommitSummaryIngressRepository,
+                bounded_commit_summary_ingress_repository::BoundedCommitSummaryIngressRepository,
                 version_repository::VersionRepository,
             },
             type_aliases::AnyError,
