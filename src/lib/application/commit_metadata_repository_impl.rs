@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use crate::usecases::{
-    metadata_spec::MetadataSpec, repository::commit_metadata_repository::CommitMetadataRepository,
+    metadata_spec::MetadataSpec, repository::commit_metadata_repository::CommitMetadataIngressRepository,
     type_aliases::AnyError,
 };
 
@@ -21,7 +21,7 @@ impl CommitMetadataRepositoryImpl {
     }
 }
 
-impl CommitMetadataRepository for CommitMetadataRepositoryImpl {
+impl CommitMetadataIngressRepository for CommitMetadataRepositoryImpl {
     fn get_metadata(&self, spec: &MetadataSpec) -> Result<String, AnyError> {
         self.commit_metadata_retriever.get_metadata(spec)
     }

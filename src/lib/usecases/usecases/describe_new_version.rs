@@ -6,7 +6,7 @@ use crate::{
         configuration::describe::DescribeConfiguration,
         error::describe_no_relevant_changes_error::DescribeNoRelevantChangesError,
         repository::{
-            commit_metadata_repository::CommitMetadataRepository,
+            commit_metadata_repository::CommitMetadataIngressRepository,
             commit_summary_repository::CommitSummaryRepository,
             version_repository::VersionRepository,
         },
@@ -19,7 +19,7 @@ use super::usecase::UseCase;
 pub struct CalculateNewVersionUseCase<'a> {
     configuration: DescribeConfiguration<'a>,
     commit_summary_repository: Rc<dyn CommitSummaryRepository>,
-    commit_metadata_repository: Rc<dyn CommitMetadataRepository>,
+    commit_metadata_repository: Rc<dyn CommitMetadataIngressRepository>,
     version_repository: Rc<dyn VersionRepository>,
 }
 
@@ -83,7 +83,7 @@ impl<'a> CalculateNewVersionUseCase<'a> {
     pub fn new(
         configuration: DescribeConfiguration,
         commit_summary_repository: Rc<dyn CommitSummaryRepository>,
-        commit_metadata_repository: Rc<dyn CommitMetadataRepository>,
+        commit_metadata_repository: Rc<dyn CommitMetadataIngressRepository>,
         version_repository: Rc<dyn VersionRepository>,
     ) -> CalculateNewVersionUseCase {
         CalculateNewVersionUseCase {
@@ -225,7 +225,7 @@ mod tests {
             error::describe_no_relevant_changes_error::DescribeNoRelevantChangesError,
             metadata_spec::MetadataSpec,
             repository::{
-                commit_metadata_repository::CommitMetadataRepository,
+                commit_metadata_repository::CommitMetadataIngressRepository,
                 commit_summary_repository::CommitSummaryRepository,
                 version_repository::VersionRepository,
             },
@@ -300,7 +300,7 @@ mod tests {
 
     struct MockCommitMetadataRepository {}
 
-    impl CommitMetadataRepository for MockCommitMetadataRepository {
+    impl CommitMetadataIngressRepository for MockCommitMetadataRepository {
         fn get_metadata(&self, spec: &MetadataSpec) -> Result<String, AnyError> {
             Ok(match spec {
                 MetadataSpec::Sha => "sha".to_string(),
