@@ -36,7 +36,7 @@ impl UseCase<()> for CreateTagUseCase {
 
 #[cfg(test)]
 mod tests {
-    use std::{borrow::Borrow, cell::RefCell, rc::Rc};
+    use std::{cell::RefCell, rc::Rc};
 
     use crate::{
         domain::semantic_version::SemanticVersion,
