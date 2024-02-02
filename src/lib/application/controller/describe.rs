@@ -94,7 +94,7 @@ impl DescribeController {
                 new_version,
                 self.options.tag_message().clone(),
                 self.options.sign_tag(),
-            );
+            )?;
             let tag_write_repository =
                 Rc::new(TagWriteRepositoryImpl::new(self.tag_write_manager.clone()));
             let tag_usecase = CreateTagUseCase::new(tag_configuration, tag_write_repository);
