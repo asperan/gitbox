@@ -193,7 +193,7 @@ fn format_item(format: &ChangelogFormat, commit: &ConventionalCommitSummary) -> 
 
 fn format_details(format: &ChangelogFormat, commit: &ConventionalCommitSummary) -> String {
     if commit.breaking() {
-        format.breaking()(commit.summary())
+        format.breaking()(&commit.summary().to_string())
     } else {
         commit.summary().to_string()
     }

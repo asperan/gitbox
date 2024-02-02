@@ -21,7 +21,7 @@ impl ConventionalCommitSummary {
         }
     }
 
-    pub fn typ(&self) -> &String {
+    pub fn typ(&self) -> &str {
         &self.typ
     }
 
@@ -33,7 +33,7 @@ impl ConventionalCommitSummary {
         self.breaking
     }
 
-    pub fn summary(&self) -> &String {
+    pub fn summary(&self) -> &str {
         &self.summary
     }
 }

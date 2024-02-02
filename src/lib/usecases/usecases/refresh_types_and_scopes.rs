@@ -41,7 +41,7 @@ impl UseCase<()> for RefreshTypesAndScopesUseCase {
                 _ => None,
             })
             .for_each(|c| {
-                if !types.contains(c.typ()) {
+                if !types.contains(&c.typ().to_string()) {
                     types.push(c.typ().to_string());
                 }
                 if let Some(s) = c.scope() {
