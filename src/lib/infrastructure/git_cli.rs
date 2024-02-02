@@ -2,14 +2,13 @@ use std::{process::Command, str::FromStr};
 
 use crate::{
     application::{
-        manager::{commit_manager::CommitManager, init_manager::InitManager},
+        manager::{commit_manager::CommitManager, init_manager::InitManager, tag_write_manager::TagWriteManager},
         retriever::{
-            commit_retriever::CommitRetriever, gitinfo_retriever::GitInfoRetriever,
-            version_retriever::VersionRetriever,
+            commit_metadata_retriever::CommitMetadataRetriever, commit_retriever::CommitRetriever, gitinfo_retriever::GitInfoRetriever, version_retriever::VersionRetriever
         },
     },
     domain::semantic_version::SemanticVersion,
-    usecases::type_aliases::AnyError,
+    usecases::{metadata_spec::MetadataSpec, type_aliases::AnyError},
 };
 
 use super::error::{command_execution_error::CommandExecutionError, generic_cli_error::CliError};
@@ -131,5 +130,37 @@ impl CommitManager for GitCli {
 impl InitManager for GitCli {
     fn init_repository(&self) -> Result<(), AnyError> {
         self.run_git_command(vec!["init"].into_iter()).map(|_| ())
+    }
+}
+
+impl TagWriteManager for GitCli {
+    fn create_tag(&self, label: &str, message: &Option<String>, sign: bool) -> Result<(), AnyError> {
+        let mut args = vec![label];
+        args.push("-m");
+        match message {
+            Some(s) => {
+                args.push(&s);
+            },
+            None => {
+                args.push("");
+            },
+        }
+        if sign {
+            args.push("-s");
+        }
+        self.run_git_command(args.into_iter()).map(|_| ())
+    }
+}
+
+impl CommitMetadataRetriever for GitCli {
+    fn get_metadata(&self, metadata_spec: &MetadataSpec) -> Result<String, AnyError> {
+        match metadata_spec {
+            MetadataSpec::Sha => {
+                self.run_git_command(vec!["log", "-n", "1", "--pretty=format:%h"].into_iter())
+            },
+            MetadataSpec::Date => {
+                self.run_git_command(vec!["log", "-n", "1", "--pretty=format:%as"].into_iter())
+            },
+        }
     }
 }
