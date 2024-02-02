@@ -4,7 +4,7 @@ use crate::{
     application::retriever::commit_retriever::CommitRetriever,
     domain::{commit_summary::CommitSummary, semantic_version::SemanticVersion},
     usecases::{
-        repository::bounded_commit_summary_ingress_repository::BoundedCommitSummaryIngressRepository, type_aliases::AnyError,
+        repository::{bounded_commit_summary_ingress_repository::BoundedCommitSummaryIngressRepository, full_commit_summary_history_ingress_repository::FullCommitSummaryHistoryIngressRepository}, type_aliases::AnyError,
     },
 };
 
@@ -18,7 +18,7 @@ impl CommitSummaryRepositoryImpl {
     }
 }
 
-impl BoundedCommitSummaryIngressRepository for CommitSummaryRepositoryImpl {
+impl FullCommitSummaryHistoryIngressRepository for CommitSummaryRepositoryImpl {
     fn get_all_commits(
         &self,
     ) -> Result<Box<dyn DoubleEndedIterator<Item = CommitSummary>>, AnyError> {
@@ -27,7 +27,9 @@ impl BoundedCommitSummaryIngressRepository for CommitSummaryRepositoryImpl {
             CommitSummary::from_str(&c).expect("Commit deserialization cannot fail")
         })))
     }
+}
 
+impl BoundedCommitSummaryIngressRepository for CommitSummaryRepositoryImpl {
     fn get_commits_from(
         &self,
         version: &Option<SemanticVersion>,
@@ -48,7 +50,7 @@ mod tests {
         application::retriever::commit_retriever::CommitRetriever,
         domain::{commit_summary::CommitSummary, semantic_version::SemanticVersion},
         usecases::{
-            repository::bounded_commit_summary_ingress_repository::BoundedCommitSummaryIngressRepository, type_aliases::AnyError,
+            repository::{bounded_commit_summary_ingress_repository::BoundedCommitSummaryIngressRepository, full_commit_summary_history_ingress_repository::FullCommitSummaryHistoryIngressRepository}, type_aliases::AnyError,
         },
     };
 
