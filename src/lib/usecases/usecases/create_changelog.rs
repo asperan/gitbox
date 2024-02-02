@@ -10,7 +10,7 @@ use crate::{
     usecases::{
         configuration::changelog::{ChangelogConfiguration, ChangelogFormat},
         repository::{
-            commit_summary_repository::CommitSummaryRepository,
+            commit_summary_repository::BoundedCommitSummaryIngressRepository,
             version_repository::VersionRepository,
         },
         type_aliases::AnyError,
@@ -20,14 +20,14 @@ use crate::{
 
 pub struct CreateChangelogUseCase<'a> {
     configuration: ChangelogConfiguration<'a>,
-    commit_repository: Rc<dyn CommitSummaryRepository>,
+    commit_repository: Rc<dyn BoundedCommitSummaryIngressRepository>,
     version_repository: Rc<dyn VersionRepository>,
 }
 
 impl<'a> CreateChangelogUseCase<'a> {
     pub fn new(
         configuration: ChangelogConfiguration,
-        commit_repository: Rc<dyn CommitSummaryRepository>,
+        commit_repository: Rc<dyn BoundedCommitSummaryIngressRepository>,
         version_repository: Rc<dyn VersionRepository>,
     ) -> CreateChangelogUseCase {
         CreateChangelogUseCase {
@@ -223,7 +223,7 @@ mod tests {
         usecases::{
             configuration::changelog::{ChangelogConfiguration, ChangelogFormat},
             repository::{
-                commit_summary_repository::CommitSummaryRepository,
+                commit_summary_repository::BoundedCommitSummaryIngressRepository,
                 version_repository::VersionRepository,
             },
             type_aliases::AnyError,
@@ -614,7 +614,7 @@ mod tests {
 
     struct MockCommitRepository {}
 
-    impl CommitSummaryRepository for MockCommitRepository {
+    impl BoundedCommitSummaryIngressRepository for MockCommitRepository {
         fn get_all_commits(
             &self,
         ) -> Result<Box<dyn DoubleEndedIterator<Item = CommitSummary>>, AnyError> {

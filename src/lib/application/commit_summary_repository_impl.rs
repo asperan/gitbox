@@ -4,7 +4,7 @@ use crate::{
     application::retriever::commit_retriever::CommitRetriever,
     domain::{commit_summary::CommitSummary, semantic_version::SemanticVersion},
     usecases::{
-        repository::commit_summary_repository::CommitSummaryRepository, type_aliases::AnyError,
+        repository::commit_summary_repository::BoundedCommitSummaryIngressRepository, type_aliases::AnyError,
     },
 };
 
@@ -18,7 +18,7 @@ impl CommitSummaryRepositoryImpl {
     }
 }
 
-impl CommitSummaryRepository for CommitSummaryRepositoryImpl {
+impl BoundedCommitSummaryIngressRepository for CommitSummaryRepositoryImpl {
     fn get_all_commits(
         &self,
     ) -> Result<Box<dyn DoubleEndedIterator<Item = CommitSummary>>, AnyError> {
@@ -48,7 +48,7 @@ mod tests {
         application::retriever::commit_retriever::CommitRetriever,
         domain::{commit_summary::CommitSummary, semantic_version::SemanticVersion},
         usecases::{
-            repository::commit_summary_repository::CommitSummaryRepository, type_aliases::AnyError,
+            repository::commit_summary_repository::BoundedCommitSummaryIngressRepository, type_aliases::AnyError,
         },
     };
 

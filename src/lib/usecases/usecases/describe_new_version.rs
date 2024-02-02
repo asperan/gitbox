@@ -7,7 +7,7 @@ use crate::{
         error::describe_no_relevant_changes_error::DescribeNoRelevantChangesError,
         repository::{
             commit_metadata_ingress_repository::CommitMetadataIngressRepository,
-            commit_summary_repository::CommitSummaryRepository,
+            commit_summary_repository::BoundedCommitSummaryIngressRepository,
             version_repository::VersionRepository,
         },
         type_aliases::AnyError,
@@ -18,7 +18,7 @@ use super::usecase::UseCase;
 
 pub struct CalculateNewVersionUseCase<'a> {
     configuration: DescribeConfiguration<'a>,
-    commit_summary_repository: Rc<dyn CommitSummaryRepository>,
+    commit_summary_repository: Rc<dyn BoundedCommitSummaryIngressRepository>,
     commit_metadata_repository: Rc<dyn CommitMetadataIngressRepository>,
     version_repository: Rc<dyn VersionRepository>,
 }
@@ -82,7 +82,7 @@ impl<'a> UseCase<(SemanticVersion, Option<SemanticVersion>)> for CalculateNewVer
 impl<'a> CalculateNewVersionUseCase<'a> {
     pub fn new(
         configuration: DescribeConfiguration,
-        commit_summary_repository: Rc<dyn CommitSummaryRepository>,
+        commit_summary_repository: Rc<dyn BoundedCommitSummaryIngressRepository>,
         commit_metadata_repository: Rc<dyn CommitMetadataIngressRepository>,
         version_repository: Rc<dyn VersionRepository>,
     ) -> CalculateNewVersionUseCase {
@@ -226,7 +226,7 @@ mod tests {
             metadata_spec::MetadataSpec,
             repository::{
                 commit_metadata_ingress_repository::CommitMetadataIngressRepository,
-                commit_summary_repository::CommitSummaryRepository,
+                commit_summary_repository::BoundedCommitSummaryIngressRepository,
                 version_repository::VersionRepository,
             },
             type_aliases::AnyError,
@@ -276,7 +276,7 @@ mod tests {
         }
     }
 
-    impl CommitSummaryRepository for MockCommitSummaryRepository {
+    impl BoundedCommitSummaryIngressRepository for MockCommitSummaryRepository {
         fn get_commits_from(
             &self,
             version: &Option<SemanticVersion>,

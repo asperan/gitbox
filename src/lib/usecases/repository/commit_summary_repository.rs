@@ -3,7 +3,7 @@ use crate::{
     usecases::type_aliases::AnyError,
 };
 
-pub trait CommitSummaryRepository {
+pub trait BoundedCommitSummaryIngressRepository {
     fn get_all_commits(
         &self,
     ) -> Result<Box<dyn DoubleEndedIterator<Item = CommitSummary>>, AnyError>;
