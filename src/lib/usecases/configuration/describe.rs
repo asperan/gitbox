@@ -1,12 +1,12 @@
 use crate::{domain::trigger::Trigger, usecases::metadata_spec::MetadataSpec};
 
-pub type PrereleasePattern = Box<dyn Fn(u32) -> String>;
-pub type OldPrereleasePattern = Box<dyn Fn(&String) -> u32>;
+pub type PrereleasePattern<'a> = Box<dyn Fn(u32) -> String + 'a>;
+pub type OldPrereleasePattern<'a> = Box<dyn Fn(&String) -> u32 + 'a>;
 
-pub struct DescribeConfiguration {
+pub struct DescribeConfiguration<'a> {
     prerelease: bool,
-    prerelease_pattern: PrereleasePattern,
-    old_prerelease_pattern: OldPrereleasePattern,
+    prerelease_pattern: PrereleasePattern<'a>,
+    old_prerelease_pattern: OldPrereleasePattern<'a>,
     prerelease_pattern_changed: bool,
     metadata: Vec<MetadataSpec>,
     major_trigger: Trigger,
@@ -14,17 +14,17 @@ pub struct DescribeConfiguration {
     patch_trigger: Trigger,
 }
 
-impl DescribeConfiguration {
+impl<'a> DescribeConfiguration<'a> {
     pub fn new(
         prerelease: bool,
-        prerelease_pattern: PrereleasePattern,
-        old_prerelease_pattern: OldPrereleasePattern,
+        prerelease_pattern: PrereleasePattern<'a>,
+        old_prerelease_pattern: OldPrereleasePattern<'a>,
         prerelease_pattern_changed: bool,
         metadata: Vec<MetadataSpec>,
         major_trigger: Trigger,
         minor_trigger: Trigger,
         patch_trigger: Trigger,
-    ) -> DescribeConfiguration {
+    ) -> DescribeConfiguration<'a> {
         DescribeConfiguration {
             prerelease,
             prerelease_pattern,
