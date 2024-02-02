@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use crate::usecases::{
-    repository::gitextra_write_repository::GitExtraWriteRepository, type_aliases::AnyError,
+    repository::gitextra_write_repository::GitExtraEgressRepository, type_aliases::AnyError,
 };
 
 use super::manager::gitextra_write_manager::GitExtraWriteManager;
@@ -20,7 +20,7 @@ impl GitExtraWriteRepositoryImpl {
     }
 }
 
-impl GitExtraWriteRepository for GitExtraWriteRepositoryImpl {
+impl GitExtraEgressRepository for GitExtraWriteRepositoryImpl {
     fn update_types(&self, types: Box<dyn Iterator<Item = String>>) -> Result<(), AnyError> {
         self.gitextra_write_manager.update_types(types)
     }

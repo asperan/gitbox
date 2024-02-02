@@ -5,7 +5,7 @@ use crate::{
     usecases::{
         repository::{
             full_commit_summary_history_ingress_repository::FullCommitSummaryHistoryIngressRepository,
-            gitextra_write_repository::GitExtraWriteRepository,
+            gitextra_write_repository::GitExtraEgressRepository,
         },
         type_aliases::AnyError,
     },
@@ -15,13 +15,13 @@ use super::usecase::UseCase;
 
 pub struct RefreshTypesAndScopesUseCase {
     commit_history_repository: Rc<dyn FullCommitSummaryHistoryIngressRepository>,
-    gitextra_write_repository: Rc<dyn GitExtraWriteRepository>,
+    gitextra_write_repository: Rc<dyn GitExtraEgressRepository>,
 }
 
 impl RefreshTypesAndScopesUseCase {
     pub fn new(
         commit_history_repository: Rc<dyn FullCommitSummaryHistoryIngressRepository>,
-        gitextra_write_repository: Rc<dyn GitExtraWriteRepository>,
+        gitextra_write_repository: Rc<dyn GitExtraEgressRepository>,
     ) -> RefreshTypesAndScopesUseCase {
         RefreshTypesAndScopesUseCase {
             commit_history_repository,
@@ -70,7 +70,7 @@ mod tests {
         usecases::{
             repository::{
                 full_commit_summary_history_ingress_repository::FullCommitSummaryHistoryIngressRepository,
-                gitextra_write_repository::GitExtraWriteRepository,
+                gitextra_write_repository::GitExtraEgressRepository,
             },
             type_aliases::AnyError,
             usecases::usecase::UseCase,
@@ -136,7 +136,7 @@ mod tests {
         }
     }
 
-    impl GitExtraWriteRepository for MockGitExtraWriteRepository {
+    impl GitExtraEgressRepository for MockGitExtraWriteRepository {
         fn update_types(&self, types: Box<dyn Iterator<Item = String>>) -> Result<(), AnyError> {
             let _ = &self.types.replace(types.collect());
             Ok(())
