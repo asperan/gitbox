@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use crate::usecases::{
-    metadata_spec::MetadataSpec, repository::commit_metadata_repository::CommitMetadataIngressRepository,
+    metadata_spec::MetadataSpec, repository::commit_metadata_ingress_repository::CommitMetadataIngressRepository,
     type_aliases::AnyError,
 };
 

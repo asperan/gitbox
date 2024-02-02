@@ -6,7 +6,7 @@ use crate::{
         configuration::describe::DescribeConfiguration,
         error::describe_no_relevant_changes_error::DescribeNoRelevantChangesError,
         repository::{
-            commit_metadata_repository::CommitMetadataIngressRepository,
+            commit_metadata_ingress_repository::CommitMetadataIngressRepository,
             commit_summary_repository::CommitSummaryRepository,
             version_repository::VersionRepository,
         },
@@ -225,7 +225,7 @@ mod tests {
             error::describe_no_relevant_changes_error::DescribeNoRelevantChangesError,
             metadata_spec::MetadataSpec,
             repository::{
-                commit_metadata_repository::CommitMetadataIngressRepository,
+                commit_metadata_ingress_repository::CommitMetadataIngressRepository,
                 commit_summary_repository::CommitSummaryRepository,
                 version_repository::VersionRepository,
             },
