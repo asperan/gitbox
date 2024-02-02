@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use crate::{
-    domain::{commit::CommitSummary, semantic_version::SemanticVersion},
+    domain::{commit_summary::CommitSummary, semantic_version::SemanticVersion},
     usecases::{
         configuration::describe::DescribeConfiguration,
         error::describe_no_relevant_changes_error::DescribeNoRelevantChangesError,
@@ -212,7 +212,7 @@ mod tests {
 
     use crate::{
         domain::{
-            commit::CommitSummary,
+            commit_summary::CommitSummary,
             conventional_commit_summary::ConventionalCommitSummary,
             semantic_version::SemanticVersion,
             trigger::{

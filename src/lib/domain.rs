@@ -1,4 +1,4 @@
-pub mod commit;
+pub mod commit_summary;
 pub mod constant;
 pub mod conventional_commit;
 pub mod conventional_commit_summary;

@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use crate::{
-    domain::{commit::CommitSummary, constant::DEFAULT_COMMIT_TYPES},
+    domain::{commit_summary::CommitSummary, constant::DEFAULT_COMMIT_TYPES},
     usecases::{
         repository::{
             commit_summary_repository::CommitSummaryRepository,
@@ -64,7 +64,7 @@ mod tests {
 
     use crate::{
         domain::{
-            commit::CommitSummary, constant::DEFAULT_COMMIT_TYPES,
+            commit_summary::CommitSummary, constant::DEFAULT_COMMIT_TYPES,
             conventional_commit_summary::ConventionalCommitSummary,
             semantic_version::SemanticVersion,
         },

@@ -2,7 +2,7 @@ use std::{rc::Rc, str::FromStr};
 
 use crate::{
     application::retriever::commit_retriever::CommitRetriever,
-    domain::{commit::CommitSummary, semantic_version::SemanticVersion},
+    domain::{commit_summary::CommitSummary, semantic_version::SemanticVersion},
     usecases::{
         repository::commit_summary_repository::CommitSummaryRepository, type_aliases::AnyError,
     },
@@ -46,7 +46,7 @@ mod tests {
 
     use crate::{
         application::retriever::commit_retriever::CommitRetriever,
-        domain::{commit::CommitSummary, semantic_version::SemanticVersion},
+        domain::{commit_summary::CommitSummary, semantic_version::SemanticVersion},
         usecases::{
             repository::commit_summary_repository::CommitSummaryRepository, type_aliases::AnyError,
         },

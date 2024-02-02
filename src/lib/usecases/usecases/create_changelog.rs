@@ -4,7 +4,7 @@ use ahash::{AHashMap, RandomState};
 
 use crate::{
     domain::{
-        commit::CommitSummary, conventional_commit_summary::ConventionalCommitSummary,
+        commit_summary::CommitSummary, conventional_commit_summary::ConventionalCommitSummary,
         semantic_version::SemanticVersion, trigger::Trigger,
     },
     usecases::{
@@ -215,7 +215,7 @@ mod tests {
 
     use crate::{
         domain::{
-            commit::CommitSummary,
+            commit_summary::CommitSummary,
             conventional_commit_summary::ConventionalCommitSummary,
             semantic_version::SemanticVersion,
             trigger::{BasicStatement, Trigger},

@@ -1,5 +1,5 @@
 use crate::{
-    domain::{commit::CommitSummary, semantic_version::SemanticVersion},
+    domain::{commit_summary::CommitSummary, semantic_version::SemanticVersion},
     usecases::type_aliases::AnyError,
 };
 

@@ -5,7 +5,7 @@ use regex::Regex;
 use crate::{
     application::error::commit_summary_parsing_error::CommitSummaryParsingError,
     domain::{
-        commit::CommitSummary, conventional_commit::ConventionalCommit,
+        commit_summary::CommitSummary, conventional_commit::ConventionalCommit,
         conventional_commit_summary::ConventionalCommitSummary,
     },
     usecases::type_aliases::AnyError,
@@ -81,7 +81,7 @@ mod tests {
     use std::str::FromStr;
 
     use crate::domain::{
-        commit::CommitSummary, conventional_commit::ConventionalCommit,
+        commit_summary::CommitSummary, conventional_commit::ConventionalCommit,
         conventional_commit_summary::ConventionalCommitSummary,
     };
 
