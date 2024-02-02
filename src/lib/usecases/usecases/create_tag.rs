@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use crate::usecases::{
-    configuration::tag::TagConfiguration, repository::tag_write_repository::TagEgressRepository,
+    configuration::tag::TagConfiguration, repository::tag_egress_repository::TagEgressRepository,
     type_aliases::AnyError,
 };
 
@@ -42,7 +42,7 @@ mod tests {
         domain::semantic_version::SemanticVersion,
         usecases::{
             configuration::tag::TagConfiguration,
-            repository::tag_write_repository::TagEgressRepository, type_aliases::AnyError,
+            repository::tag_egress_repository::TagEgressRepository, type_aliases::AnyError,
             usecases::usecase::UseCase,
         },
     };

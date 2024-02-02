@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use crate::{
     domain::semantic_version::SemanticVersion,
-    usecases::{repository::tag_write_repository::TagEgressRepository, type_aliases::AnyError},
+    usecases::{repository::tag_egress_repository::TagEgressRepository, type_aliases::AnyError},
 };
 
 use super::manager::tag_write_manager::TagWriteManager;
