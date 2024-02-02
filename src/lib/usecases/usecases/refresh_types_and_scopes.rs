@@ -4,7 +4,7 @@ use crate::{
     domain::{commit_summary::CommitSummary, constant::DEFAULT_COMMIT_TYPES},
     usecases::{
         repository::{
-            commit_summary_repository::CommitSummaryRepository,
+            full_commit_summary_history_ingress_repository::FullCommitSummaryHistoryIngressRepository,
             gitextra_write_repository::GitExtraWriteRepository,
         },
         type_aliases::AnyError,
@@ -14,17 +14,17 @@ use crate::{
 use super::usecase::UseCase;
 
 pub struct RefreshTypesAndScopesUseCase {
-    commit_summary_repository: Rc<dyn CommitSummaryRepository>,
+    commit_history_repository: Rc<dyn FullCommitSummaryHistoryIngressRepository>,
     gitextra_write_repository: Rc<dyn GitExtraWriteRepository>,
 }
 
 impl RefreshTypesAndScopesUseCase {
     pub fn new(
-        commit_summary_repository: Rc<dyn CommitSummaryRepository>,
+        commit_history_repository: Rc<dyn FullCommitSummaryHistoryIngressRepository>,
         gitextra_write_repository: Rc<dyn GitExtraWriteRepository>,
     ) -> RefreshTypesAndScopesUseCase {
         RefreshTypesAndScopesUseCase {
-            commit_summary_repository,
+            commit_history_repository,
             gitextra_write_repository,
         }
     }
@@ -32,7 +32,7 @@ impl RefreshTypesAndScopesUseCase {
 
 impl UseCase<()> for RefreshTypesAndScopesUseCase {
     fn execute(&self) -> Result<(), AnyError> {
-        let commits = self.commit_summary_repository.get_all_commits()?;
+        let commits = self.commit_history_repository.get_all_commits()?;
         let mut types: Vec<String> = Vec::from(DEFAULT_COMMIT_TYPES.map(|it| it.to_string()));
         let mut scopes: Vec<String> = Vec::new();
         commits
@@ -66,11 +66,10 @@ mod tests {
         domain::{
             commit_summary::CommitSummary, constant::DEFAULT_COMMIT_TYPES,
             conventional_commit_summary::ConventionalCommitSummary,
-            semantic_version::SemanticVersion,
         },
         usecases::{
             repository::{
-                commit_summary_repository::CommitSummaryRepository,
+                full_commit_summary_history_ingress_repository::FullCommitSummaryHistoryIngressRepository,
                 gitextra_write_repository::GitExtraWriteRepository,
             },
             type_aliases::AnyError,
@@ -91,9 +90,9 @@ mod tests {
 
     impl Error for MockError {}
 
-    struct MockCommitSummaryRepository {}
+    struct MockFullCommitSummaryHistoryIngressRepository {}
 
-    impl CommitSummaryRepository for MockCommitSummaryRepository {
+    impl FullCommitSummaryHistoryIngressRepository for MockFullCommitSummaryHistoryIngressRepository {
         fn get_all_commits(
             &self,
         ) -> Result<Box<dyn DoubleEndedIterator<Item = CommitSummary>>, AnyError> {
@@ -120,13 +119,6 @@ mod tests {
                 ]
                 .into_iter(),
             ))
-        }
-
-        fn get_commits_from(
-            &self,
-            _version: &Option<SemanticVersion>,
-        ) -> Result<Box<dyn DoubleEndedIterator<Item = CommitSummary>>, AnyError> {
-            unreachable!()
         }
     }
 
@@ -157,7 +149,7 @@ mod tests {
 
     #[test]
     fn refresh_adds_only_distinct_values() {
-        let commit_summary_repository = Rc::new(MockCommitSummaryRepository {});
+        let commit_summary_repository = Rc::new(MockFullCommitSummaryHistoryIngressRepository {});
         let gitextra_write_repository = Rc::new(MockGitExtraWriteRepository::new());
         let usecase = RefreshTypesAndScopesUseCase::new(
             commit_summary_repository.clone(),
