@@ -8,12 +8,12 @@ pub struct ChangelogConfiguration<'a> {
 
 impl<'a> ChangelogConfiguration<'a> {
     pub fn new(
-        from_latest_version: bool,
+        generate_from_latest_version: bool,
         format: ChangelogFormat,
         exclude_trigger: Option<Trigger>,
     ) -> ChangelogConfiguration {
         ChangelogConfiguration {
-            generate_from_latest_version: from_latest_version,
+            generate_from_latest_version,
             format,
             exclude_trigger,
         }
