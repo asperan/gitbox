@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use crate::{
     application::{
-        manager::{commit_manager::CommitManager, output_manager::OutputManager},
+        manager::{commit_manager::ConventionalCommitEgressManager, output_manager::OutputManager},
         options::commit::CommitOptions,
         repository_impl::commit_repository_impl::CommitRepositoryImpl,
     },
@@ -16,14 +16,14 @@ use super::exit_code::ControllerExitCode;
 
 pub struct CommitController {
     options: CommitOptions,
-    commit_manager: Rc<dyn CommitManager>,
+    commit_manager: Rc<dyn ConventionalCommitEgressManager>,
     output_manager: Rc<dyn OutputManager>,
 }
 
 impl CommitController {
     pub fn new(
         options: CommitOptions,
-        commit_manager: Rc<dyn CommitManager>,
+        commit_manager: Rc<dyn ConventionalCommitEgressManager>,
         output_manager: Rc<dyn OutputManager>,
     ) -> CommitController {
         CommitController {
@@ -74,7 +74,7 @@ mod tests {
     use crate::{
         application::{
             controller::{commit::CommitController, exit_code::ControllerExitCode},
-            manager::{commit_manager::CommitManager, output_manager::OutputManager},
+            manager::{commit_manager::ConventionalCommitEgressManager, output_manager::OutputManager},
             options::commit::CommitOptions,
         },
         usecases::type_aliases::AnyError,
@@ -95,7 +95,7 @@ mod tests {
         fail: bool,
     }
 
-    impl CommitManager for MockCommitManager {
+    impl ConventionalCommitEgressManager for MockCommitManager {
         fn create_empty_commit(&self, _commit: &str) -> Result<(), AnyError> {
             if self.fail {
                 Err(Box::new(MockError {}))

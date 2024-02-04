@@ -3,7 +3,7 @@ use std::{process::Command, str::FromStr};
 use crate::{
     application::{
         manager::{
-            commit_manager::CommitManager, init_manager::InitManager,
+            commit_manager::ConventionalCommitEgressManager, init_manager::InitManager,
             tag_write_manager::TagWriteManager,
         },
         retriever::{
@@ -124,7 +124,7 @@ impl GitInfoIngressManager for GitCli {
     }
 }
 
-impl CommitManager for GitCli {
+impl ConventionalCommitEgressManager for GitCli {
     fn create_commit(&self, commit: &str) -> Result<(), AnyError> {
         self.run_git_command(vec!["commit", "-m", commit].into_iter())
             .map(|_| ())

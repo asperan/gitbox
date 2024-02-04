@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use crate::{
-    application::manager::commit_manager::CommitManager,
+    application::manager::commit_manager::ConventionalCommitEgressManager,
     domain::conventional_commit::ConventionalCommit,
     usecases::{
         repository::conventional_commit_egress_repository::ConventionalCommitEgressRepository,
@@ -10,11 +10,11 @@ use crate::{
 };
 
 pub struct CommitRepositoryImpl {
-    commit_manager: Rc<dyn CommitManager>,
+    commit_manager: Rc<dyn ConventionalCommitEgressManager>,
 }
 
 impl CommitRepositoryImpl {
-    pub fn new(commit_manager: Rc<dyn CommitManager>) -> CommitRepositoryImpl {
+    pub fn new(commit_manager: Rc<dyn ConventionalCommitEgressManager>) -> CommitRepositoryImpl {
         CommitRepositoryImpl { commit_manager }
     }
 }
@@ -35,7 +35,7 @@ mod tests {
 
     use crate::{
         application::{
-            manager::commit_manager::CommitManager, repository_impl::commit_repository_impl::CommitRepositoryImpl
+            manager::commit_manager::ConventionalCommitEgressManager, repository_impl::commit_repository_impl::CommitRepositoryImpl
         },
         domain::conventional_commit::ConventionalCommit,
         usecases::{
@@ -59,7 +59,7 @@ mod tests {
         fail: bool,
     }
 
-    impl CommitManager for MockCommitManager {
+    impl ConventionalCommitEgressManager for MockCommitManager {
         fn create_commit(&self, _commit: &str) -> Result<(), AnyError> {
             if self.fail {
                 Err(Box::new(MockError {}))
