@@ -6,7 +6,7 @@ use crate::{
             conventional_commit_egress_manager::ConventionalCommitEgressManager, init_egress_manager::InitEgressManager, message_egress_manager::MessageEgressManager,
         },
         options::init::InitOptions,
-        repository_impl::commit_repository_impl::CommitRepositoryImpl,
+        repository_impl::commit_repository_impl::ConventionalCommitEgressRepositoryImpl,
     },
     usecases::{
         configuration::commit::CommitConfiguration,
@@ -53,7 +53,7 @@ impl InitController {
                 None,
             )
             .expect("Init commit configuration is hand-made");
-            let commit_repository = Rc::new(CommitRepositoryImpl::new(self.commit_manager.clone()));
+            let commit_repository = Rc::new(ConventionalCommitEgressRepositoryImpl::new(self.commit_manager.clone()));
             let usecase = CreateConventionalCommitUseCase::new(configuration, commit_repository);
             if let Err(e) = usecase.execute() {
                 self.output_manager.error(&e.to_string());

@@ -9,23 +9,23 @@ use crate::{
     },
 };
 
-pub struct CommitRepositoryImpl {
-    commit_manager: Rc<dyn ConventionalCommitEgressManager>,
+pub struct ConventionalCommitEgressRepositoryImpl {
+    conventional_commit_egress_manager: Rc<dyn ConventionalCommitEgressManager>,
 }
 
-impl CommitRepositoryImpl {
-    pub fn new(commit_manager: Rc<dyn ConventionalCommitEgressManager>) -> CommitRepositoryImpl {
-        CommitRepositoryImpl { commit_manager }
+impl ConventionalCommitEgressRepositoryImpl {
+    pub fn new(conventional_commit_egress_manager: Rc<dyn ConventionalCommitEgressManager>) -> ConventionalCommitEgressRepositoryImpl {
+        ConventionalCommitEgressRepositoryImpl { conventional_commit_egress_manager }
     }
 }
 
-impl ConventionalCommitEgressRepository for CommitRepositoryImpl {
+impl ConventionalCommitEgressRepository for ConventionalCommitEgressRepositoryImpl {
     fn create_commit(&self, commit: &ConventionalCommit) -> Result<(), AnyError> {
-        self.commit_manager.create_commit(&commit.to_string())
+        self.conventional_commit_egress_manager.create_commit(&commit.to_string())
     }
 
     fn create_empty_commit(&self, commit: &ConventionalCommit) -> Result<(), AnyError> {
-        self.commit_manager.create_empty_commit(&commit.to_string())
+        self.conventional_commit_egress_manager.create_empty_commit(&commit.to_string())
     }
 }
 
@@ -35,7 +35,7 @@ mod tests {
 
     use crate::{
         application::{
-            manager::conventional_commit_egress_manager::ConventionalCommitEgressManager, repository_impl::commit_repository_impl::CommitRepositoryImpl
+            manager::conventional_commit_egress_manager::ConventionalCommitEgressManager, repository_impl::commit_repository_impl::ConventionalCommitEgressRepositoryImpl
         },
         domain::conventional_commit::ConventionalCommit,
         usecases::{
@@ -81,7 +81,7 @@ mod tests {
         let commit =
             ConventionalCommit::new("feat".to_string(), None, false, "test".to_string(), None);
         let commit_manager = Rc::new(MockCommitManager { fail: false });
-        let commit_repository = CommitRepositoryImpl::new(commit_manager);
+        let commit_repository = ConventionalCommitEgressRepositoryImpl::new(commit_manager);
         let result = commit_repository.create_commit(&commit);
         assert!(result.is_ok());
     }
@@ -91,7 +91,7 @@ mod tests {
         let commit =
             ConventionalCommit::new("feat".to_string(), None, false, "test".to_string(), None);
         let commit_manager = Rc::new(MockCommitManager { fail: true });
-        let commit_repository = CommitRepositoryImpl::new(commit_manager);
+        let commit_repository = ConventionalCommitEgressRepositoryImpl::new(commit_manager);
         let result = commit_repository.create_commit(&commit);
         assert!(result.is_err());
     }
@@ -101,7 +101,7 @@ mod tests {
         let commit =
             ConventionalCommit::new("feat".to_string(), None, false, "test".to_string(), None);
         let commit_manager = Rc::new(MockCommitManager { fail: false });
-        let commit_repository = CommitRepositoryImpl::new(commit_manager);
+        let commit_repository = ConventionalCommitEgressRepositoryImpl::new(commit_manager);
         let result = commit_repository.create_empty_commit(&commit);
         assert!(result.is_ok());
     }
@@ -111,7 +111,7 @@ mod tests {
         let commit =
             ConventionalCommit::new("feat".to_string(), None, false, "test".to_string(), None);
         let commit_manager = Rc::new(MockCommitManager { fail: true });
-        let commit_repository = CommitRepositoryImpl::new(commit_manager);
+        let commit_repository = ConventionalCommitEgressRepositoryImpl::new(commit_manager);
         let result = commit_repository.create_empty_commit(&commit);
         assert!(result.is_err());
     }

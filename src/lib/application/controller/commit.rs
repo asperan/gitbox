@@ -4,7 +4,7 @@ use crate::{
     application::{
         manager::{conventional_commit_egress_manager::ConventionalCommitEgressManager, message_egress_manager::MessageEgressManager},
         options::commit::CommitOptions,
-        repository_impl::commit_repository_impl::CommitRepositoryImpl,
+        repository_impl::commit_repository_impl::ConventionalCommitEgressRepositoryImpl,
     },
     usecases::{
         configuration::commit::CommitConfiguration,
@@ -43,7 +43,7 @@ impl CommitController {
         ) {
             Ok(configuration) => {
                 let commit_repository =
-                    Rc::new(CommitRepositoryImpl::new(self.commit_manager.clone()));
+                    Rc::new(ConventionalCommitEgressRepositoryImpl::new(self.commit_manager.clone()));
                 let usecase =
                     CreateConventionalCommitUseCase::new(configuration, commit_repository);
                 match usecase.execute() {
