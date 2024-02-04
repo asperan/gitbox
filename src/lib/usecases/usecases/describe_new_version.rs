@@ -31,36 +31,7 @@ impl<'a> UseCase<(SemanticVersion, Option<SemanticVersion>)> for CalculateNewVer
             self.version_repository.last_stable_version()
         }?;
         let new_version = {
-            let stable_version = if base_version.is_none() {
-                StableVersion::first_stable()
-            } else {
-                let greatest_change = self.greatest_change_from(&base_version)?;
-                let base_version = base_version
-                    .as_ref()
-                    .expect("base version must be present in this branch");
-                match greatest_change {
-                    Change::Major => StableVersion::new(base_version.major() + 1, 0, 0),
-                    Change::Minor => {
-                        StableVersion::new(base_version.major(), base_version.minor() + 1, 0)
-                    }
-                    Change::Patch => StableVersion::new(
-                        base_version.major(),
-                        base_version.minor(),
-                        base_version.patch() + 1,
-                    ),
-                    Change::None => {
-                        if self.configuration.prerelease().is_active() {
-                            StableVersion::new(
-                                base_version.major(),
-                                base_version.minor(),
-                                base_version.patch(),
-                            )
-                        } else {
-                            return Err(Box::new(DescribeNoRelevantChangesError {}));
-                        }
-                    }
-                }
-            };
+            let stable_version = self.next_stable(&base_version)?;
             let prerelease = if self.configuration.prerelease().is_active() {
                 Some(self.update_prerelease(&stable_version)?)
             } else {
@@ -94,6 +65,7 @@ impl<'a> CalculateNewVersionUseCase<'a> {
         }
     }
 
+    #[inline]
     fn greatest_change_from(&self, version: &Option<SemanticVersion>) -> Result<Change, AnyError> {
         Ok(self
             .commit_summary_repository
@@ -103,15 +75,17 @@ impl<'a> CalculateNewVersionUseCase<'a> {
             .unwrap_or(Change::None))
     }
 
+    #[inline]
     fn commit_to_change(&self, commit: &CommitSummary) -> Change {
         match commit {
             CommitSummary::FreeForm(_) => Change::None,
             CommitSummary::Conventional(c) => {
-                if self.configuration.triggers().major().accept(
-                    c.typ(),
-                    c.scope(),
-                    c.breaking(),
-                ) {
+                if self
+                    .configuration
+                    .triggers()
+                    .major()
+                    .accept(c.typ(), c.scope(), c.breaking())
+                {
                     Change::Major
                 } else if self.configuration.triggers().minor().accept(
                     c.typ(),
@@ -132,6 +106,44 @@ impl<'a> CalculateNewVersionUseCase<'a> {
         }
     }
 
+    #[inline]
+    fn next_stable(
+        &self,
+        base_version: &Option<SemanticVersion>,
+    ) -> Result<StableVersion, AnyError> {
+        Ok(if base_version.is_none() {
+            StableVersion::first_stable()
+        } else {
+            let greatest_change = self.greatest_change_from(&base_version)?;
+            let base_version = base_version
+                .as_ref()
+                .expect("base version must be present in this branch");
+            match greatest_change {
+                Change::Major => StableVersion::new(base_version.major() + 1, 0, 0),
+                Change::Minor => {
+                    StableVersion::new(base_version.major(), base_version.minor() + 1, 0)
+                }
+                Change::Patch => StableVersion::new(
+                    base_version.major(),
+                    base_version.minor(),
+                    base_version.patch() + 1,
+                ),
+                Change::None => {
+                    if self.configuration.prerelease().is_active() {
+                        StableVersion::new(
+                            base_version.major(),
+                            base_version.minor(),
+                            base_version.patch(),
+                        )
+                    } else {
+                        return Err(Box::new(DescribeNoRelevantChangesError {}));
+                    }
+                }
+            }
+        })
+    }
+
+    #[inline]
     fn update_prerelease(&self, next_stable: &StableVersion) -> Result<String, AnyError> {
         let last_version = self.version_repository.last_version()?;
         let is_stable_updated = match &last_version {
@@ -149,10 +161,7 @@ impl<'a> CalculateNewVersionUseCase<'a> {
         {
             Err(Box::new(DescribeNoRelevantChangesError::new()))
         } else {
-            let next_prerelease_number = if self
-                .configuration
-                .prerelease()
-                .pattern_changed()
+            let next_prerelease_number = if self.configuration.prerelease().pattern_changed()
                 || is_stable_updated
             {
                 // Reset number
@@ -160,9 +169,7 @@ impl<'a> CalculateNewVersionUseCase<'a> {
             } else {
                 let last_version_prerelease = last_version.as_ref().expect("stable is not updated, so last version is bound to exist").prerelease().as_ref().expect("prerelease is present, else this function would have returned an error already");
                 let old_prerelease_number =
-                    self.configuration.prerelease().old_pattern()(
-                        &last_version_prerelease,
-                    );
+                    self.configuration.prerelease().old_pattern()(&last_version_prerelease);
                 old_prerelease_number + 1
             };
             Ok(self.configuration.prerelease().pattern()(
@@ -171,6 +178,7 @@ impl<'a> CalculateNewVersionUseCase<'a> {
         }
     }
 
+    #[inline]
     fn generate_metadata(&self) -> Result<Option<String>, AnyError> {
         Ok(self
             .configuration
