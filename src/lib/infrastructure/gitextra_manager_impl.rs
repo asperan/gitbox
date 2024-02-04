@@ -8,7 +8,7 @@ use std::{
 use crate::domain::constant::DEFAULT_COMMIT_TYPES;
 use crate::{
     application::{
-        manager::gitextra_write_manager::GitExtraEgressManager,
+        manager::gitextra_egress_manager::GitExtraEgressManager,
         retriever::gitinfo_ingress_manager::GitInfoIngressManager,
     },
     usecases::type_aliases::AnyError,
