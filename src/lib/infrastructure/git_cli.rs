@@ -9,7 +9,7 @@ use crate::{
         retriever::{
             commit_metadata_ingress_manager::CommitMetadataIngressManager,
             commit_retriever::CommitRetriever, gitinfo_ingress_manager::GitInfoIngressManager,
-            version_retriever::VersionIngressManager,
+            version_ingress_manager::VersionIngressManager,
         },
     },
     domain::semantic_version::SemanticVersion,

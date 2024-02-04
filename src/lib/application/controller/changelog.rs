@@ -8,7 +8,7 @@ use crate::{
             commit_summary_repository_impl::CommitSummaryRepositoryImpl,
             version_repository_impl::VersionRepositoryImpl,
         },
-        retriever::{commit_retriever::CommitRetriever, version_retriever::VersionIngressManager},
+        retriever::{commit_retriever::CommitRetriever, version_ingress_manager::VersionIngressManager},
     },
     domain::trigger::Trigger,
     usecases::{
@@ -97,7 +97,7 @@ mod tests {
             controller::exit_code::ControllerExitCode,
             manager::output_manager::OutputManager,
             options::changelog::ChangelogOptions,
-            retriever::{commit_retriever::CommitRetriever, version_retriever::VersionIngressManager},
+            retriever::{commit_retriever::CommitRetriever, version_ingress_manager::VersionIngressManager},
         },
         domain::semantic_version::SemanticVersion,
         usecases::type_aliases::AnyError,
