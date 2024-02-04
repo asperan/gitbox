@@ -175,7 +175,7 @@ impl<'a> CalculateNewVersionUseCase<'a> {
         Ok(self
             .configuration
             .metadata()
-            .metadata()
+            .specs()
             .iter()
             .map(|it| self.commit_metadata_repository.get_metadata(it))
             .collect::<Result<Vec<String>, AnyError>>()?

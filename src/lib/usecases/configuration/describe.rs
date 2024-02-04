@@ -69,16 +69,16 @@ impl<'a> DescribePrereleaseConfiguration<'a> {
 }
 
 pub struct DescribeMetadataConfiguration {
-    metadata: Vec<MetadataSpec>,
+    specs: Vec<MetadataSpec>,
 }
 
 impl DescribeMetadataConfiguration {
-    pub fn new(metadata: Vec<MetadataSpec>) -> DescribeMetadataConfiguration {
-        DescribeMetadataConfiguration { metadata }
+    pub fn new(specs: Vec<MetadataSpec>) -> DescribeMetadataConfiguration {
+        DescribeMetadataConfiguration { specs }
     }
 
-    pub fn metadata(&self) -> &Vec<MetadataSpec> {
-        &self.metadata
+    pub fn specs(&self) -> &Vec<MetadataSpec> {
+        &self.specs
     }
 }
 
