@@ -2,7 +2,7 @@ use std::{rc::Rc, str::FromStr};
 
 use crate::{
     application::{
-        manager::output_manager::OutputManager,
+        manager::output_manager::MessageEgressManager,
         options::changelog::{ChangelogOptions, FORMAT_PLACEHOLDER},
         repository_impl::{
             bounded_commit_summary_ingress_repository_impl::BoundedCommitSummaryIngressRepositoryImpl,
@@ -26,7 +26,7 @@ pub struct ChangelogController {
     options: ChangelogOptions,
     commit_retriever: Rc<dyn BoundedCommitSummaryIngressManager>,
     version_retriever: Rc<dyn VersionIngressManager>,
-    output_manager: Rc<dyn OutputManager>,
+    output_manager: Rc<dyn MessageEgressManager>,
 }
 
 impl ChangelogController {
@@ -34,7 +34,7 @@ impl ChangelogController {
         options: ChangelogOptions,
         commit_retriever: Rc<dyn BoundedCommitSummaryIngressManager>,
         version_retriever: Rc<dyn VersionIngressManager>,
-        output_manager: Rc<dyn OutputManager>,
+        output_manager: Rc<dyn MessageEgressManager>,
     ) -> ChangelogController {
         ChangelogController {
             options,
@@ -98,7 +98,7 @@ mod tests {
     use crate::{
         application::{
             controller::exit_code::ControllerExitCode,
-            manager::output_manager::OutputManager,
+            manager::output_manager::MessageEgressManager,
             options::changelog::ChangelogOptions,
             retriever::{
                 bounded_commit_summary_ingress_manager::BoundedCommitSummaryIngressManager,
@@ -150,7 +150,7 @@ mod tests {
     }
 
     struct MockOutputManager {}
-    impl OutputManager for MockOutputManager {
+    impl MessageEgressManager for MockOutputManager {
         fn output(&self, _message: &str) {}
 
         fn error(&self, _error: &str) {}

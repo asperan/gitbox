@@ -1,4 +1,4 @@
-use crate::application::manager::output_manager::OutputManager;
+use crate::application::manager::output_manager::MessageEgressManager;
 
 pub struct OutputManagerImpl {}
 
@@ -8,7 +8,7 @@ impl OutputManagerImpl {
     }
 }
 
-impl OutputManager for OutputManagerImpl {
+impl MessageEgressManager for OutputManagerImpl {
     fn output(&self, message: &str) {
         println!("{}", message);
     }

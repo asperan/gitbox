@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use crate::{
     application::{
-        manager::{conventional_commit_egress_manager::ConventionalCommitEgressManager, output_manager::OutputManager},
+        manager::{conventional_commit_egress_manager::ConventionalCommitEgressManager, output_manager::MessageEgressManager},
         options::commit::CommitOptions,
         repository_impl::commit_repository_impl::CommitRepositoryImpl,
     },
@@ -17,14 +17,14 @@ use super::exit_code::ControllerExitCode;
 pub struct CommitController {
     options: CommitOptions,
     commit_manager: Rc<dyn ConventionalCommitEgressManager>,
-    output_manager: Rc<dyn OutputManager>,
+    output_manager: Rc<dyn MessageEgressManager>,
 }
 
 impl CommitController {
     pub fn new(
         options: CommitOptions,
         commit_manager: Rc<dyn ConventionalCommitEgressManager>,
-        output_manager: Rc<dyn OutputManager>,
+        output_manager: Rc<dyn MessageEgressManager>,
     ) -> CommitController {
         CommitController {
             options,
@@ -74,7 +74,7 @@ mod tests {
     use crate::{
         application::{
             controller::{commit::CommitController, exit_code::ControllerExitCode},
-            manager::{conventional_commit_egress_manager::ConventionalCommitEgressManager, output_manager::OutputManager},
+            manager::{conventional_commit_egress_manager::ConventionalCommitEgressManager, output_manager::MessageEgressManager},
             options::commit::CommitOptions,
         },
         usecases::type_aliases::AnyError,
@@ -114,7 +114,7 @@ mod tests {
 
     struct MockOutputManager {}
 
-    impl OutputManager for MockOutputManager {
+    impl MessageEgressManager for MockOutputManager {
         fn error(&self, _error: &str) {}
         fn output(&self, _message: &str) {}
     }

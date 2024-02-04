@@ -4,7 +4,7 @@ use regex::Regex;
 
 use crate::{
     application::{
-        manager::{output_manager::OutputManager, tag_write_manager::TagWriteManager},
+        manager::{output_manager::MessageEgressManager, tag_write_manager::TagWriteManager},
         options::describe::DescribeOptions,
         repository_impl::{
             commit_metadata_ingress_repository_impl::CommitMetadataIngressRepositoryImpl,
@@ -42,7 +42,7 @@ pub struct DescribeController {
     commit_metadata_manager: Rc<dyn CommitMetadataIngressManager>,
     version_manager: Rc<dyn VersionIngressManager>,
     tag_write_manager: Rc<dyn TagWriteManager>,
-    output_manager: Rc<dyn OutputManager>,
+    output_manager: Rc<dyn MessageEgressManager>,
 }
 
 impl DescribeController {
@@ -52,7 +52,7 @@ impl DescribeController {
         commit_metadata_manager: Rc<dyn CommitMetadataIngressManager>,
         version_manager: Rc<dyn VersionIngressManager>,
         tag_write_manager: Rc<dyn TagWriteManager>,
-        output_manager: Rc<dyn OutputManager>,
+        output_manager: Rc<dyn MessageEgressManager>,
     ) -> DescribeController {
         DescribeController {
             options,

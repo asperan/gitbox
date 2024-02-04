@@ -5,7 +5,7 @@ use clap::{builder::NonEmptyStringValueParser, Args, Subcommand as ClapSubcomman
 use crate::{
     application::{
         controller::{commit::CommitController, exit_code::ControllerExitCode},
-        manager::output_manager::OutputManager,
+        manager::output_manager::MessageEgressManager,
         options::commit::CommitOptions,
     },
     infrastructure::{
