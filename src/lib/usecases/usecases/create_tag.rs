@@ -85,7 +85,8 @@ mod tests {
             SemanticVersion::new(1, 0, 0, None, None),
             Some("test".to_string()),
             true,
-        ).expect("Hand made configuration should be correct");
+        )
+        .expect("Hand made configuration should be correct");
         let tag_write_repository = Rc::new(MockTagWriteRepository::new());
         let usecase = CreateTagUseCase::new(tag_configuration, tag_write_repository.clone());
         let _result = usecase.execute().expect("Mock does not return an error");
