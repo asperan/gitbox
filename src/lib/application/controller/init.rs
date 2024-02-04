@@ -3,7 +3,7 @@ use std::rc::Rc;
 use crate::{
     application::{
         manager::{
-            conventional_commit_egress_manager::ConventionalCommitEgressManager, init_manager::InitManager, output_manager::OutputManager,
+            conventional_commit_egress_manager::ConventionalCommitEgressManager, init_manager::InitEgressManager, output_manager::OutputManager,
         },
         options::init::InitOptions,
         repository_impl::commit_repository_impl::CommitRepositoryImpl,
@@ -18,7 +18,7 @@ use super::exit_code::ControllerExitCode;
 
 pub struct InitController {
     options: InitOptions,
-    init_manager: Rc<dyn InitManager>,
+    init_manager: Rc<dyn InitEgressManager>,
     commit_manager: Rc<dyn ConventionalCommitEgressManager>,
     output_manager: Rc<dyn OutputManager>,
 }
@@ -26,7 +26,7 @@ pub struct InitController {
 impl InitController {
     pub fn new(
         options: InitOptions,
-        init_manager: Rc<dyn InitManager>,
+        init_manager: Rc<dyn InitEgressManager>,
         commit_manager: Rc<dyn ConventionalCommitEgressManager>,
         output_manager: Rc<dyn OutputManager>,
     ) -> InitController {
@@ -74,7 +74,7 @@ mod tests {
         application::{
             controller::{exit_code::ControllerExitCode, init::InitController},
             manager::{
-                conventional_commit_egress_manager::ConventionalCommitEgressManager, init_manager::InitManager,
+                conventional_commit_egress_manager::ConventionalCommitEgressManager, init_manager::InitEgressManager,
                 output_manager::OutputManager,
             },
             options::init::InitOptions,
@@ -97,7 +97,7 @@ mod tests {
         fail: bool,
     }
 
-    impl InitManager for MockInitManager {
+    impl InitEgressManager for MockInitManager {
         fn init_repository(&self) -> Result<(), AnyError> {
             if self.fail {
                 Err(Box::new(MockError {}))

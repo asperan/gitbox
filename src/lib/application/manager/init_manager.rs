@@ -1,5 +1,5 @@
 use crate::usecases::type_aliases::AnyError;
 
-pub trait InitManager {
+pub trait InitEgressManager {
     fn init_repository(&self) -> Result<(), AnyError>;
 }
