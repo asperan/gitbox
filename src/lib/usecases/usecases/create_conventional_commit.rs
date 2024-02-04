@@ -4,7 +4,8 @@ use crate::{
     domain::conventional_commit::ConventionalCommit,
     usecases::{
         configuration::commit::CommitConfiguration,
-        repository::conventional_commit_egress_repository::ConventionalCommitEgressRepository, type_aliases::AnyError,
+        repository::conventional_commit_egress_repository::ConventionalCommitEgressRepository,
+        type_aliases::AnyError,
     },
 };
 
