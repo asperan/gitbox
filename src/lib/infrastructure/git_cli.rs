@@ -4,7 +4,7 @@ use crate::{
     application::{
         manager::{
             conventional_commit_egress_manager::ConventionalCommitEgressManager, init_egress_manager::InitEgressManager,
-            tag_write_manager::TagWriteManager,
+            tag_write_manager::TagEgressManager,
         },
         retriever::{
             commit_metadata_ingress_manager::CommitMetadataIngressManager,
@@ -142,7 +142,7 @@ impl InitEgressManager for GitCli {
     }
 }
 
-impl TagWriteManager for GitCli {
+impl TagEgressManager for GitCli {
     fn create_tag(
         &self,
         label: &str,
