@@ -8,7 +8,7 @@ use crate::{
         },
         retriever::{
             commit_metadata_ingress_manager::CommitMetadataIngressManager,
-            commit_retriever::CommitRetriever, gitinfo_retriever::GitInfoIngressManager,
+            commit_retriever::CommitRetriever, gitinfo_ingress_manager::GitInfoIngressManager,
             version_retriever::VersionRetriever,
         },
     },
