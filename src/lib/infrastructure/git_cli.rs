@@ -7,7 +7,7 @@ use crate::{
             tag_write_manager::TagWriteManager,
         },
         retriever::{
-            commit_metadata_retriever::CommitMetadataIngressManager,
+            commit_metadata_ingress_manager::CommitMetadataIngressManager,
             commit_retriever::CommitRetriever, gitinfo_retriever::GitInfoRetriever,
             version_retriever::VersionRetriever,
         },

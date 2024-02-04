@@ -13,7 +13,7 @@ use crate::{
             version_repository_impl::VersionRepositoryImpl,
         },
         retriever::{
-            commit_metadata_retriever::CommitMetadataIngressManager,
+            commit_metadata_ingress_manager::CommitMetadataIngressManager,
             commit_retriever::CommitRetriever, version_retriever::VersionRetriever,
         },
     },
