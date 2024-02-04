@@ -9,7 +9,7 @@ use crate::domain::constant::DEFAULT_COMMIT_TYPES;
 use crate::{
     application::{
         manager::gitextra_write_manager::GitExtraWriteManager,
-        retriever::gitinfo_retriever::GitInfoRetriever,
+        retriever::gitinfo_retriever::GitInfoIngressManager,
     },
     usecases::type_aliases::AnyError,
 };
@@ -23,11 +23,11 @@ const TYPES_FILE_PATH: &str = "types.txt";
 const SCOPES_FILE_PATH: &str = "scopes.txt";
 
 pub struct GitExtraManagerImpl {
-    gitinfo_manager: Rc<dyn GitInfoRetriever>,
+    gitinfo_manager: Rc<dyn GitInfoIngressManager>,
 }
 
 impl GitExtraManagerImpl {
-    pub fn new(gitinfo_manager: Rc<dyn GitInfoRetriever>) -> GitExtraManagerImpl {
+    pub fn new(gitinfo_manager: Rc<dyn GitInfoIngressManager>) -> GitExtraManagerImpl {
         GitExtraManagerImpl { gitinfo_manager }
     }
 

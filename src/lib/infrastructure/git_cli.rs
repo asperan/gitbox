@@ -8,7 +8,7 @@ use crate::{
         },
         retriever::{
             commit_metadata_ingress_manager::CommitMetadataIngressManager,
-            commit_retriever::CommitRetriever, gitinfo_retriever::GitInfoRetriever,
+            commit_retriever::CommitRetriever, gitinfo_retriever::GitInfoIngressManager,
             version_retriever::VersionRetriever,
         },
     },
@@ -114,7 +114,7 @@ impl VersionRetriever for GitCli {
     }
 }
 
-impl GitInfoRetriever for GitCli {
+impl GitInfoIngressManager for GitCli {
     fn git_dir(&self) -> Result<String, AnyError> {
         self.run_git_command(vec!["rev-parse", "--absolute-git-dir"].into_iter())
     }
