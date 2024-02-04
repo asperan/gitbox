@@ -3,7 +3,7 @@ use std::{process::Command, str::FromStr};
 use crate::{
     application::{
         manager::{
-            commit_manager::ConventionalCommitEgressManager, init_manager::InitManager,
+            conventional_commit_egress_manager::ConventionalCommitEgressManager, init_manager::InitManager,
             tag_write_manager::TagWriteManager,
         },
         retriever::{
