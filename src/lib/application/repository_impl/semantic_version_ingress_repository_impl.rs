@@ -43,7 +43,7 @@ mod tests {
 
     use crate::{
         application::{
-            repository_impl::version_repository_impl::SemanticVersionIngressRepositoryImpl,
+            repository_impl::semantic_version_ingress_repository_impl::SemanticVersionIngressRepositoryImpl,
             retriever::version_ingress_manager::VersionIngressManager,
         },
         domain::semantic_version::SemanticVersion,
