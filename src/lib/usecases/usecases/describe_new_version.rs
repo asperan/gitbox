@@ -6,8 +6,8 @@ use crate::{
         configuration::describe::DescribeConfiguration,
         error::describe_no_relevant_changes_error::DescribeNoRelevantChangesError,
         repository::{
-            commit_metadata_ingress_repository::CommitMetadataIngressRepository,
             bounded_commit_summary_ingress_repository::BoundedCommitSummaryIngressRepository,
+            commit_metadata_ingress_repository::CommitMetadataIngressRepository,
             semantic_version_ingress_repository::SemanticVersionIngressRepository,
         },
         type_aliases::AnyError,
@@ -25,7 +25,7 @@ pub struct CalculateNewVersionUseCase<'a> {
 
 impl<'a> UseCase<(SemanticVersion, Option<SemanticVersion>)> for CalculateNewVersionUseCase<'a> {
     fn execute(&self) -> Result<(SemanticVersion, Option<SemanticVersion>), AnyError> {
-        let base_version = if self.configuration.prerelease() {
+        let base_version = if self.configuration.prerelease().prerelease() {
             self.version_repository.last_version()
         } else {
             self.version_repository.last_stable_version()
@@ -49,7 +49,7 @@ impl<'a> UseCase<(SemanticVersion, Option<SemanticVersion>)> for CalculateNewVer
                         base_version.patch() + 1,
                     ),
                     Change::None => {
-                        if self.configuration.prerelease() {
+                        if self.configuration.prerelease().prerelease() {
                             StableVersion::new(
                                 base_version.major(),
                                 base_version.minor(),
@@ -61,7 +61,7 @@ impl<'a> UseCase<(SemanticVersion, Option<SemanticVersion>)> for CalculateNewVer
                     }
                 }
             };
-            let prerelease = if self.configuration.prerelease() {
+            let prerelease = if self.configuration.prerelease().prerelease() {
                 Some(self.update_prerelease(&stable_version)?)
             } else {
                 None
@@ -107,19 +107,19 @@ impl<'a> CalculateNewVersionUseCase<'a> {
         match commit {
             CommitSummary::FreeForm(_) => Change::None,
             CommitSummary::Conventional(c) => {
-                if self
-                    .configuration
-                    .major_trigger()
-                    .accept(c.typ(), c.scope(), c.breaking())
-                {
+                if self.configuration.triggers().major_trigger().accept(
+                    c.typ(),
+                    c.scope(),
+                    c.breaking(),
+                ) {
                     Change::Major
-                } else if self.configuration.minor_trigger().accept(
+                } else if self.configuration.triggers().minor_trigger().accept(
                     c.typ(),
                     c.scope(),
                     c.breaking(),
                 ) {
                     Change::Minor
-                } else if self.configuration.patch_trigger().accept(
+                } else if self.configuration.triggers().patch_trigger().accept(
                     c.typ(),
                     c.scope(),
                     c.breaking(),
@@ -149,7 +149,10 @@ impl<'a> CalculateNewVersionUseCase<'a> {
         {
             Err(Box::new(DescribeNoRelevantChangesError::new()))
         } else {
-            let next_prerelease_number = if self.configuration.prerelease_pattern_changed()
+            let next_prerelease_number = if self
+                .configuration
+                .prerelease()
+                .prerelease_pattern_changed()
                 || is_stable_updated
             {
                 // Reset number
@@ -157,10 +160,12 @@ impl<'a> CalculateNewVersionUseCase<'a> {
             } else {
                 let last_version_prerelease = last_version.as_ref().expect("stable is not updated, so last version is bound to exist").prerelease().as_ref().expect("prerelease is present, else this function would have returned an error already");
                 let old_prerelease_number =
-                    self.configuration.old_prerelease_pattern()(&last_version_prerelease);
+                    self.configuration.prerelease().old_prerelease_pattern()(
+                        &last_version_prerelease,
+                    );
                 old_prerelease_number + 1
             };
-            Ok(self.configuration.prerelease_pattern()(
+            Ok(self.configuration.prerelease().prerelease_pattern()(
                 next_prerelease_number,
             ))
         }
@@ -169,6 +174,7 @@ impl<'a> CalculateNewVersionUseCase<'a> {
     fn generate_metadata(&self) -> Result<Option<String>, AnyError> {
         Ok(self
             .configuration
+            .metadata()
             .metadata()
             .iter()
             .map(|it| self.commit_metadata_repository.get_metadata(it))
@@ -221,12 +227,15 @@ mod tests {
             },
         },
         usecases::{
-            configuration::describe::DescribeConfiguration,
+            configuration::describe::{
+                DescribeConfiguration, DescribeMetadataConfiguration,
+                DescribePrereleaseConfiguration, DescribeTriggerConfiguration,
+            },
             error::describe_no_relevant_changes_error::DescribeNoRelevantChangesError,
             metadata_spec::MetadataSpec,
             repository::{
-                commit_metadata_ingress_repository::CommitMetadataIngressRepository,
                 bounded_commit_summary_ingress_repository::BoundedCommitSummaryIngressRepository,
+                commit_metadata_ingress_repository::CommitMetadataIngressRepository,
                 semantic_version_ingress_repository::SemanticVersionIngressRepository,
             },
             type_aliases::AnyError,
@@ -237,26 +246,38 @@ mod tests {
         },
     };
 
-    fn default_major_trigger() -> Trigger {
-        Trigger::new(Start::Basic(BasicStatement::Breaking(BreakingNode {})))
+    fn trigger_configuration() -> DescribeTriggerConfiguration {
+        DescribeTriggerConfiguration::new(
+            Trigger::new(Start::Basic(BasicStatement::Breaking(BreakingNode {}))),
+            Trigger::new(Start::Basic(BasicStatement::In(InNode {
+                object: ObjectNode::Type(TypeNode {}),
+                array: ArrayNode {
+                    values: vec!["feat".to_string()],
+                },
+            }))),
+            Trigger::new(Start::Basic(BasicStatement::In(InNode {
+                object: ObjectNode::Type(TypeNode {}),
+                array: ArrayNode {
+                    values: vec!["fix".to_string()],
+                },
+            }))),
+        )
     }
 
-    fn default_minor_trigger() -> Trigger {
-        Trigger::new(Start::Basic(BasicStatement::In(InNode {
-            object: ObjectNode::Type(TypeNode {}),
-            array: ArrayNode {
-                values: vec!["feat".to_string()],
-            },
-        })))
-    }
-
-    fn default_patch_trigger() -> Trigger {
-        Trigger::new(Start::Basic(BasicStatement::In(InNode {
-            object: ObjectNode::Type(TypeNode {}),
-            array: ArrayNode {
-                values: vec!["fix".to_string()],
-            },
-        })))
+    fn basic_configuration<'a>() -> DescribeConfiguration<'a> {
+        let prerelease_configuration = DescribePrereleaseConfiguration::new(
+            false,
+            Box::new(|it| it.to_string()),
+            Box::new(|_it| 0),
+            false,
+        );
+        let metadata_configuration = DescribeMetadataConfiguration::new(vec![]);
+        let trigger_configuration = trigger_configuration();
+        DescribeConfiguration::new(
+            prerelease_configuration,
+            metadata_configuration,
+            trigger_configuration,
+        )
     }
 
     struct MockCommitSummaryRepository {
@@ -322,16 +343,7 @@ mod tests {
     // test ancillary methods
     #[test]
     fn greatest_change_from_list() {
-        let configuration = DescribeConfiguration::new(
-            false,
-            Box::new(|it| it.to_string()),
-            Box::new(|_it| 0),
-            false,
-            vec![],
-            default_major_trigger(),
-            default_minor_trigger(),
-            default_patch_trigger(),
-        );
+        let configuration = basic_configuration();
         let commit_summary_repository = Rc::new(MockCommitSummaryRepository::new(
             vec![
                 CommitSummary::Conventional(ConventionalCommitSummary::new(
@@ -376,16 +388,7 @@ mod tests {
 
     #[test]
     fn greatest_change_from_empty_list() {
-        let configuration = DescribeConfiguration::new(
-            false,
-            Box::new(|it| it.to_string()),
-            Box::new(|_it| 0),
-            false,
-            vec![],
-            default_major_trigger(),
-            default_minor_trigger(),
-            default_patch_trigger(),
-        );
+        let configuration = basic_configuration();
         let commit_summary_repository = Rc::new(MockCommitSummaryRepository::new(vec![], vec![]));
         let commit_metadata_repository = Rc::new(MockCommitMetadataRepository {});
         let version_repository = Rc::new(MockVersionRepository {
@@ -408,16 +411,7 @@ mod tests {
 
     #[test]
     fn commit_to_change_freeform() {
-        let configuration = DescribeConfiguration::new(
-            false,
-            Box::new(|it| it.to_string()),
-            Box::new(|_it| 0),
-            false,
-            vec![],
-            default_major_trigger(),
-            default_minor_trigger(),
-            default_patch_trigger(),
-        );
+        let configuration = basic_configuration();
         let commit_summary_repository = Rc::new(MockCommitSummaryRepository::new(vec![], vec![]));
         let commit_metadata_repository = Rc::new(MockCommitMetadataRepository {});
         let version_repository = Rc::new(MockVersionRepository {
@@ -437,16 +431,7 @@ mod tests {
 
     #[test]
     fn commit_to_change_major() {
-        let configuration = DescribeConfiguration::new(
-            false,
-            Box::new(|it| it.to_string()),
-            Box::new(|_it| 0),
-            false,
-            vec![],
-            default_major_trigger(),
-            default_minor_trigger(),
-            default_patch_trigger(),
-        );
+        let configuration = basic_configuration();
         let commit_summary_repository = Rc::new(MockCommitSummaryRepository::new(vec![], vec![]));
         let commit_metadata_repository = Rc::new(MockCommitMetadataRepository {});
         let version_repository = Rc::new(MockVersionRepository {
@@ -471,16 +456,7 @@ mod tests {
 
     #[test]
     fn commit_to_change_minor() {
-        let configuration = DescribeConfiguration::new(
-            false,
-            Box::new(|it| it.to_string()),
-            Box::new(|_it| 0),
-            false,
-            vec![],
-            default_major_trigger(),
-            default_minor_trigger(),
-            default_patch_trigger(),
-        );
+        let configuration = basic_configuration();
         let commit_summary_repository = Rc::new(MockCommitSummaryRepository::new(vec![], vec![]));
         let commit_metadata_repository = Rc::new(MockCommitMetadataRepository {});
         let version_repository = Rc::new(MockVersionRepository {
@@ -505,16 +481,7 @@ mod tests {
 
     #[test]
     fn commit_to_change_patch() {
-        let configuration = DescribeConfiguration::new(
-            false,
-            Box::new(|it| it.to_string()),
-            Box::new(|_it| 0),
-            false,
-            vec![],
-            default_major_trigger(),
-            default_minor_trigger(),
-            default_patch_trigger(),
-        );
+        let configuration = basic_configuration();
         let commit_summary_repository = Rc::new(MockCommitSummaryRepository::new(vec![], vec![]));
         let commit_metadata_repository = Rc::new(MockCommitMetadataRepository {});
         let version_repository = Rc::new(MockVersionRepository {
@@ -539,16 +506,7 @@ mod tests {
 
     #[test]
     fn commit_to_change_none() {
-        let configuration = DescribeConfiguration::new(
-            false,
-            Box::new(|it| it.to_string()),
-            Box::new(|_it| 0),
-            false,
-            vec![],
-            default_major_trigger(),
-            default_minor_trigger(),
-            default_patch_trigger(),
-        );
+        let configuration = basic_configuration();
         let commit_summary_repository = Rc::new(MockCommitSummaryRepository::new(vec![], vec![]));
         let commit_metadata_repository = Rc::new(MockCommitMetadataRepository {});
         let version_repository = Rc::new(MockVersionRepository {
@@ -574,16 +532,7 @@ mod tests {
     // test stable version generation
     #[test]
     fn first_stable_version_is_first_release() {
-        let configuration = DescribeConfiguration::new(
-            false,
-            Box::new(|it| it.to_string()),
-            Box::new(|_it| 0),
-            false,
-            vec![],
-            default_major_trigger(),
-            default_minor_trigger(),
-            default_patch_trigger(),
-        );
+        let configuration = basic_configuration();
         let commit_summary_repository = Rc::new(MockCommitSummaryRepository::new(vec![], vec![]));
         let commit_metadata_repository = Rc::new(MockCommitMetadataRepository {});
         let version_repository = Rc::new(MockVersionRepository {
@@ -604,15 +553,18 @@ mod tests {
 
     #[test]
     fn first_unstable_version_is_first_release_and_first_prerelease() {
-        let configuration = DescribeConfiguration::new(
+        let prerelease_configuration = DescribePrereleaseConfiguration::new(
             true,
             Box::new(|it| format!("dev{}", it)),
             Box::new(|_it| 0),
             false,
-            vec![],
-            default_major_trigger(),
-            default_minor_trigger(),
-            default_patch_trigger(),
+        );
+        let metadata_configuration = DescribeMetadataConfiguration::new(vec![]);
+        let trigger_configuration = trigger_configuration();
+        let configuration = DescribeConfiguration::new(
+            prerelease_configuration,
+            metadata_configuration,
+            trigger_configuration,
         );
         let commit_summary_repository = Rc::new(MockCommitSummaryRepository::new(vec![], vec![]));
         let commit_metadata_repository = Rc::new(MockCommitMetadataRepository {});
@@ -637,7 +589,7 @@ mod tests {
 
     #[test]
     fn patch_trigger_proc_patch_number_increase() {
-        let configuration = DescribeConfiguration::new(
+        let prerelease_configuration = DescribePrereleaseConfiguration::new(
             false,
             Box::new(|it| format!("dev{}", it)),
             Box::new(|it| {
@@ -647,10 +599,13 @@ mod tests {
                     .expect("the value must be a number")
             }),
             false,
-            vec![],
-            default_major_trigger(),
-            default_minor_trigger(),
-            default_patch_trigger(),
+        );
+        let metadata_configuration = DescribeMetadataConfiguration::new(vec![]);
+        let trigger_configuration = trigger_configuration();
+        let configuration = DescribeConfiguration::new(
+            prerelease_configuration,
+            metadata_configuration,
+            trigger_configuration,
         );
         let commit_summary_repository = Rc::new(MockCommitSummaryRepository::new(
             vec![CommitSummary::Conventional(ConventionalCommitSummary::new(
@@ -680,7 +635,7 @@ mod tests {
 
     #[test]
     fn minor_trigger_proc_minor_number_increase() {
-        let configuration = DescribeConfiguration::new(
+        let prerelease_configuration = DescribePrereleaseConfiguration::new(
             false,
             Box::new(|it| format!("dev{}", it)),
             Box::new(|it| {
@@ -690,10 +645,13 @@ mod tests {
                     .expect("the value must be a number")
             }),
             false,
-            vec![],
-            default_major_trigger(),
-            default_minor_trigger(),
-            default_patch_trigger(),
+        );
+        let metadata_configuration = DescribeMetadataConfiguration::new(vec![]);
+        let trigger_configuration = trigger_configuration();
+        let configuration = DescribeConfiguration::new(
+            prerelease_configuration,
+            metadata_configuration,
+            trigger_configuration,
         );
         let commit_summary_repository = Rc::new(MockCommitSummaryRepository::new(
             vec![CommitSummary::Conventional(ConventionalCommitSummary::new(
@@ -723,7 +681,7 @@ mod tests {
 
     #[test]
     fn major_trigger_proc_major_number_increase() {
-        let configuration = DescribeConfiguration::new(
+        let prerelease_configuration = DescribePrereleaseConfiguration::new(
             false,
             Box::new(|it| format!("dev{}", it)),
             Box::new(|it| {
@@ -733,10 +691,13 @@ mod tests {
                     .expect("the value must be a number")
             }),
             false,
-            vec![],
-            default_major_trigger(),
-            default_minor_trigger(),
-            default_patch_trigger(),
+        );
+        let metadata_configuration = DescribeMetadataConfiguration::new(vec![]);
+        let trigger_configuration = trigger_configuration();
+        let configuration = DescribeConfiguration::new(
+            prerelease_configuration,
+            metadata_configuration,
+            trigger_configuration,
         );
         let commit_summary_repository = Rc::new(MockCommitSummaryRepository::new(
             vec![CommitSummary::Conventional(ConventionalCommitSummary::new(
@@ -766,7 +727,7 @@ mod tests {
 
     #[test]
     fn return_error_with_no_relevant_changes_when_describing_stable() {
-        let configuration = DescribeConfiguration::new(
+        let prerelease_configuration = DescribePrereleaseConfiguration::new(
             false,
             Box::new(|it| format!("dev{}", it)),
             Box::new(|it| {
@@ -776,10 +737,13 @@ mod tests {
                     .expect("the value must be a number")
             }),
             false,
-            vec![],
-            default_major_trigger(),
-            default_minor_trigger(),
-            default_patch_trigger(),
+        );
+        let metadata_configuration = DescribeMetadataConfiguration::new(vec![]);
+        let trigger_configuration = trigger_configuration();
+        let configuration = DescribeConfiguration::new(
+            prerelease_configuration,
+            metadata_configuration,
+            trigger_configuration,
         );
         let commit_summary_repository = Rc::new(MockCommitSummaryRepository::new(
             vec![CommitSummary::Conventional(ConventionalCommitSummary::new(
@@ -810,7 +774,7 @@ mod tests {
     // test prerelease generation
     #[test]
     fn prerelease_number_reset_on_pattern_change() {
-        let configuration = DescribeConfiguration::new(
+        let prerelease_configuration = DescribePrereleaseConfiguration::new(
             true,
             Box::new(|it| format!("dev{}", it)),
             Box::new(|it| {
@@ -820,10 +784,13 @@ mod tests {
                     .expect("the value must be a number")
             }),
             true,
-            vec![],
-            default_major_trigger(),
-            default_minor_trigger(),
-            default_patch_trigger(),
+        );
+        let metadata_configuration = DescribeMetadataConfiguration::new(vec![]);
+        let trigger_configuration = trigger_configuration();
+        let configuration = DescribeConfiguration::new(
+            prerelease_configuration,
+            metadata_configuration,
+            trigger_configuration,
         );
         let commit_summary_repository = Rc::new(MockCommitSummaryRepository::new(
             vec![CommitSummary::Conventional(ConventionalCommitSummary::new(
@@ -860,7 +827,7 @@ mod tests {
 
     #[test]
     fn prerelease_number_reset_on_stable_update() {
-        let configuration = DescribeConfiguration::new(
+        let prerelease_configuration = DescribePrereleaseConfiguration::new(
             true,
             Box::new(|it| format!("dev{}", it)),
             Box::new(|it| {
@@ -870,10 +837,13 @@ mod tests {
                     .expect("the value must be a number")
             }),
             false,
-            vec![],
-            default_major_trigger(),
-            default_minor_trigger(),
-            default_patch_trigger(),
+        );
+        let metadata_configuration = DescribeMetadataConfiguration::new(vec![]);
+        let trigger_configuration = trigger_configuration();
+        let configuration = DescribeConfiguration::new(
+            prerelease_configuration,
+            metadata_configuration,
+            trigger_configuration,
         );
         let commit_summary_repository = Rc::new(MockCommitSummaryRepository::new(
             vec![CommitSummary::Conventional(ConventionalCommitSummary::new(
@@ -915,7 +885,7 @@ mod tests {
 
     #[test]
     fn describe_prerelease_error_without_relevant_changes_from_stable_version() {
-        let configuration = DescribeConfiguration::new(
+        let prerelease_configuration = DescribePrereleaseConfiguration::new(
             true,
             Box::new(|it| format!("dev{}", it)),
             Box::new(|it| {
@@ -925,10 +895,13 @@ mod tests {
                     .expect("the value must be a number")
             }),
             false,
-            vec![],
-            default_major_trigger(),
-            default_minor_trigger(),
-            default_patch_trigger(),
+        );
+        let metadata_configuration = DescribeMetadataConfiguration::new(vec![]);
+        let trigger_configuration = trigger_configuration();
+        let configuration = DescribeConfiguration::new(
+            prerelease_configuration,
+            metadata_configuration,
+            trigger_configuration,
         );
         let commit_summary_repository = Rc::new(MockCommitSummaryRepository::new(
             vec![CommitSummary::Conventional(ConventionalCommitSummary::new(
@@ -956,7 +929,7 @@ mod tests {
 
     #[test]
     fn prerelease_number_increase() {
-        let configuration = DescribeConfiguration::new(
+        let prerelease_configuration = DescribePrereleaseConfiguration::new(
             true,
             Box::new(|it| format!("dev{}", it)),
             Box::new(|it| {
@@ -966,10 +939,13 @@ mod tests {
                     .expect("the value must be a number")
             }),
             false,
-            vec![],
-            default_major_trigger(),
-            default_minor_trigger(),
-            default_patch_trigger(),
+        );
+        let metadata_configuration = DescribeMetadataConfiguration::new(vec![]);
+        let trigger_configuration = trigger_configuration();
+        let configuration = DescribeConfiguration::new(
+            prerelease_configuration,
+            metadata_configuration,
+            trigger_configuration,
         );
         let commit_summary_repository = Rc::new(MockCommitSummaryRepository::new(
             vec![CommitSummary::Conventional(ConventionalCommitSummary::new(
@@ -1013,7 +989,7 @@ mod tests {
 
     #[test]
     fn empty_metadata() {
-        let configuration = DescribeConfiguration::new(
+        let prerelease_configuration = DescribePrereleaseConfiguration::new(
             false,
             Box::new(|it| format!("dev{}", it)),
             Box::new(|it| {
@@ -1023,10 +999,13 @@ mod tests {
                     .expect("the value must be a number")
             }),
             false,
-            vec![],
-            default_major_trigger(),
-            default_minor_trigger(),
-            default_patch_trigger(),
+        );
+        let metadata_configuration = DescribeMetadataConfiguration::new(vec![]);
+        let trigger_configuration = trigger_configuration();
+        let configuration = DescribeConfiguration::new(
+            prerelease_configuration,
+            metadata_configuration,
+            trigger_configuration,
         );
         let commit_summary_repository = Rc::new(MockCommitSummaryRepository::new(vec![], vec![]));
         let commit_metadata_repository = Rc::new(MockCommitMetadataRepository {});
@@ -1048,7 +1027,7 @@ mod tests {
 
     #[test]
     fn single_metadata() {
-        let configuration = DescribeConfiguration::new(
+        let prerelease_configuration = DescribePrereleaseConfiguration::new(
             false,
             Box::new(|it| format!("dev{}", it)),
             Box::new(|it| {
@@ -1058,10 +1037,13 @@ mod tests {
                     .expect("the value must be a number")
             }),
             false,
-            vec![MetadataSpec::Sha],
-            default_major_trigger(),
-            default_minor_trigger(),
-            default_patch_trigger(),
+        );
+        let metadata_configuration = DescribeMetadataConfiguration::new(vec![MetadataSpec::Sha]);
+        let trigger_configuration = trigger_configuration();
+        let configuration = DescribeConfiguration::new(
+            prerelease_configuration,
+            metadata_configuration,
+            trigger_configuration,
         );
         let commit_summary_repository = Rc::new(MockCommitSummaryRepository::new(vec![], vec![]));
         let commit_metadata_repository = Rc::new(MockCommitMetadataRepository {});
@@ -1083,7 +1065,7 @@ mod tests {
 
     #[test]
     fn multiple_metadata() {
-        let configuration = DescribeConfiguration::new(
+        let prerelease_configuration = DescribePrereleaseConfiguration::new(
             false,
             Box::new(|it| format!("dev{}", it)),
             Box::new(|it| {
@@ -1093,10 +1075,14 @@ mod tests {
                     .expect("the value must be a number")
             }),
             false,
-            vec![MetadataSpec::Date, MetadataSpec::Sha],
-            default_major_trigger(),
-            default_minor_trigger(),
-            default_patch_trigger(),
+        );
+        let metadata_configuration =
+            DescribeMetadataConfiguration::new(vec![MetadataSpec::Date, MetadataSpec::Sha]);
+        let trigger_configuration = trigger_configuration();
+        let configuration = DescribeConfiguration::new(
+            prerelease_configuration,
+            metadata_configuration,
+            trigger_configuration,
         );
         let commit_summary_repository = Rc::new(MockCommitSummaryRepository::new(vec![], vec![]));
         let commit_metadata_repository = Rc::new(MockCommitMetadataRepository {});

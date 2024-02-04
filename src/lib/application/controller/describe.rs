@@ -17,7 +17,13 @@ use crate::{
     },
     domain::trigger::Trigger,
     usecases::{
-        configuration::{describe::DescribeConfiguration, tag::TagConfiguration},
+        configuration::{
+            describe::{
+                DescribeConfiguration, DescribeMetadataConfiguration,
+                DescribePrereleaseConfiguration, DescribeTriggerConfiguration,
+            },
+            tag::TagConfiguration,
+        },
         type_aliases::AnyError,
         usecases::{
             create_tag::CreateTagUseCase, describe_new_version::CalculateNewVersionUseCase,
@@ -111,7 +117,7 @@ impl DescribeController {
     fn generate_describe_configuration<'a>(
         &'a self,
     ) -> Result<DescribeConfiguration<'a>, AnyError> {
-        Ok(DescribeConfiguration::new(
+        let prerelease_configuration = DescribePrereleaseConfiguration::new(
             self.options.prerelease(),
             Box::new(|it| {
                 self.options
@@ -136,7 +142,10 @@ impl DescribeController {
                     .unwrap()
             }),
             self.options.prerelease_pattern() != self.options.old_prerelease_pattern(),
-            self.options.metadata().to_vec(),
+        );
+        let metadata_configuration =
+            DescribeMetadataConfiguration::new(self.options.metadata().to_vec());
+        let trigger_configuration = DescribeTriggerConfiguration::new(
             Trigger::from_str(
                 &self
                     .options
@@ -158,6 +167,11 @@ impl DescribeController {
                     .clone()
                     .unwrap_or_else(|| String::from(Self::DEFAULT_PATCH_TRIGGER_STR)),
             )?,
+        );
+        Ok(DescribeConfiguration::new(
+            prerelease_configuration,
+            metadata_configuration,
+            trigger_configuration,
         ))
     }
 }
