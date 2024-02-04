@@ -6,7 +6,7 @@ use crate::{
         options::changelog::{ChangelogOptions, FORMAT_PLACEHOLDER},
         repository_impl::{
             bounded_commit_summary_ingress_repository_impl::BoundedCommitSummaryIngressRepositoryImpl,
-            version_repository_impl::VersionRepositoryImpl,
+            version_repository_impl::SemanticVersionIngressRepositoryImpl,
         },
         retriever::{
             bounded_commit_summary_ingress_manager::BoundedCommitSummaryIngressManager,
@@ -76,7 +76,7 @@ impl ChangelogController {
             Rc::new(BoundedCommitSummaryIngressRepositoryImpl::new(
                 self.commit_retriever.clone(),
             )),
-            Rc::new(VersionRepositoryImpl::new(self.version_retriever.clone())),
+            Rc::new(SemanticVersionIngressRepositoryImpl::new(self.version_retriever.clone())),
         );
         match usecase.execute() {
             Ok(c) => {

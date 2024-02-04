@@ -10,7 +10,7 @@ use crate::{
             commit_metadata_ingress_repository_impl::CommitMetadataIngressRepositoryImpl,
             bounded_commit_summary_ingress_repository_impl::BoundedCommitSummaryIngressRepositoryImpl,
             tag_egress_repository_impl::TagEgressRepositoryImpl,
-            version_repository_impl::VersionRepositoryImpl,
+            version_repository_impl::SemanticVersionIngressRepositoryImpl,
         },
         retriever::{
             commit_metadata_ingress_manager::CommitMetadataIngressManager,
@@ -82,7 +82,7 @@ impl DescribeController {
         let commit_metadata_repository = Rc::new(CommitMetadataIngressRepositoryImpl::new(
             self.commit_metadata_manager.clone(),
         ));
-        let version_repository = Rc::new(VersionRepositoryImpl::new(self.version_manager.clone()));
+        let version_repository = Rc::new(SemanticVersionIngressRepositoryImpl::new(self.version_manager.clone()));
         let describe_usecase = CalculateNewVersionUseCase::new(
             describe_configuration,
             commit_summary_repository.clone(),
