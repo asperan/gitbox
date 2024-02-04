@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use crate::{
     application::{
-        manager::{gitextra_write_manager::GitExtraWriteManager, output_manager::OutputManager},
+        manager::{gitextra_write_manager::GitExtraEgressManager, output_manager::OutputManager},
         repository_impl::{
             full_commit_summary_history_repository_impl::FullCommitSummaryHistoryRepositoryImpl,
             gitextra_write_repository_impl::GitExtraWriteRepositoryImpl,
@@ -18,14 +18,14 @@ use super::exit_code::ControllerExitCode;
 
 pub struct RefreshController {
     full_commit_summary_history_ingress_manager: Rc<dyn FullCommitSummaryHistoryIngressManager>,
-    gitextra_write_manager: Rc<dyn GitExtraWriteManager>,
+    gitextra_write_manager: Rc<dyn GitExtraEgressManager>,
     output_manager: Rc<dyn OutputManager>,
 }
 
 impl RefreshController {
     pub fn new(
         full_commit_summary_history_ingress_manager: Rc<dyn FullCommitSummaryHistoryIngressManager>,
-        gitextra_write_manager: Rc<dyn GitExtraWriteManager>,
+        gitextra_write_manager: Rc<dyn GitExtraEgressManager>,
         output_manager: Rc<dyn OutputManager>,
     ) -> RefreshController {
         RefreshController {

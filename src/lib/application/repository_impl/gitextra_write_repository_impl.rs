@@ -1,19 +1,19 @@
 use std::rc::Rc;
 
 use crate::{
-    application::manager::gitextra_write_manager::GitExtraWriteManager,
+    application::manager::gitextra_write_manager::GitExtraEgressManager,
     usecases::{
         repository::git_extra_egress_repository::GitExtraEgressRepository, type_aliases::AnyError,
     },
 };
 
 pub struct GitExtraWriteRepositoryImpl {
-    gitextra_write_manager: Rc<dyn GitExtraWriteManager>,
+    gitextra_write_manager: Rc<dyn GitExtraEgressManager>,
 }
 
 impl GitExtraWriteRepositoryImpl {
     pub fn new(
-        gitextra_write_manager: Rc<dyn GitExtraWriteManager>,
+        gitextra_write_manager: Rc<dyn GitExtraEgressManager>,
     ) -> GitExtraWriteRepositoryImpl {
         GitExtraWriteRepositoryImpl {
             gitextra_write_manager,

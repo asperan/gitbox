@@ -8,7 +8,7 @@ use std::{
 use crate::domain::constant::DEFAULT_COMMIT_TYPES;
 use crate::{
     application::{
-        manager::gitextra_write_manager::GitExtraWriteManager,
+        manager::gitextra_write_manager::GitExtraEgressManager,
         retriever::gitinfo_ingress_manager::GitInfoIngressManager,
     },
     usecases::type_aliases::AnyError,
@@ -51,7 +51,7 @@ impl GitExtraManagerImpl {
     }
 }
 
-impl GitExtraWriteManager for GitExtraManagerImpl {
+impl GitExtraEgressManager for GitExtraManagerImpl {
     fn update_types(&self, types: Box<dyn Iterator<Item = String>>) -> Result<(), AnyError> {
         let content = types.fold(String::new(), |acc, e| acc + "\n" + &e);
         let path = Path::new(&self.gitinfo_manager.git_dir()?)
