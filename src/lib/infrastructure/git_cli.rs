@@ -9,7 +9,7 @@ use crate::{
         retriever::{
             commit_metadata_ingress_manager::CommitMetadataIngressManager,
             commit_retriever::CommitRetriever, gitinfo_ingress_manager::GitInfoIngressManager,
-            version_retriever::VersionRetriever,
+            version_retriever::VersionIngressManager,
         },
     },
     domain::semantic_version::SemanticVersion,
@@ -84,7 +84,7 @@ impl CommitRetriever for GitCli {
     }
 }
 
-impl VersionRetriever for GitCli {
+impl VersionIngressManager for GitCli {
     fn last_version(&self) -> Result<Option<String>, AnyError> {
         let output = self.run_git_command(vec!["describe", "--tags", "--abbrev=0"].into_iter());
         match output {

@@ -14,7 +14,7 @@ use crate::{
         },
         retriever::{
             commit_metadata_ingress_manager::CommitMetadataIngressManager,
-            commit_retriever::CommitRetriever, version_retriever::VersionRetriever,
+            commit_retriever::CommitRetriever, version_retriever::VersionIngressManager,
         },
     },
     domain::trigger::Trigger,
@@ -40,7 +40,7 @@ pub struct DescribeController {
     options: DescribeOptions,
     commit_summary_manager: Rc<dyn CommitRetriever>,
     commit_metadata_manager: Rc<dyn CommitMetadataIngressManager>,
-    version_manager: Rc<dyn VersionRetriever>,
+    version_manager: Rc<dyn VersionIngressManager>,
     tag_write_manager: Rc<dyn TagWriteManager>,
     output_manager: Rc<dyn OutputManager>,
 }
@@ -50,7 +50,7 @@ impl DescribeController {
         options: DescribeOptions,
         commit_summary_manager: Rc<dyn CommitRetriever>,
         commit_metadata_manager: Rc<dyn CommitMetadataIngressManager>,
-        version_manager: Rc<dyn VersionRetriever>,
+        version_manager: Rc<dyn VersionIngressManager>,
         tag_write_manager: Rc<dyn TagWriteManager>,
         output_manager: Rc<dyn OutputManager>,
     ) -> DescribeController {

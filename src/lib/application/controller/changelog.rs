@@ -8,7 +8,7 @@ use crate::{
             commit_summary_repository_impl::CommitSummaryRepositoryImpl,
             version_repository_impl::VersionRepositoryImpl,
         },
-        retriever::{commit_retriever::CommitRetriever, version_retriever::VersionRetriever},
+        retriever::{commit_retriever::CommitRetriever, version_retriever::VersionIngressManager},
     },
     domain::trigger::Trigger,
     usecases::{
@@ -22,7 +22,7 @@ use super::exit_code::ControllerExitCode;
 pub struct ChangelogController {
     options: ChangelogOptions,
     commit_retriever: Rc<dyn CommitRetriever>,
-    version_retriever: Rc<dyn VersionRetriever>,
+    version_retriever: Rc<dyn VersionIngressManager>,
     output_manager: Rc<dyn OutputManager>,
 }
 
@@ -30,7 +30,7 @@ impl ChangelogController {
     pub fn new(
         options: ChangelogOptions,
         commit_retriever: Rc<dyn CommitRetriever>,
-        version_retriever: Rc<dyn VersionRetriever>,
+        version_retriever: Rc<dyn VersionIngressManager>,
         output_manager: Rc<dyn OutputManager>,
     ) -> ChangelogController {
         ChangelogController {
@@ -97,7 +97,7 @@ mod tests {
             controller::exit_code::ControllerExitCode,
             manager::output_manager::OutputManager,
             options::changelog::ChangelogOptions,
-            retriever::{commit_retriever::CommitRetriever, version_retriever::VersionRetriever},
+            retriever::{commit_retriever::CommitRetriever, version_retriever::VersionIngressManager},
         },
         domain::semantic_version::SemanticVersion,
         usecases::type_aliases::AnyError,
@@ -137,7 +137,7 @@ mod tests {
     impl Error for MockVersionError {}
 
     struct MockVersionRetriever {}
-    impl VersionRetriever for MockVersionRetriever {
+    impl VersionIngressManager for MockVersionRetriever {
         fn last_version(&self) -> Result<Option<String>, AnyError> {
             Err(Box::new(MockVersionError {}))
         }

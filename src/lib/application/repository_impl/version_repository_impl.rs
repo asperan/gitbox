@@ -1,7 +1,7 @@
 use std::{rc::Rc, str::FromStr};
 
 use crate::{
-    application::retriever::version_retriever::VersionRetriever,
+    application::retriever::version_retriever::VersionIngressManager,
     domain::semantic_version::SemanticVersion,
     usecases::{
         repository::semantic_version_ingress_repository::SemanticVersionIngressRepository,
@@ -10,11 +10,11 @@ use crate::{
 };
 
 pub struct VersionRepositoryImpl {
-    version_retriever: Rc<dyn VersionRetriever>,
+    version_retriever: Rc<dyn VersionIngressManager>,
 }
 
 impl VersionRepositoryImpl {
-    pub fn new(version_retriever: Rc<dyn VersionRetriever>) -> VersionRepositoryImpl {
+    pub fn new(version_retriever: Rc<dyn VersionIngressManager>) -> VersionRepositoryImpl {
         VersionRepositoryImpl { version_retriever }
     }
 }
@@ -44,7 +44,7 @@ mod tests {
     use crate::{
         application::{
             repository_impl::version_repository_impl::VersionRepositoryImpl,
-            retriever::version_retriever::VersionRetriever,
+            retriever::version_retriever::VersionIngressManager,
         },
         domain::semantic_version::SemanticVersion,
         usecases::{
@@ -55,7 +55,7 @@ mod tests {
 
     struct MockEmptyVersionRetriever {}
 
-    impl VersionRetriever for MockEmptyVersionRetriever {
+    impl VersionIngressManager for MockEmptyVersionRetriever {
         fn last_version(&self) -> Result<Option<String>, AnyError> {
             Ok(None)
         }
@@ -67,7 +67,7 @@ mod tests {
 
     struct MockFullVersionRetriever {}
 
-    impl VersionRetriever for MockFullVersionRetriever {
+    impl VersionIngressManager for MockFullVersionRetriever {
         fn last_version(&self) -> Result<Option<String>, AnyError> {
             Ok(Some(String::from("0.1.0-dev1")))
         }
@@ -79,7 +79,7 @@ mod tests {
 
     struct MockWrongVersionRetriever {}
 
-    impl VersionRetriever for MockWrongVersionRetriever {
+    impl VersionIngressManager for MockWrongVersionRetriever {
         fn last_version(&self) -> Result<Option<String>, AnyError> {
             Ok(Some(String::from("22.04")))
         }
