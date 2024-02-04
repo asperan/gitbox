@@ -5,7 +5,7 @@ use crate::{
         manager::{gitextra_egress_manager::GitExtraEgressManager, message_egress_manager::MessageEgressManager},
         repository_impl::{
             full_commit_summary_history_repository_impl::FullCommitSummaryHistoryRepositoryImpl,
-            gitextra_write_repository_impl::GitExtraWriteRepositoryImpl,
+            gitextra_write_repository_impl::GitExtraEgressRepositoryImpl,
         },
         retriever::full_commit_summary_history_ingress_manager::FullCommitSummaryHistoryIngressManager,
     },
@@ -40,7 +40,7 @@ impl RefreshController {
             Rc::new(FullCommitSummaryHistoryRepositoryImpl::new(
                 self.full_commit_summary_history_ingress_manager.clone(),
             )),
-            Rc::new(GitExtraWriteRepositoryImpl::new(
+            Rc::new(GitExtraEgressRepositoryImpl::new(
                 self.gitextra_write_manager.clone(),
             )),
         );
