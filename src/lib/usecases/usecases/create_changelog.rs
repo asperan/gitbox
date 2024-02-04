@@ -54,6 +54,7 @@ impl UseCase<String> for CreateChangelogUseCase<'_> {
     }
 }
 
+#[inline(always)]
 fn format_title(format: &ChangelogFormat, version: &Option<SemanticVersion>) -> String {
     let title = match version {
         Some(v) => format!("Changes from version {}", v),
@@ -69,6 +70,7 @@ const HASH_RANDOM_STATE: RandomState = RandomState::with_seeds(0, 0, 0, 0);
 type ScopeMap = AHashMap<String, Vec<ConventionalCommitSummary>>;
 type TypeMap = AHashMap<String, ScopeMap>;
 
+#[inline(always)]
 fn categorize_commit_list(
     list: impl Iterator<Item = CommitSummary>,
     exclude_trigger: &Option<Trigger>,
@@ -120,6 +122,7 @@ fn ensure_inner_vector_exists(scope_map: &mut ScopeMap, s: &String) {
     }
 }
 
+#[inline]
 fn format_types(format: &ChangelogFormat, types_map: &TypeMap) -> String {
     let feat_scopes = types_map.get("feat").map_or(String::new(), |scope_map| {
         format!(
@@ -161,6 +164,7 @@ fn format_types(format: &ChangelogFormat, types_map: &TypeMap) -> String {
         + &non_conventional
 }
 
+#[inline]
 fn format_scopes(format: &ChangelogFormat, scope_map: &ScopeMap) -> String {
     scope_map
         .iter()
@@ -175,6 +179,7 @@ fn format_scopes(format: &ChangelogFormat, scope_map: &ScopeMap) -> String {
         .unwrap_or_else(String::new)
 }
 
+#[inline]
 fn format_list<'a>(
     format: &ChangelogFormat,
     commit_list: impl Iterator<Item = &'a ConventionalCommitSummary>,
@@ -187,10 +192,12 @@ fn format_list<'a>(
     )
 }
 
+#[inline]
 fn format_item(format: &ChangelogFormat, commit: &ConventionalCommitSummary) -> String {
     format.item()(&format_details(format, commit))
 }
 
+#[inline]
 fn format_details(format: &ChangelogFormat, commit: &ConventionalCommitSummary) -> String {
     if commit.breaking() {
         format.breaking()(&commit.summary().to_string())
