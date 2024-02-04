@@ -5,10 +5,10 @@ use crate::{
         manager::output_manager::OutputManager,
         options::changelog::{ChangelogOptions, FORMAT_PLACEHOLDER},
         repository_impl::{
-            commit_summary_repository_impl::CommitSummaryRepositoryImpl,
+            commit_summary_repository_impl::BoundedCommitSummaryRepositoryImpl,
             version_repository_impl::VersionRepositoryImpl,
         },
-        retriever::{commit_retriever::CommitRetriever, version_ingress_manager::VersionIngressManager},
+        retriever::{commit_retriever::BoundedCommitSummaryIngressManager, version_ingress_manager::VersionIngressManager},
     },
     domain::trigger::Trigger,
     usecases::{
@@ -21,7 +21,7 @@ use super::exit_code::ControllerExitCode;
 
 pub struct ChangelogController {
     options: ChangelogOptions,
-    commit_retriever: Rc<dyn CommitRetriever>,
+    commit_retriever: Rc<dyn BoundedCommitSummaryIngressManager>,
     version_retriever: Rc<dyn VersionIngressManager>,
     output_manager: Rc<dyn OutputManager>,
 }
@@ -29,7 +29,7 @@ pub struct ChangelogController {
 impl ChangelogController {
     pub fn new(
         options: ChangelogOptions,
-        commit_retriever: Rc<dyn CommitRetriever>,
+        commit_retriever: Rc<dyn BoundedCommitSummaryIngressManager>,
         version_retriever: Rc<dyn VersionIngressManager>,
         output_manager: Rc<dyn OutputManager>,
     ) -> ChangelogController {
@@ -70,7 +70,7 @@ impl ChangelogController {
         );
         let usecase = CreateChangelogUseCase::new(
             configuration,
-            Rc::new(CommitSummaryRepositoryImpl::new(
+            Rc::new(BoundedCommitSummaryRepositoryImpl::new(
                 self.commit_retriever.clone(),
             )),
             Rc::new(VersionRepositoryImpl::new(self.version_retriever.clone())),
@@ -97,7 +97,7 @@ mod tests {
             controller::exit_code::ControllerExitCode,
             manager::output_manager::OutputManager,
             options::changelog::ChangelogOptions,
-            retriever::{commit_retriever::CommitRetriever, version_ingress_manager::VersionIngressManager},
+            retriever::{commit_retriever::BoundedCommitSummaryIngressManager, version_ingress_manager::VersionIngressManager},
         },
         domain::semantic_version::SemanticVersion,
         usecases::type_aliases::AnyError,
@@ -106,11 +106,7 @@ mod tests {
     use super::ChangelogController;
 
     struct MockCommitRetriever {}
-    impl CommitRetriever for MockCommitRetriever {
-        fn get_all_commits(&self) -> Result<Box<dyn DoubleEndedIterator<Item = String>>, AnyError> {
-            unreachable!()
-        }
-
+    impl BoundedCommitSummaryIngressManager for MockCommitRetriever {
         fn get_commits_from(
             &self,
             _version: &Option<SemanticVersion>,

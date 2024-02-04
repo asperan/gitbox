@@ -4,10 +4,10 @@ use crate::{
     application::{
         manager::{gitextra_write_manager::GitExtraWriteManager, output_manager::OutputManager},
         repository_impl::{
-            commit_summary_repository_impl::CommitSummaryRepositoryImpl,
+            full_commit_summary_history_repository_impl::FullCommitSummaryHistoryRepositoryImpl,
             gitextra_write_repository_impl::GitExtraWriteRepositoryImpl,
         },
-        retriever::commit_retriever::CommitRetriever,
+        retriever::full_commit_summary_history_ingress_manager::FullCommitSummaryHistoryIngressManager,
     },
     usecases::usecases::{
         refresh_types_and_scopes::RefreshTypesAndScopesUseCase, usecase::UseCase,
@@ -17,19 +17,19 @@ use crate::{
 use super::exit_code::ControllerExitCode;
 
 pub struct RefreshController {
-    commit_retriever: Rc<dyn CommitRetriever>,
+    full_commit_summary_history_ingress_manager: Rc<dyn FullCommitSummaryHistoryIngressManager>,
     gitextra_write_manager: Rc<dyn GitExtraWriteManager>,
     output_manager: Rc<dyn OutputManager>,
 }
 
 impl RefreshController {
     pub fn new(
-        commit_retriever: Rc<dyn CommitRetriever>,
+        full_commit_summary_history_ingress_manager: Rc<dyn FullCommitSummaryHistoryIngressManager>,
         gitextra_write_manager: Rc<dyn GitExtraWriteManager>,
         output_manager: Rc<dyn OutputManager>,
     ) -> RefreshController {
         RefreshController {
-            commit_retriever,
+            full_commit_summary_history_ingress_manager,
             gitextra_write_manager,
             output_manager,
         }
@@ -37,8 +37,8 @@ impl RefreshController {
 
     pub fn refresh(&self) -> ControllerExitCode {
         let usecase = RefreshTypesAndScopesUseCase::new(
-            Rc::new(CommitSummaryRepositoryImpl::new(
-                self.commit_retriever.clone(),
+            Rc::new(FullCommitSummaryHistoryRepositoryImpl::new(
+                self.full_commit_summary_history_ingress_manager.clone(),
             )),
             Rc::new(GitExtraWriteRepositoryImpl::new(
                 self.gitextra_write_manager.clone(),

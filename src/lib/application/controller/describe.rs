@@ -8,13 +8,13 @@ use crate::{
         options::describe::DescribeOptions,
         repository_impl::{
             commit_metadata_ingress_repository_impl::CommitMetadataIngressRepositoryImpl,
-            commit_summary_repository_impl::CommitSummaryRepositoryImpl,
+            commit_summary_repository_impl::BoundedCommitSummaryRepositoryImpl,
             tag_write_repository_impl::TagWriteRepositoryImpl,
             version_repository_impl::VersionRepositoryImpl,
         },
         retriever::{
             commit_metadata_ingress_manager::CommitMetadataIngressManager,
-            commit_retriever::CommitRetriever, version_ingress_manager::VersionIngressManager,
+            commit_retriever::BoundedCommitSummaryIngressManager, version_ingress_manager::VersionIngressManager,
         },
     },
     domain::trigger::Trigger,
@@ -38,7 +38,7 @@ use super::exit_code::ControllerExitCode;
 
 pub struct DescribeController {
     options: DescribeOptions,
-    commit_summary_manager: Rc<dyn CommitRetriever>,
+    commit_summary_manager: Rc<dyn BoundedCommitSummaryIngressManager>,
     commit_metadata_manager: Rc<dyn CommitMetadataIngressManager>,
     version_manager: Rc<dyn VersionIngressManager>,
     tag_write_manager: Rc<dyn TagWriteManager>,
@@ -48,7 +48,7 @@ pub struct DescribeController {
 impl DescribeController {
     pub fn new(
         options: DescribeOptions,
-        commit_summary_manager: Rc<dyn CommitRetriever>,
+        commit_summary_manager: Rc<dyn BoundedCommitSummaryIngressManager>,
         commit_metadata_manager: Rc<dyn CommitMetadataIngressManager>,
         version_manager: Rc<dyn VersionIngressManager>,
         tag_write_manager: Rc<dyn TagWriteManager>,
@@ -76,7 +76,7 @@ impl DescribeController {
 
     fn run(&self) -> Result<(), AnyError> {
         let describe_configuration = self.generate_describe_configuration()?;
-        let commit_summary_repository = Rc::new(CommitSummaryRepositoryImpl::new(
+        let commit_summary_repository = Rc::new(BoundedCommitSummaryRepositoryImpl::new(
             self.commit_summary_manager.clone(),
         ));
         let commit_metadata_repository = Rc::new(CommitMetadataIngressRepositoryImpl::new(

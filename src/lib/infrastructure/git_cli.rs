@@ -8,7 +8,9 @@ use crate::{
         },
         retriever::{
             commit_metadata_ingress_manager::CommitMetadataIngressManager,
-            commit_retriever::CommitRetriever, gitinfo_ingress_manager::GitInfoIngressManager,
+            commit_retriever::BoundedCommitSummaryIngressManager,
+            full_commit_summary_history_ingress_manager::FullCommitSummaryHistoryIngressManager,
+            gitinfo_ingress_manager::GitInfoIngressManager,
             version_ingress_manager::VersionIngressManager,
         },
     },
@@ -61,13 +63,15 @@ impl GitCli {
     }
 }
 
-impl CommitRetriever for GitCli {
+impl FullCommitSummaryHistoryIngressManager for GitCli {
     fn get_all_commits(&self) -> Result<Box<dyn DoubleEndedIterator<Item = String>>, AnyError> {
         let log_list =
             self.run_git_command(vec!["log", "--pretty=format:%s", "--all"].into_iter())?;
         Ok(Box::new(self.split_and_clean_commits(log_list).into_iter()))
     }
+}
 
+impl BoundedCommitSummaryIngressManager for GitCli {
     fn get_commits_from(
         &self,
         version: &Option<SemanticVersion>,
