@@ -1,4 +1,4 @@
-use crate::application::manager::output_manager::MessageEgressManager;
+use crate::application::manager::message_egress_manager::MessageEgressManager;
 
 pub struct OutputManagerImpl {}
 

@@ -2,7 +2,7 @@ use std::{rc::Rc, str::FromStr};
 
 use crate::{
     application::{
-        manager::output_manager::MessageEgressManager,
+        manager::message_egress_manager::MessageEgressManager,
         options::changelog::{ChangelogOptions, FORMAT_PLACEHOLDER},
         repository_impl::{
             bounded_commit_summary_ingress_repository_impl::BoundedCommitSummaryIngressRepositoryImpl,
@@ -98,7 +98,7 @@ mod tests {
     use crate::{
         application::{
             controller::exit_code::ControllerExitCode,
-            manager::output_manager::MessageEgressManager,
+            manager::message_egress_manager::MessageEgressManager,
             options::changelog::ChangelogOptions,
             retriever::{
                 bounded_commit_summary_ingress_manager::BoundedCommitSummaryIngressManager,

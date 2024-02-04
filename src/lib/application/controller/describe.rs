@@ -4,7 +4,7 @@ use regex::Regex;
 
 use crate::{
     application::{
-        manager::{output_manager::MessageEgressManager, tag_write_manager::TagWriteManager},
+        manager::{message_egress_manager::MessageEgressManager, tag_write_manager::TagWriteManager},
         options::describe::DescribeOptions,
         repository_impl::{
             commit_metadata_ingress_repository_impl::CommitMetadataIngressRepositoryImpl,

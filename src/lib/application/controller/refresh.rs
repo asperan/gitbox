@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use crate::{
     application::{
-        manager::{gitextra_egress_manager::GitExtraEgressManager, output_manager::MessageEgressManager},
+        manager::{gitextra_egress_manager::GitExtraEgressManager, message_egress_manager::MessageEgressManager},
         repository_impl::{
             full_commit_summary_history_repository_impl::FullCommitSummaryHistoryRepositoryImpl,
             gitextra_write_repository_impl::GitExtraWriteRepositoryImpl,

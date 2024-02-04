@@ -3,7 +3,7 @@ use std::rc::Rc;
 use crate::{
     application::{
         manager::{
-            conventional_commit_egress_manager::ConventionalCommitEgressManager, init_egress_manager::InitEgressManager, output_manager::MessageEgressManager,
+            conventional_commit_egress_manager::ConventionalCommitEgressManager, init_egress_manager::InitEgressManager, message_egress_manager::MessageEgressManager,
         },
         options::init::InitOptions,
         repository_impl::commit_repository_impl::CommitRepositoryImpl,
@@ -75,7 +75,7 @@ mod tests {
             controller::{exit_code::ControllerExitCode, init::InitController},
             manager::{
                 conventional_commit_egress_manager::ConventionalCommitEgressManager, init_egress_manager::InitEgressManager,
-                output_manager::MessageEgressManager,
+                message_egress_manager::MessageEgressManager,
             },
             options::init::InitOptions,
         },

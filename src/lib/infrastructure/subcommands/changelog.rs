@@ -5,7 +5,7 @@ use clap::Args;
 use crate::{
     application::{
         controller::{changelog::ChangelogController, exit_code::ControllerExitCode},
-        manager::output_manager::MessageEgressManager,
+        manager::message_egress_manager::MessageEgressManager,
         options::changelog::ChangelogOptions,
         retriever::gitinfo_ingress_manager::GitInfoIngressManager,
     },
