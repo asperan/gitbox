@@ -6,7 +6,7 @@ use crate::{
             conventional_commit_egress_manager::ConventionalCommitEgressManager, init_egress_manager::InitEgressManager, message_egress_manager::MessageEgressManager,
         },
         options::init::InitOptions,
-        repository_impl::commit_repository_impl::ConventionalCommitEgressRepositoryImpl,
+        repository_impl::conventional_commit_egress_repository_impl::ConventionalCommitEgressRepositoryImpl,
     },
     usecases::{
         configuration::commit::CommitConfiguration,

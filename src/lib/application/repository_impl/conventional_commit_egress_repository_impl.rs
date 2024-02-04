@@ -35,7 +35,7 @@ mod tests {
 
     use crate::{
         application::{
-            manager::conventional_commit_egress_manager::ConventionalCommitEgressManager, repository_impl::commit_repository_impl::ConventionalCommitEgressRepositoryImpl
+            manager::conventional_commit_egress_manager::ConventionalCommitEgressManager, repository_impl::conventional_commit_egress_repository_impl::ConventionalCommitEgressRepositoryImpl
         },
         domain::conventional_commit::ConventionalCommit,
         usecases::{

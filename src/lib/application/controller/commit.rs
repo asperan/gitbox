@@ -4,7 +4,7 @@ use crate::{
     application::{
         manager::{conventional_commit_egress_manager::ConventionalCommitEgressManager, message_egress_manager::MessageEgressManager},
         options::commit::CommitOptions,
-        repository_impl::commit_repository_impl::ConventionalCommitEgressRepositoryImpl,
+        repository_impl::conventional_commit_egress_repository_impl::ConventionalCommitEgressRepositoryImpl,
     },
     usecases::{
         configuration::commit::CommitConfiguration,
