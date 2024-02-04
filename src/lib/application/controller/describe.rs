@@ -9,7 +9,7 @@ use crate::{
         repository_impl::{
             commit_metadata_ingress_repository_impl::CommitMetadataIngressRepositoryImpl,
             bounded_commit_summary_ingress_repository_impl::BoundedCommitSummaryIngressRepositoryImpl,
-            tag_write_repository_impl::TagWriteRepositoryImpl,
+            tag_write_repository_impl::TagEgressRepositoryImpl,
             version_repository_impl::VersionRepositoryImpl,
         },
         retriever::{
@@ -104,7 +104,7 @@ impl DescribeController {
                 self.options.sign_tag(),
             )?;
             let tag_write_repository =
-                Rc::new(TagWriteRepositoryImpl::new(self.tag_write_manager.clone()));
+                Rc::new(TagEgressRepositoryImpl::new(self.tag_write_manager.clone()));
             let tag_usecase = CreateTagUseCase::new(tag_configuration, tag_write_repository);
             tag_usecase.execute()?;
             self.output_manager.output("Tag created successfully");

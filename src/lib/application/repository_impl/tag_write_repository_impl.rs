@@ -6,24 +6,24 @@ use crate::{
     usecases::{repository::tag_egress_repository::TagEgressRepository, type_aliases::AnyError},
 };
 
-pub struct TagWriteRepositoryImpl {
-    tag_write_manager: Rc<dyn TagEgressManager>,
+pub struct TagEgressRepositoryImpl {
+    tag_egress_manager: Rc<dyn TagEgressManager>,
 }
 
-impl TagWriteRepositoryImpl {
-    pub fn new(tag_write_manager: Rc<dyn TagEgressManager>) -> TagWriteRepositoryImpl {
-        TagWriteRepositoryImpl { tag_write_manager }
+impl TagEgressRepositoryImpl {
+    pub fn new(tag_egress_manager: Rc<dyn TagEgressManager>) -> TagEgressRepositoryImpl {
+        TagEgressRepositoryImpl { tag_egress_manager }
     }
 }
 
-impl TagEgressRepository for TagWriteRepositoryImpl {
+impl TagEgressRepository for TagEgressRepositoryImpl {
     fn create_tag(
         &self,
         version: &SemanticVersion,
         message: &Option<String>,
         sign: bool,
     ) -> Result<(), AnyError> {
-        self.tag_write_manager
+        self.tag_egress_manager
             .create_tag(&version.to_string(), message, sign)
     }
 }
