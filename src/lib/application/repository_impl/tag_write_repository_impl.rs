@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use crate::{
-    application::manager::tag_write_manager::TagEgressManager,
+    application::manager::tag_egress_manager::TagEgressManager,
     domain::semantic_version::SemanticVersion,
     usecases::{repository::tag_egress_repository::TagEgressRepository, type_aliases::AnyError},
 };

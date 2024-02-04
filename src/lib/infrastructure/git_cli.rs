@@ -4,7 +4,7 @@ use crate::{
     application::{
         manager::{
             conventional_commit_egress_manager::ConventionalCommitEgressManager, init_egress_manager::InitEgressManager,
-            tag_write_manager::TagEgressManager,
+            tag_egress_manager::TagEgressManager,
         },
         retriever::{
             commit_metadata_ingress_manager::CommitMetadataIngressManager,
