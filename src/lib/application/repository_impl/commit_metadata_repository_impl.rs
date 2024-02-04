@@ -9,21 +9,21 @@ use crate::{
     },
 };
 
-pub struct CommitMetadataRepositoryImpl {
+pub struct CommitMetadataIngressRepositoryImpl {
     commit_metadata_retriever: Rc<dyn CommitMetadataRetriever>,
 }
 
-impl CommitMetadataRepositoryImpl {
+impl CommitMetadataIngressRepositoryImpl {
     pub fn new(
         commit_metadata_retriever: Rc<dyn CommitMetadataRetriever>,
-    ) -> CommitMetadataRepositoryImpl {
-        CommitMetadataRepositoryImpl {
+    ) -> CommitMetadataIngressRepositoryImpl {
+        CommitMetadataIngressRepositoryImpl {
             commit_metadata_retriever,
         }
     }
 }
 
-impl CommitMetadataIngressRepository for CommitMetadataRepositoryImpl {
+impl CommitMetadataIngressRepository for CommitMetadataIngressRepositoryImpl {
     fn get_metadata(&self, spec: &MetadataSpec) -> Result<String, AnyError> {
         self.commit_metadata_retriever.get_metadata(spec)
     }

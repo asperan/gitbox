@@ -7,7 +7,7 @@ use crate::{
         manager::{output_manager::OutputManager, tag_write_manager::TagWriteManager},
         options::describe::DescribeOptions,
         repository_impl::{
-            commit_metadata_repository_impl::CommitMetadataRepositoryImpl,
+            commit_metadata_repository_impl::CommitMetadataIngressRepositoryImpl,
             commit_summary_repository_impl::CommitSummaryRepositoryImpl,
             tag_write_repository_impl::TagWriteRepositoryImpl,
             version_repository_impl::VersionRepositoryImpl,
@@ -79,7 +79,7 @@ impl DescribeController {
         let commit_summary_repository = Rc::new(CommitSummaryRepositoryImpl::new(
             self.commit_summary_manager.clone(),
         ));
-        let commit_metadata_repository = Rc::new(CommitMetadataRepositoryImpl::new(
+        let commit_metadata_repository = Rc::new(CommitMetadataIngressRepositoryImpl::new(
             self.commit_metadata_manager.clone(),
         ));
         let version_repository = Rc::new(VersionRepositoryImpl::new(self.version_manager.clone()));
