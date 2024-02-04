@@ -5,10 +5,13 @@ use crate::{
         manager::output_manager::OutputManager,
         options::changelog::{ChangelogOptions, FORMAT_PLACEHOLDER},
         repository_impl::{
-            commit_summary_repository_impl::BoundedCommitSummaryRepositoryImpl,
+            bounded_commit_summary_ingress_repository_impl::BoundedCommitSummaryIngressRepositoryImpl,
             version_repository_impl::VersionRepositoryImpl,
         },
-        retriever::{commit_retriever::BoundedCommitSummaryIngressManager, version_ingress_manager::VersionIngressManager},
+        retriever::{
+            commit_retriever::BoundedCommitSummaryIngressManager,
+            version_ingress_manager::VersionIngressManager,
+        },
     },
     domain::trigger::Trigger,
     usecases::{
@@ -70,7 +73,7 @@ impl ChangelogController {
         );
         let usecase = CreateChangelogUseCase::new(
             configuration,
-            Rc::new(BoundedCommitSummaryRepositoryImpl::new(
+            Rc::new(BoundedCommitSummaryIngressRepositoryImpl::new(
                 self.commit_retriever.clone(),
             )),
             Rc::new(VersionRepositoryImpl::new(self.version_retriever.clone())),
@@ -97,7 +100,10 @@ mod tests {
             controller::exit_code::ControllerExitCode,
             manager::output_manager::OutputManager,
             options::changelog::ChangelogOptions,
-            retriever::{commit_retriever::BoundedCommitSummaryIngressManager, version_ingress_manager::VersionIngressManager},
+            retriever::{
+                commit_retriever::BoundedCommitSummaryIngressManager,
+                version_ingress_manager::VersionIngressManager,
+            },
         },
         domain::semantic_version::SemanticVersion,
         usecases::type_aliases::AnyError,

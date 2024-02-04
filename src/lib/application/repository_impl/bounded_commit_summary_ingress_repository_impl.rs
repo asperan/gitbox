@@ -9,21 +9,21 @@ use crate::{
     },
 };
 
-pub struct BoundedCommitSummaryRepositoryImpl {
+pub struct BoundedCommitSummaryIngressRepositoryImpl {
     bounded_commit_summary_ingress_manager: Rc<dyn BoundedCommitSummaryIngressManager>,
 }
 
-impl BoundedCommitSummaryRepositoryImpl {
+impl BoundedCommitSummaryIngressRepositoryImpl {
     pub fn new(
         bounded_commit_summary_ingress_manager: Rc<dyn BoundedCommitSummaryIngressManager>,
-    ) -> BoundedCommitSummaryRepositoryImpl {
-        BoundedCommitSummaryRepositoryImpl {
+    ) -> BoundedCommitSummaryIngressRepositoryImpl {
+        BoundedCommitSummaryIngressRepositoryImpl {
             bounded_commit_summary_ingress_manager,
         }
     }
 }
 
-impl BoundedCommitSummaryIngressRepository for BoundedCommitSummaryRepositoryImpl {
+impl BoundedCommitSummaryIngressRepository for BoundedCommitSummaryIngressRepositoryImpl {
     fn get_commits_from(
         &self,
         version: &Option<SemanticVersion>,
@@ -51,7 +51,7 @@ mod tests {
         },
     };
 
-    use super::BoundedCommitSummaryRepositoryImpl;
+    use super::BoundedCommitSummaryIngressRepositoryImpl;
 
     struct MockCommitRetriever {}
 
@@ -70,7 +70,7 @@ mod tests {
 
     #[test]
     fn get_commits_from_basic() {
-        let repository = BoundedCommitSummaryRepositoryImpl::new(Rc::new(MockCommitRetriever {}));
+        let repository = BoundedCommitSummaryIngressRepositoryImpl::new(Rc::new(MockCommitRetriever {}));
         let commit_list = repository.get_commits_from(&None);
         assert!(commit_list.is_ok());
         assert!(commit_list

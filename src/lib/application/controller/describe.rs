@@ -8,7 +8,7 @@ use crate::{
         options::describe::DescribeOptions,
         repository_impl::{
             commit_metadata_ingress_repository_impl::CommitMetadataIngressRepositoryImpl,
-            commit_summary_repository_impl::BoundedCommitSummaryRepositoryImpl,
+            bounded_commit_summary_ingress_repository_impl::BoundedCommitSummaryIngressRepositoryImpl,
             tag_write_repository_impl::TagWriteRepositoryImpl,
             version_repository_impl::VersionRepositoryImpl,
         },
@@ -76,7 +76,7 @@ impl DescribeController {
 
     fn run(&self) -> Result<(), AnyError> {
         let describe_configuration = self.generate_describe_configuration()?;
-        let commit_summary_repository = Rc::new(BoundedCommitSummaryRepositoryImpl::new(
+        let commit_summary_repository = Rc::new(BoundedCommitSummaryIngressRepositoryImpl::new(
             self.commit_summary_manager.clone(),
         ));
         let commit_metadata_repository = Rc::new(CommitMetadataIngressRepositoryImpl::new(
