@@ -6,9 +6,9 @@ use crate::{
         options::changelog::{ChangelogOptions, FORMAT_PLACEHOLDER},
         repository_impl::{
             bounded_commit_summary_ingress_repository_impl::BoundedCommitSummaryIngressRepositoryImpl,
-            version_repository_impl::SemanticVersionIngressRepositoryImpl,
+            semantic_version_ingress_repository_impl::SemanticVersionIngressRepositoryImpl,
         },
-        retriever::{
+        manager::{
             bounded_commit_summary_ingress_manager::BoundedCommitSummaryIngressManager,
             version_ingress_manager::VersionIngressManager,
         },
@@ -100,7 +100,7 @@ mod tests {
             controller::exit_code::ControllerExitCode,
             manager::message_egress_manager::MessageEgressManager,
             options::changelog::ChangelogOptions,
-            retriever::{
+            manager::{
                 bounded_commit_summary_ingress_manager::BoundedCommitSummaryIngressManager,
                 version_ingress_manager::VersionIngressManager,
             },

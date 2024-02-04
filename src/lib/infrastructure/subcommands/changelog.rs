@@ -7,7 +7,7 @@ use crate::{
         controller::{changelog::ChangelogController, exit_code::ControllerExitCode},
         manager::message_egress_manager::MessageEgressManager,
         options::changelog::ChangelogOptions,
-        retriever::gitinfo_ingress_manager::GitInfoIngressManager,
+        manager::gitinfo_ingress_manager::GitInfoIngressManager,
     },
     infrastructure::{
         git_cli::GitCli, output_manager_impl::OutputManagerImpl, subcommand::Subcommand,

@@ -6,7 +6,7 @@ use crate::{
             conventional_commit_egress_manager::ConventionalCommitEgressManager, init_egress_manager::InitEgressManager,
             tag_egress_manager::TagEgressManager,
         },
-        retriever::{
+        manager::{
             commit_metadata_ingress_manager::CommitMetadataIngressManager,
             bounded_commit_summary_ingress_manager::BoundedCommitSummaryIngressManager,
             full_commit_summary_history_ingress_manager::FullCommitSummaryHistoryIngressManager,

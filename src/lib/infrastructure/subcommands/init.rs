@@ -7,7 +7,7 @@ use crate::{
         controller::{exit_code::ControllerExitCode, init::InitController},
         manager::message_egress_manager::MessageEgressManager,
         options::init::InitOptions,
-        retriever::gitinfo_ingress_manager::GitInfoIngressManager,
+        manager::gitinfo_ingress_manager::GitInfoIngressManager,
     },
     infrastructure::{
         git_cli::GitCli, output_manager_impl::OutputManagerImpl, subcommand::Subcommand,

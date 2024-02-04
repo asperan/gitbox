@@ -9,7 +9,7 @@ use crate::domain::constant::DEFAULT_COMMIT_TYPES;
 use crate::{
     application::{
         manager::gitextra_egress_manager::GitExtraEgressManager,
-        retriever::gitinfo_ingress_manager::GitInfoIngressManager,
+        manager::gitinfo_ingress_manager::GitInfoIngressManager,
     },
     usecases::type_aliases::AnyError,
 };

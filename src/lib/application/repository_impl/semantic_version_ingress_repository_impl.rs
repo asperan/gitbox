@@ -1,7 +1,7 @@
 use std::{rc::Rc, str::FromStr};
 
 use crate::{
-    application::retriever::version_ingress_manager::VersionIngressManager,
+    application::manager::version_ingress_manager::VersionIngressManager,
     domain::semantic_version::SemanticVersion,
     usecases::{
         repository::semantic_version_ingress_repository::SemanticVersionIngressRepository,
@@ -44,7 +44,7 @@ mod tests {
     use crate::{
         application::{
             repository_impl::semantic_version_ingress_repository_impl::SemanticVersionIngressRepositoryImpl,
-            retriever::version_ingress_manager::VersionIngressManager,
+            manager::version_ingress_manager::VersionIngressManager,
         },
         domain::semantic_version::SemanticVersion,
         usecases::{

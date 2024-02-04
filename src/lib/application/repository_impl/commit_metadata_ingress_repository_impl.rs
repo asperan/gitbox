@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use crate::{
-    application::retriever::commit_metadata_ingress_manager::CommitMetadataIngressManager,
+    application::manager::commit_metadata_ingress_manager::CommitMetadataIngressManager,
     usecases::{
         metadata_spec::MetadataSpec,
         repository::commit_metadata_ingress_repository::CommitMetadataIngressRepository,

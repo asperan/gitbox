@@ -10,9 +10,9 @@ use crate::{
             commit_metadata_ingress_repository_impl::CommitMetadataIngressRepositoryImpl,
             bounded_commit_summary_ingress_repository_impl::BoundedCommitSummaryIngressRepositoryImpl,
             tag_egress_repository_impl::TagEgressRepositoryImpl,
-            version_repository_impl::SemanticVersionIngressRepositoryImpl,
+            semantic_version_ingress_repository_impl::SemanticVersionIngressRepositoryImpl,
         },
-        retriever::{
+        manager::{
             commit_metadata_ingress_manager::CommitMetadataIngressManager,
             bounded_commit_summary_ingress_manager::BoundedCommitSummaryIngressManager, version_ingress_manager::VersionIngressManager,
         },

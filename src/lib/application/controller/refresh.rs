@@ -7,7 +7,7 @@ use crate::{
             full_commit_summary_history_repository_impl::FullCommitSummaryHistoryRepositoryImpl,
             gitextra_egress_repository_impl::GitExtraEgressRepositoryImpl,
         },
-        retriever::full_commit_summary_history_ingress_manager::FullCommitSummaryHistoryIngressManager,
+        manager::full_commit_summary_history_ingress_manager::FullCommitSummaryHistoryIngressManager,
     },
     usecases::usecases::{
         refresh_types_and_scopes::RefreshTypesAndScopesUseCase, usecase::UseCase,
