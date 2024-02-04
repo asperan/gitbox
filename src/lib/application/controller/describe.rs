@@ -13,8 +13,8 @@ use crate::{
             version_repository_impl::VersionRepositoryImpl,
         },
         retriever::{
-            commit_metadata_retriever::CommitMetadataRetriever, commit_retriever::CommitRetriever,
-            version_retriever::VersionRetriever,
+            commit_metadata_retriever::CommitMetadataIngressManager,
+            commit_retriever::CommitRetriever, version_retriever::VersionRetriever,
         },
     },
     domain::trigger::Trigger,
@@ -39,7 +39,7 @@ use super::exit_code::ControllerExitCode;
 pub struct DescribeController {
     options: DescribeOptions,
     commit_summary_manager: Rc<dyn CommitRetriever>,
-    commit_metadata_manager: Rc<dyn CommitMetadataRetriever>,
+    commit_metadata_manager: Rc<dyn CommitMetadataIngressManager>,
     version_manager: Rc<dyn VersionRetriever>,
     tag_write_manager: Rc<dyn TagWriteManager>,
     output_manager: Rc<dyn OutputManager>,
@@ -49,7 +49,7 @@ impl DescribeController {
     pub fn new(
         options: DescribeOptions,
         commit_summary_manager: Rc<dyn CommitRetriever>,
-        commit_metadata_manager: Rc<dyn CommitMetadataRetriever>,
+        commit_metadata_manager: Rc<dyn CommitMetadataIngressManager>,
         version_manager: Rc<dyn VersionRetriever>,
         tag_write_manager: Rc<dyn TagWriteManager>,
         output_manager: Rc<dyn OutputManager>,

@@ -2,9 +2,14 @@ use std::{process::Command, str::FromStr};
 
 use crate::{
     application::{
-        manager::{commit_manager::CommitManager, init_manager::InitManager, tag_write_manager::TagWriteManager},
+        manager::{
+            commit_manager::CommitManager, init_manager::InitManager,
+            tag_write_manager::TagWriteManager,
+        },
         retriever::{
-            commit_metadata_retriever::CommitMetadataRetriever, commit_retriever::CommitRetriever, gitinfo_retriever::GitInfoRetriever, version_retriever::VersionRetriever
+            commit_metadata_retriever::CommitMetadataIngressManager,
+            commit_retriever::CommitRetriever, gitinfo_retriever::GitInfoRetriever,
+            version_retriever::VersionRetriever,
         },
     },
     domain::semantic_version::SemanticVersion,
@@ -134,16 +139,21 @@ impl InitManager for GitCli {
 }
 
 impl TagWriteManager for GitCli {
-    fn create_tag(&self, label: &str, message: &Option<String>, sign: bool) -> Result<(), AnyError> {
+    fn create_tag(
+        &self,
+        label: &str,
+        message: &Option<String>,
+        sign: bool,
+    ) -> Result<(), AnyError> {
         let mut args = vec![label];
         args.push("-m");
         match message {
             Some(s) => {
                 args.push(&s);
-            },
+            }
             None => {
                 args.push("");
-            },
+            }
         }
         if sign {
             args.push("-s");
@@ -152,15 +162,15 @@ impl TagWriteManager for GitCli {
     }
 }
 
-impl CommitMetadataRetriever for GitCli {
+impl CommitMetadataIngressManager for GitCli {
     fn get_metadata(&self, metadata_spec: &MetadataSpec) -> Result<String, AnyError> {
         match metadata_spec {
             MetadataSpec::Sha => {
                 self.run_git_command(vec!["log", "-n", "1", "--pretty=format:%h"].into_iter())
-            },
+            }
             MetadataSpec::Date => {
                 self.run_git_command(vec!["log", "-n", "1", "--pretty=format:%as"].into_iter())
-            },
+            }
         }
     }
 }
