@@ -2,11 +2,13 @@ use std::{rc::Rc, str::FromStr};
 
 use crate::{
     application::{
-        commit_summary_repository_impl::CommitSummaryRepositoryImpl,
         manager::output_manager::OutputManager,
         options::changelog::{ChangelogOptions, FORMAT_PLACEHOLDER},
+        repository_impl::{
+            commit_summary_repository_impl::CommitSummaryRepositoryImpl,
+            version_repository_impl::VersionRepositoryImpl,
+        },
         retriever::{commit_retriever::CommitRetriever, version_retriever::VersionRetriever},
-        version_repository_impl::VersionRepositoryImpl,
     },
     domain::trigger::Trigger,
     usecases::{
@@ -68,7 +70,9 @@ impl ChangelogController {
         );
         let usecase = CreateChangelogUseCase::new(
             configuration,
-            Rc::new(CommitSummaryRepositoryImpl::new(self.commit_retriever.clone())),
+            Rc::new(CommitSummaryRepositoryImpl::new(
+                self.commit_retriever.clone(),
+            )),
             Rc::new(VersionRepositoryImpl::new(self.version_retriever.clone())),
         );
         match usecase.execute() {

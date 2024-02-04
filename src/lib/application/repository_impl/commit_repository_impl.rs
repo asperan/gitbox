@@ -1,11 +1,13 @@
 use std::rc::Rc;
 
 use crate::{
+    application::manager::commit_manager::CommitManager,
     domain::conventional_commit::ConventionalCommit,
-    usecases::{repository::conventional_commit_egress_repository::ConventionalCommitEgressRepository, type_aliases::AnyError},
+    usecases::{
+        repository::conventional_commit_egress_repository::ConventionalCommitEgressRepository,
+        type_aliases::AnyError,
+    },
 };
-
-use super::manager::commit_manager::CommitManager;
 
 pub struct CommitRepositoryImpl {
     commit_manager: Rc<dyn CommitManager>,
@@ -33,10 +35,13 @@ mod tests {
 
     use crate::{
         application::{
-            commit_repository_impl::CommitRepositoryImpl, manager::commit_manager::CommitManager,
+            manager::commit_manager::CommitManager, repository_impl::commit_repository_impl::CommitRepositoryImpl
         },
         domain::conventional_commit::ConventionalCommit,
-        usecases::{repository::conventional_commit_egress_repository::ConventionalCommitEgressRepository, type_aliases::AnyError},
+        usecases::{
+            repository::conventional_commit_egress_repository::ConventionalCommitEgressRepository,
+            type_aliases::AnyError,
+        },
     };
 
     #[derive(Debug)]

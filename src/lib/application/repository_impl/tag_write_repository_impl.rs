@@ -1,11 +1,10 @@
 use std::rc::Rc;
 
 use crate::{
+    application::manager::tag_write_manager::TagWriteManager,
     domain::semantic_version::SemanticVersion,
     usecases::{repository::tag_egress_repository::TagEgressRepository, type_aliases::AnyError},
 };
-
-use super::manager::tag_write_manager::TagWriteManager;
 
 pub struct TagWriteRepositoryImpl {
     tag_write_manager: Rc<dyn TagWriteManager>,

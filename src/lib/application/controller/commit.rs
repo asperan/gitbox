@@ -2,9 +2,9 @@ use std::rc::Rc;
 
 use crate::{
     application::{
-        commit_repository_impl::CommitRepositoryImpl,
         manager::{commit_manager::CommitManager, output_manager::OutputManager},
         options::commit::CommitOptions,
+        repository_impl::commit_repository_impl::CommitRepositoryImpl,
     },
     usecases::{
         configuration::commit::CommitConfiguration,

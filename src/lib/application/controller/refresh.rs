@@ -2,9 +2,11 @@ use std::rc::Rc;
 
 use crate::{
     application::{
-        commit_summary_repository_impl::CommitSummaryRepositoryImpl,
-        gitextra_write_repository_impl::GitExtraWriteRepositoryImpl,
         manager::{gitextra_write_manager::GitExtraWriteManager, output_manager::OutputManager},
+        repository_impl::{
+            commit_summary_repository_impl::CommitSummaryRepositoryImpl,
+            gitextra_write_repository_impl::GitExtraWriteRepositoryImpl,
+        },
         retriever::commit_retriever::CommitRetriever,
     },
     usecases::usecases::{

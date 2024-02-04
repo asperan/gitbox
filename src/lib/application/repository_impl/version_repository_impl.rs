@@ -1,11 +1,13 @@
 use std::{rc::Rc, str::FromStr};
 
 use crate::{
+    application::retriever::version_retriever::VersionRetriever,
     domain::semantic_version::SemanticVersion,
-    usecases::{repository::semantic_version_ingress_repository::SemanticVersionIngressRepository, type_aliases::AnyError},
+    usecases::{
+        repository::semantic_version_ingress_repository::SemanticVersionIngressRepository,
+        type_aliases::AnyError,
+    },
 };
-
-use super::retriever::version_retriever::VersionRetriever;
 
 pub struct VersionRepositoryImpl {
     version_retriever: Rc<dyn VersionRetriever>,
@@ -41,11 +43,14 @@ mod tests {
 
     use crate::{
         application::{
+            repository_impl::version_repository_impl::VersionRepositoryImpl,
             retriever::version_retriever::VersionRetriever,
-            version_repository_impl::VersionRepositoryImpl,
         },
         domain::semantic_version::SemanticVersion,
-        usecases::{repository::semantic_version_ingress_repository::SemanticVersionIngressRepository, type_aliases::AnyError},
+        usecases::{
+            repository::semantic_version_ingress_repository::SemanticVersionIngressRepository,
+            type_aliases::AnyError,
+        },
     };
 
     struct MockEmptyVersionRetriever {}

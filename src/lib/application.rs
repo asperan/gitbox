@@ -1,12 +1,7 @@
-pub mod commit_metadata_repository_impl;
-pub mod commit_repository_impl;
-pub mod commit_summary_repository_impl;
 pub mod controller;
 pub mod error;
-pub mod gitextra_write_repository_impl;
 pub mod manager;
 pub mod options;
 pub mod presenter;
+pub mod repository_impl;
 pub mod retriever;
-pub mod tag_write_repository_impl;
-pub mod version_repository_impl;

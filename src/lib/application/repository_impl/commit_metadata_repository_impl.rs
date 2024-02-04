@@ -1,11 +1,13 @@
 use std::rc::Rc;
 
-use crate::usecases::{
-    metadata_spec::MetadataSpec, repository::commit_metadata_ingress_repository::CommitMetadataIngressRepository,
-    type_aliases::AnyError,
+use crate::{
+    application::retriever::commit_metadata_retriever::CommitMetadataRetriever,
+    usecases::{
+        metadata_spec::MetadataSpec,
+        repository::commit_metadata_ingress_repository::CommitMetadataIngressRepository,
+        type_aliases::AnyError,
+    },
 };
-
-use super::retriever::commit_metadata_retriever::CommitMetadataRetriever;
 
 pub struct CommitMetadataRepositoryImpl {
     commit_metadata_retriever: Rc<dyn CommitMetadataRetriever>,

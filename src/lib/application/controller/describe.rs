@@ -4,16 +4,18 @@ use regex::Regex;
 
 use crate::{
     application::{
-        commit_metadata_repository_impl::CommitMetadataRepositoryImpl,
-        commit_summary_repository_impl::CommitSummaryRepositoryImpl,
         manager::{output_manager::OutputManager, tag_write_manager::TagWriteManager},
         options::describe::DescribeOptions,
+        repository_impl::{
+            commit_metadata_repository_impl::CommitMetadataRepositoryImpl,
+            commit_summary_repository_impl::CommitSummaryRepositoryImpl,
+            tag_write_repository_impl::TagWriteRepositoryImpl,
+            version_repository_impl::VersionRepositoryImpl,
+        },
         retriever::{
             commit_metadata_retriever::CommitMetadataRetriever, commit_retriever::CommitRetriever,
             version_retriever::VersionRetriever,
         },
-        tag_write_repository_impl::TagWriteRepositoryImpl,
-        version_repository_impl::VersionRepositoryImpl,
     },
     domain::trigger::Trigger,
     usecases::{
