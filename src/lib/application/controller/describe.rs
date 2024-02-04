@@ -7,7 +7,7 @@ use crate::{
         manager::{output_manager::OutputManager, tag_write_manager::TagWriteManager},
         options::describe::DescribeOptions,
         repository_impl::{
-            commit_metadata_repository_impl::CommitMetadataIngressRepositoryImpl,
+            commit_metadata_ingress_repository_impl::CommitMetadataIngressRepositoryImpl,
             commit_summary_repository_impl::CommitSummaryRepositoryImpl,
             tag_write_repository_impl::TagWriteRepositoryImpl,
             version_repository_impl::VersionRepositoryImpl,
