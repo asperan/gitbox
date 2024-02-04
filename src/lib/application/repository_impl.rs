@@ -2,6 +2,6 @@ pub mod commit_metadata_ingress_repository_impl;
 pub mod conventional_commit_egress_repository_impl;
 pub mod bounded_commit_summary_ingress_repository_impl;
 pub mod full_commit_summary_history_repository_impl;
-pub mod gitextra_write_repository_impl;
+pub mod gitextra_egress_repository_impl;
 pub mod tag_write_repository_impl;
 pub mod version_repository_impl;
