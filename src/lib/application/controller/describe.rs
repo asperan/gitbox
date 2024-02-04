@@ -14,7 +14,7 @@ use crate::{
         },
         retriever::{
             commit_metadata_ingress_manager::CommitMetadataIngressManager,
-            commit_retriever::BoundedCommitSummaryIngressManager, version_ingress_manager::VersionIngressManager,
+            bounded_commit_summary_ingress_manager::BoundedCommitSummaryIngressManager, version_ingress_manager::VersionIngressManager,
         },
     },
     domain::trigger::Trigger,

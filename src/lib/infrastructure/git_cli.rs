@@ -8,7 +8,7 @@ use crate::{
         },
         retriever::{
             commit_metadata_ingress_manager::CommitMetadataIngressManager,
-            commit_retriever::BoundedCommitSummaryIngressManager,
+            bounded_commit_summary_ingress_manager::BoundedCommitSummaryIngressManager,
             full_commit_summary_history_ingress_manager::FullCommitSummaryHistoryIngressManager,
             gitinfo_ingress_manager::GitInfoIngressManager,
             version_ingress_manager::VersionIngressManager,

@@ -9,7 +9,7 @@ use crate::{
             version_repository_impl::VersionRepositoryImpl,
         },
         retriever::{
-            commit_retriever::BoundedCommitSummaryIngressManager,
+            bounded_commit_summary_ingress_manager::BoundedCommitSummaryIngressManager,
             version_ingress_manager::VersionIngressManager,
         },
     },
@@ -101,7 +101,7 @@ mod tests {
             manager::output_manager::OutputManager,
             options::changelog::ChangelogOptions,
             retriever::{
-                commit_retriever::BoundedCommitSummaryIngressManager,
+                bounded_commit_summary_ingress_manager::BoundedCommitSummaryIngressManager,
                 version_ingress_manager::VersionIngressManager,
             },
         },
