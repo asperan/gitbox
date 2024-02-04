@@ -107,19 +107,19 @@ impl<'a> CalculateNewVersionUseCase<'a> {
         match commit {
             CommitSummary::FreeForm(_) => Change::None,
             CommitSummary::Conventional(c) => {
-                if self.configuration.triggers().major_trigger().accept(
+                if self.configuration.triggers().major().accept(
                     c.typ(),
                     c.scope(),
                     c.breaking(),
                 ) {
                     Change::Major
-                } else if self.configuration.triggers().minor_trigger().accept(
+                } else if self.configuration.triggers().minor().accept(
                     c.typ(),
                     c.scope(),
                     c.breaking(),
                 ) {
                     Change::Minor
-                } else if self.configuration.triggers().patch_trigger().accept(
+                } else if self.configuration.triggers().patch().accept(
                     c.typ(),
                     c.scope(),
                     c.breaking(),

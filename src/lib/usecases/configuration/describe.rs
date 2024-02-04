@@ -101,13 +101,13 @@ impl DescribeTriggerConfiguration {
         }
     }
 
-    pub fn major_trigger(&self) -> &Trigger {
+    pub fn major(&self) -> &Trigger {
         &self.major_trigger
     }
-    pub fn minor_trigger(&self) -> &Trigger {
+    pub fn minor(&self) -> &Trigger {
         &self.minor_trigger
     }
-    pub fn patch_trigger(&self) -> &Trigger {
+    pub fn patch(&self) -> &Trigger {
         &self.patch_trigger
     }
 }
