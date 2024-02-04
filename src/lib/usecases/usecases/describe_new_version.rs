@@ -25,7 +25,7 @@ pub struct CalculateNewVersionUseCase<'a> {
 
 impl<'a> UseCase<(SemanticVersion, Option<SemanticVersion>)> for CalculateNewVersionUseCase<'a> {
     fn execute(&self) -> Result<(SemanticVersion, Option<SemanticVersion>), AnyError> {
-        let base_version = if self.configuration.prerelease().prerelease() {
+        let base_version = if self.configuration.prerelease().is_active() {
             self.version_repository.last_version()
         } else {
             self.version_repository.last_stable_version()
@@ -49,7 +49,7 @@ impl<'a> UseCase<(SemanticVersion, Option<SemanticVersion>)> for CalculateNewVer
                         base_version.patch() + 1,
                     ),
                     Change::None => {
-                        if self.configuration.prerelease().prerelease() {
+                        if self.configuration.prerelease().is_active() {
                             StableVersion::new(
                                 base_version.major(),
                                 base_version.minor(),
@@ -61,7 +61,7 @@ impl<'a> UseCase<(SemanticVersion, Option<SemanticVersion>)> for CalculateNewVer
                     }
                 }
             };
-            let prerelease = if self.configuration.prerelease().prerelease() {
+            let prerelease = if self.configuration.prerelease().is_active() {
                 Some(self.update_prerelease(&stable_version)?)
             } else {
                 None
@@ -152,7 +152,7 @@ impl<'a> CalculateNewVersionUseCase<'a> {
             let next_prerelease_number = if self
                 .configuration
                 .prerelease()
-                .prerelease_pattern_changed()
+                .pattern_changed()
                 || is_stable_updated
             {
                 // Reset number
@@ -160,12 +160,12 @@ impl<'a> CalculateNewVersionUseCase<'a> {
             } else {
                 let last_version_prerelease = last_version.as_ref().expect("stable is not updated, so last version is bound to exist").prerelease().as_ref().expect("prerelease is present, else this function would have returned an error already");
                 let old_prerelease_number =
-                    self.configuration.prerelease().old_prerelease_pattern()(
+                    self.configuration.prerelease().old_pattern()(
                         &last_version_prerelease,
                     );
                 old_prerelease_number + 1
             };
-            Ok(self.configuration.prerelease().prerelease_pattern()(
+            Ok(self.configuration.prerelease().pattern()(
                 next_prerelease_number,
             ))
         }

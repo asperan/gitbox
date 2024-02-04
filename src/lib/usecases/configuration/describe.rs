@@ -54,16 +54,16 @@ impl<'a> DescribePrereleaseConfiguration<'a> {
         }
     }
 
-    pub fn prerelease(&self) -> bool {
+    pub fn is_active(&self) -> bool {
         self.prerelease
     }
-    pub fn prerelease_pattern(&self) -> &PrereleasePattern<'a> {
+    pub fn pattern(&self) -> &PrereleasePattern<'a> {
         &self.prerelease_pattern
     }
-    pub fn old_prerelease_pattern(&self) -> &OldPrereleasePattern<'a> {
+    pub fn old_pattern(&self) -> &OldPrereleasePattern<'a> {
         &self.old_prerelease_pattern
     }
-    pub fn prerelease_pattern_changed(&self) -> bool {
+    pub fn pattern_changed(&self) -> bool {
         self.prerelease_pattern_changed
     }
 }
