@@ -128,7 +128,7 @@ mod tests {
             "test".to_string(),
             None,
             false,
-        );
+        ).expect("commit options are hand made");
         let commit_manager = Rc::new(MockCommitManager { fail: false });
         let output_manager = Rc::new(MockOutputManager {});
         let controller = CommitController::new(options, commit_manager, output_manager);
@@ -145,7 +145,7 @@ mod tests {
             "test".to_string(),
             None,
             false,
-        );
+        ).expect("commit options are hand made");
         let commit_manager = Rc::new(MockCommitManager { fail: true });
         let output_manager = Rc::new(MockOutputManager {});
         let controller = CommitController::new(options, commit_manager, output_manager);

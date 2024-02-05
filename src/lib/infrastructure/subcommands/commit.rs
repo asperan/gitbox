@@ -123,13 +123,13 @@ impl CommitSubCommand {
             Some(_) => None,
             None => prompt_manager.ask_body()?,
         };
-        Ok(CommitOptions::new(
+        CommitOptions::new(
             temp_type,
             temp_scope,
             temp_breaking,
             temp_summary,
             temp_message,
             self.quiet,
-        ))
+        )
     }
 }
