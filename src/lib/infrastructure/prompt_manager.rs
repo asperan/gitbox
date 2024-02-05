@@ -6,7 +6,7 @@ use requestty::{prompt_one, Answer, Question};
 use crate::usecases::type_aliases::AnyError;
 
 use super::{
-    gitextra_append_manager::GitExtraEgressHelper, gitextra_ingress_manager::GitExtraIngressManager,
+    gitextra_egress_helper::GitExtraEgressHelper, gitextra_ingress_manager::GitExtraIngressManager,
 };
 
 pub struct PromptManager {

@@ -1,6 +1,6 @@
 pub mod error;
 mod git_cli;
-mod gitextra_append_manager;
+mod gitextra_egress_helper;
 mod gitextra_manager_impl;
 mod gitextra_ingress_manager;
 pub mod output_manager_impl;
