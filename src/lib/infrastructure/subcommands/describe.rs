@@ -5,6 +5,7 @@ use clap::{builder::PossibleValue, Args, ValueEnum};
 use crate::{
     application::{
         controller::{describe::DescribeController, exit_code::ControllerExitCode},
+        manager::message_egress_manager::MessageEgressManager,
         options::describe::DescribeOptions,
     },
     infrastructure::{
@@ -82,7 +83,7 @@ impl Subcommand for DescribeSubCommand {
     fn execute(&self) -> i32 {
         let git_cli = Rc::new(GitCli::new());
         let output_manager = Rc::new(OutputManagerImpl::new());
-        let options = DescribeOptions::new(
+        match DescribeOptions::new(
             self.prerelease,
             self.prerelease_pattern.clone(),
             self.old_prerelease_pattern
@@ -96,18 +97,25 @@ impl Subcommand for DescribeSubCommand {
             self.create_tag,
             self.tag_message.clone(),
             self.sign_tag,
-        );
-        let controller = DescribeController::new(
-            options,
-            git_cli.clone(),
-            git_cli.clone(),
-            git_cli.clone(),
-            git_cli.clone(),
-            output_manager.clone(),
-        );
-        match controller.describe() {
-            ControllerExitCode::Ok => 0,
-            ControllerExitCode::Error(i) => i,
+        ) {
+            Ok(options) => {
+                let controller = DescribeController::new(
+                    options,
+                    git_cli.clone(),
+                    git_cli.clone(),
+                    git_cli.clone(),
+                    git_cli.clone(),
+                    output_manager.clone(),
+                );
+                match controller.describe() {
+                    ControllerExitCode::Ok => 0,
+                    ControllerExitCode::Error(i) => i,
+                }
+            }
+            Err(e) => {
+                output_manager.error(&e.to_string());
+                1
+            }
         }
     }
 }
