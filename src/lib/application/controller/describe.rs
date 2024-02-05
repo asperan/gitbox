@@ -4,17 +4,20 @@ use regex::Regex;
 
 use crate::{
     application::{
-        manager::{message_egress_manager::MessageEgressManager, tag_egress_manager::TagEgressManager},
-        options::describe::DescribeOptions,
-        repository_impl::{
-            commit_metadata_ingress_repository_impl::CommitMetadataIngressRepositoryImpl,
-            bounded_commit_summary_ingress_repository_impl::BoundedCommitSummaryIngressRepositoryImpl,
-            tag_egress_repository_impl::TagEgressRepositoryImpl,
-            semantic_version_ingress_repository_impl::SemanticVersionIngressRepositoryImpl,
+        manager::{
+            bounded_commit_summary_ingress_manager::BoundedCommitSummaryIngressManager,
+            commit_metadata_ingress_manager::CommitMetadataIngressManager,
+            version_ingress_manager::VersionIngressManager,
         },
         manager::{
-            commit_metadata_ingress_manager::CommitMetadataIngressManager,
-            bounded_commit_summary_ingress_manager::BoundedCommitSummaryIngressManager, version_ingress_manager::VersionIngressManager,
+            message_egress_manager::MessageEgressManager, tag_egress_manager::TagEgressManager,
+        },
+        options::describe::DescribeOptions,
+        repository_impl::{
+            bounded_commit_summary_ingress_repository_impl::BoundedCommitSummaryIngressRepositoryImpl,
+            commit_metadata_ingress_repository_impl::CommitMetadataIngressRepositoryImpl,
+            semantic_version_ingress_repository_impl::SemanticVersionIngressRepositoryImpl,
+            tag_egress_repository_impl::TagEgressRepositoryImpl,
         },
     },
     domain::trigger::Trigger,
@@ -82,7 +85,9 @@ impl DescribeController {
         let commit_metadata_repository = Rc::new(CommitMetadataIngressRepositoryImpl::new(
             self.commit_metadata_manager.clone(),
         ));
-        let version_repository = Rc::new(SemanticVersionIngressRepositoryImpl::new(self.version_manager.clone()));
+        let version_repository = Rc::new(SemanticVersionIngressRepositoryImpl::new(
+            self.version_manager.clone(),
+        ));
         let describe_usecase = CalculateNewVersionUseCase::new(
             describe_configuration,
             commit_summary_repository.clone(),
