@@ -10,7 +10,7 @@ use crate::{
         manager::gitinfo_ingress_manager::GitInfoIngressManager,
     },
     infrastructure::{
-        git_cli::GitCli, output_manager_impl::OutputManagerImpl, subcommand::Subcommand,
+        git_cli::GitCli, output_manager_impl::MessageEgressManagerImpl, subcommand::Subcommand,
     },
 };
 
@@ -23,7 +23,7 @@ pub struct InitSubCommand {
 
 impl Subcommand for InitSubCommand {
     fn execute(&self) -> i32 {
-        let output_manager = Rc::new(OutputManagerImpl::new());
+        let output_manager = Rc::new(MessageEgressManagerImpl::new());
         let git_cli = Rc::new(GitCli::new());
         let gitinfo_retriever = git_cli.clone();
         if gitinfo_retriever.git_dir().is_ok() {

@@ -12,7 +12,7 @@ use crate::{
         options::describe::DescribeOptions,
     },
     infrastructure::{
-        git_cli::GitCli, output_manager_impl::OutputManagerImpl, subcommand::Subcommand,
+        git_cli::GitCli, output_manager_impl::MessageEgressManagerImpl, subcommand::Subcommand,
     },
     usecases::metadata_spec::MetadataSpec,
 };
@@ -85,7 +85,7 @@ pub struct DescribeSubCommand {
 impl Subcommand for DescribeSubCommand {
     fn execute(&self) -> i32 {
         let git_cli = Rc::new(GitCli::new());
-        let output_manager = Rc::new(OutputManagerImpl::new());
+        let output_manager = Rc::new(MessageEgressManagerImpl::new());
         if let Err(e) = git_cli.git_dir() {
             output_manager.error(&format!("Failed to retrieve git dir: {}", e.to_string()));
             output_manager.error("describe subcommand can only be run inside a git project");

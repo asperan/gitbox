@@ -11,7 +11,7 @@ use crate::{
     },
     infrastructure::{
         git_cli::GitCli, gitextra_manager_impl::GitExtraManagerImpl,
-        output_manager_impl::OutputManagerImpl, subcommand::Subcommand,
+        output_manager_impl::MessageEgressManagerImpl, subcommand::Subcommand,
     },
 };
 
@@ -22,7 +22,7 @@ pub struct RefreshExtraSubcommand {}
 impl Subcommand for RefreshExtraSubcommand {
     fn execute(&self) -> i32 {
         let git_cli = Rc::new(GitCli::new());
-        let output_manager = Rc::new(OutputManagerImpl::new());
+        let output_manager = Rc::new(MessageEgressManagerImpl::new());
         if let Err(e) = git_cli.git_dir() {
             output_manager.error(&format!("Failed to retrieve git dir: {}", e));
             output_manager.error("refresh-extra subcommand can only be run inside a git project");

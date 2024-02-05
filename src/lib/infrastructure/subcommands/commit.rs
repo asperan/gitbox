@@ -10,7 +10,7 @@ use crate::{
     },
     infrastructure::{
         git_cli::GitCli, gitextra_manager_impl::GitExtraManagerImpl,
-        output_manager_impl::OutputManagerImpl, prompt_helper::PromptHelper,
+        output_manager_impl::MessageEgressManagerImpl, helper::prompt_helper::PromptHelper,
         subcommand::Subcommand,
     },
     usecases::type_aliases::AnyError,
@@ -51,7 +51,7 @@ pub struct CommitSubCommand {
 impl Subcommand for CommitSubCommand {
     fn execute(&self) -> i32 {
         let git_cli = Rc::new(GitCli::new());
-        let output_manager = Rc::new(OutputManagerImpl::new());
+        let output_manager = Rc::new(MessageEgressManagerImpl::new());
         if let Err(e) = git_cli.git_dir() {
             output_manager.error(&format!("Failed to retrieve git directory: {}", e.to_string()));
             output_manager.error("commit subcommand can only be run inside a git project.");

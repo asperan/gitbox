@@ -1,14 +1,14 @@
 use crate::application::manager::message_egress_manager::MessageEgressManager;
 
-pub struct OutputManagerImpl {}
+pub struct MessageEgressManagerImpl {}
 
-impl OutputManagerImpl {
-    pub fn new() -> OutputManagerImpl {
-        OutputManagerImpl {}
+impl MessageEgressManagerImpl {
+    pub fn new() -> MessageEgressManagerImpl {
+        MessageEgressManagerImpl {}
     }
 }
 
-impl MessageEgressManager for OutputManagerImpl {
+impl MessageEgressManager for MessageEgressManagerImpl {
     fn output(&self, message: &str) {
         println!("{}", message);
     }

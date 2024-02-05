@@ -10,7 +10,7 @@ use crate::{
         options::changelog::ChangelogOptions,
     },
     infrastructure::{
-        git_cli::GitCli, output_manager_impl::OutputManagerImpl, subcommand::Subcommand,
+        git_cli::GitCli, output_manager_impl::MessageEgressManagerImpl, subcommand::Subcommand,
     },
 };
 
@@ -80,7 +80,7 @@ pub struct ChangelogSubCommand {
 
 impl Subcommand for ChangelogSubCommand {
     fn execute(&self) -> i32 {
-        let output_manager = Rc::new(OutputManagerImpl::new());
+        let output_manager = Rc::new(MessageEgressManagerImpl::new());
         let git_cli = Rc::new(GitCli::new());
         if let Err(e) = git_cli.git_dir() {
             output_manager.error(&format!("Failed to retrieve git dir: {}", e.to_string()));
