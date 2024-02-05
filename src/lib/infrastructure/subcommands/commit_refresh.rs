@@ -10,9 +10,10 @@ use crate::{
 };
 
 #[derive(Args, Clone, Debug)]
-pub struct RefreshTypesAndScopesSubcommand {}
+#[command(about = "Refresh the content of the git extra folder")]
+pub struct RefreshExtraSubcommand {}
 
-impl Subcommand for RefreshTypesAndScopesSubcommand {
+impl Subcommand for RefreshExtraSubcommand {
     fn execute(&self) -> i32 {
         let git_cli = Rc::new(GitCli::new());
         let gitextra_manager = Rc::new(GitExtraManagerImpl::new(git_cli.clone()));
