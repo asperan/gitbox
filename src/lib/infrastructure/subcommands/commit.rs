@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use clap::{builder::NonEmptyStringValueParser, Args, Subcommand as ClapSubcommand};
+use clap::{builder::NonEmptyStringValueParser, Args};
 
 use crate::{
     application::{
@@ -11,7 +11,7 @@ use crate::{
     infrastructure::{
         git_cli::GitCli, gitextra_manager_impl::GitExtraManagerImpl,
         output_manager_impl::OutputManagerImpl, prompt_manager::PromptManager,
-        subcommand::Subcommand, subcommands::commit_refresh::RefreshTypesAndScopesSubcommand,
+        subcommand::Subcommand,
     },
     usecases::type_aliases::AnyError,
 };
@@ -46,32 +46,10 @@ pub struct CommitSubCommand {
 
     #[arg(short, long, help = "Suppress the print of the complete message")]
     quiet: bool,
-
-    #[command(subcommand)]
-    subcommand: Option<CommitSubCommands>,
-}
-
-#[derive(ClapSubcommand, Clone, Debug)]
-enum CommitSubCommands {
-    #[command(
-        about = "Refresh the lists of already used types and scopes (best result is after a fetch)"
-    )]
-    Refresh(RefreshTypesAndScopesSubcommand),
 }
 
 impl Subcommand for CommitSubCommand {
     fn execute(&self) -> i32 {
-        match &self.subcommand {
-            Some(c) => match c {
-                CommitSubCommands::Refresh(refresh) => refresh.execute(),
-            },
-            None => self.basic_command(),
-        }
-    }
-}
-
-impl CommitSubCommand {
-    fn basic_command(&self) -> i32 {
         let git_cli = Rc::new(GitCli::new());
         let output_manager = Rc::new(OutputManagerImpl::new());
         let gitextra_manager = Rc::new(GitExtraManagerImpl::new(git_cli.clone()));
@@ -90,7 +68,9 @@ impl CommitSubCommand {
             ControllerExitCode::Error(i) => i,
         }
     }
+}
 
+impl CommitSubCommand {
     fn breaking_option(&self) -> Option<bool> {
         match (self.is_breaking, self.is_not_breaking) {
             (false, false) => None,
