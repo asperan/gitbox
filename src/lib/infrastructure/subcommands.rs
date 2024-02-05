@@ -1,6 +1,6 @@
 pub mod changelog;
 pub mod commit;
-pub mod commit_refresh;
+pub mod refresh_extra;
 pub mod complete;
 pub mod describe;
 pub mod grammar;
