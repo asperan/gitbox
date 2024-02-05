@@ -10,7 +10,7 @@ use crate::{
     },
     infrastructure::{
         git_cli::GitCli, gitextra_manager_impl::GitExtraManagerImpl,
-        output_manager_impl::OutputManagerImpl, prompt_manager::PromptManager,
+        output_manager_impl::OutputManagerImpl, prompt_manager::PromptHelper,
         subcommand::Subcommand,
     },
     usecases::type_aliases::AnyError,
@@ -58,7 +58,7 @@ impl Subcommand for CommitSubCommand {
             return 1
         }
         let gitextra_manager = Rc::new(GitExtraManagerImpl::new(git_cli.clone()));
-        let prompt_manager = PromptManager::new(gitextra_manager.clone(), gitextra_manager.clone());
+        let prompt_manager = PromptHelper::new(gitextra_manager.clone(), gitextra_manager.clone());
         let options = match self.ask_missing_fields(prompt_manager) {
             Ok(o) => o,
             Err(e) => {
@@ -85,7 +85,7 @@ impl CommitSubCommand {
         }
     }
 
-    fn ask_missing_fields(&self, prompt_manager: PromptManager) -> Result<CommitOptions, AnyError> {
+    fn ask_missing_fields(&self, prompt_manager: PromptHelper) -> Result<CommitOptions, AnyError> {
         let temp_type = match self.commit_type.clone() {
             Some(t) => t,
             None => prompt_manager.ask_type()?,

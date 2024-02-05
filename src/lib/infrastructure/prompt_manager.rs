@@ -9,17 +9,17 @@ use super::helper::{
     gitextra_egress_helper::GitExtraEgressHelper, gitextra_ingress_helper::GitExtraIngressHelper,
 };
 
-pub struct PromptManager {
+pub struct PromptHelper {
     gitextra_read_manager: Rc<dyn GitExtraIngressHelper>,
     gitextra_append_manager: Rc<dyn GitExtraEgressHelper>,
 }
 
-impl PromptManager {
+impl PromptHelper {
     pub fn new(
         gitextra_read_manager: Rc<dyn GitExtraIngressHelper>,
         gitextra_append_manager: Rc<dyn GitExtraEgressHelper>,
-    ) -> PromptManager {
-        PromptManager {
+    ) -> PromptHelper {
+        PromptHelper {
             gitextra_read_manager,
             gitextra_append_manager,
         }
