@@ -5,7 +5,10 @@ use clap::{builder::PossibleValue, Args, ValueEnum};
 use crate::{
     application::{
         controller::{describe::DescribeController, exit_code::ControllerExitCode},
-        manager::message_egress_manager::MessageEgressManager,
+        manager::{
+            gitinfo_ingress_manager::GitInfoIngressManager,
+            message_egress_manager::MessageEgressManager,
+        },
         options::describe::DescribeOptions,
     },
     infrastructure::{
@@ -83,6 +86,11 @@ impl Subcommand for DescribeSubCommand {
     fn execute(&self) -> i32 {
         let git_cli = Rc::new(GitCli::new());
         let output_manager = Rc::new(OutputManagerImpl::new());
+        if let Err(e) = git_cli.git_dir() {
+            output_manager.error(&format!("Failed to retrieve git dir: {}", e.to_string()));
+            output_manager.error("describe subcommand can only be run inside a git project");
+            return 1;
+        }
         match DescribeOptions::new(
             self.prerelease,
             self.prerelease_pattern.clone(),
