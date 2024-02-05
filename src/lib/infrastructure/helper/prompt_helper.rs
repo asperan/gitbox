@@ -5,7 +5,7 @@ use requestty::{prompt_one, Answer, Question};
 
 use crate::usecases::type_aliases::AnyError;
 
-use super::helper::{
+use super::{
     gitextra_egress_helper::GitExtraEgressHelper, gitextra_ingress_helper::GitExtraIngressHelper,
 };
 
