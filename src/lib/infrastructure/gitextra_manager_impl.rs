@@ -14,7 +14,7 @@ use crate::{
     usecases::type_aliases::AnyError,
 };
 
-use super::{
+use super::helper::{
     gitextra_egress_helper::GitExtraEgressHelper, gitextra_ingress_helper::GitExtraIngressHelper,
 };
 
