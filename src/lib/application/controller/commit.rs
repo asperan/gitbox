@@ -2,7 +2,10 @@ use std::rc::Rc;
 
 use crate::{
     application::{
-        manager::{conventional_commit_egress_manager::ConventionalCommitEgressManager, message_egress_manager::MessageEgressManager},
+        manager::{
+            conventional_commit_egress_manager::ConventionalCommitEgressManager,
+            message_egress_manager::MessageEgressManager,
+        },
         options::commit::CommitOptions,
         repository_impl::conventional_commit_egress_repository_impl::ConventionalCommitEgressRepositoryImpl,
     },
@@ -42,8 +45,9 @@ impl CommitController {
             self.options.message().clone(),
         ) {
             Ok(configuration) => {
-                let commit_repository =
-                    Rc::new(ConventionalCommitEgressRepositoryImpl::new(self.commit_manager.clone()));
+                let commit_repository = Rc::new(ConventionalCommitEgressRepositoryImpl::new(
+                    self.commit_manager.clone(),
+                ));
                 let usecase =
                     CreateConventionalCommitUseCase::new(configuration, commit_repository);
                 match usecase.execute() {
@@ -74,7 +78,10 @@ mod tests {
     use crate::{
         application::{
             controller::{commit::CommitController, exit_code::ControllerExitCode},
-            manager::{conventional_commit_egress_manager::ConventionalCommitEgressManager, message_egress_manager::MessageEgressManager},
+            manager::{
+                conventional_commit_egress_manager::ConventionalCommitEgressManager,
+                message_egress_manager::MessageEgressManager,
+            },
             options::commit::CommitOptions,
         },
         usecases::type_aliases::AnyError,
@@ -128,7 +135,8 @@ mod tests {
             "test".to_string(),
             None,
             false,
-        ).expect("commit options are hand made");
+        )
+        .expect("commit options are hand made");
         let commit_manager = Rc::new(MockCommitManager { fail: false });
         let output_manager = Rc::new(MockOutputManager {});
         let controller = CommitController::new(options, commit_manager, output_manager);
@@ -145,7 +153,8 @@ mod tests {
             "test".to_string(),
             None,
             false,
-        ).expect("commit options are hand made");
+        )
+        .expect("commit options are hand made");
         let commit_manager = Rc::new(MockCommitManager { fail: true });
         let output_manager = Rc::new(MockOutputManager {});
         let controller = CommitController::new(options, commit_manager, output_manager);
