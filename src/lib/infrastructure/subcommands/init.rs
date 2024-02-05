@@ -5,12 +5,12 @@ use clap::Args;
 use crate::{
     application::{
         controller::{exit_code::ControllerExitCode, init::InitController},
+        manager::gitinfo_ingress_manager::GitInfoIngressManager,
         manager::message_egress_manager::MessageEgressManager,
         options::init::InitOptions,
-        manager::gitinfo_ingress_manager::GitInfoIngressManager,
     },
     infrastructure::{
-        git_cli::GitCli, message_egress_manager_impl::MessageEgressManagerImpl, subcommand::Subcommand,
+        interface::{git_cli::GitCli, message_egress_manager_impl::MessageEgressManagerImpl}, subcommand::Subcommand
     },
 };
 

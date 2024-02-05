@@ -1,7 +1,5 @@
 pub mod error;
-mod git_cli;
-mod gitextra_manager_impl;
 mod helper;
-pub mod message_egress_manager_impl;
+mod interface;
 pub mod subcommand;
 pub mod subcommands;

@@ -10,7 +10,8 @@ use crate::{
         options::changelog::ChangelogOptions,
     },
     infrastructure::{
-        git_cli::GitCli, message_egress_manager_impl::MessageEgressManagerImpl, subcommand::Subcommand,
+        interface::{git_cli::GitCli, message_egress_manager_impl::MessageEgressManagerImpl},
+        subcommand::Subcommand,
     },
 };
 

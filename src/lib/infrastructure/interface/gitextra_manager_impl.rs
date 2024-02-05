@@ -5,7 +5,6 @@ use std::{
     rc::Rc,
 };
 
-use crate::domain::constant::DEFAULT_COMMIT_TYPES;
 use crate::{
     application::{
         manager::gitextra_egress_manager::GitExtraEgressManager,
@@ -13,9 +12,12 @@ use crate::{
     },
     usecases::type_aliases::AnyError,
 };
-
-use super::helper::{
-    gitextra_egress_helper::GitExtraEgressHelper, gitextra_ingress_helper::GitExtraIngressHelper,
+use crate::{
+    domain::constant::DEFAULT_COMMIT_TYPES,
+    infrastructure::helper::{
+        gitextra_egress_helper::GitExtraEgressHelper,
+        gitextra_ingress_helper::GitExtraIngressHelper,
+    },
 };
 
 const EXTRA_DIR_PATH: &str = "extra";

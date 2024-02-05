@@ -5,12 +5,18 @@ use clap::{builder::NonEmptyStringValueParser, Args};
 use crate::{
     application::{
         controller::{commit::CommitController, exit_code::ControllerExitCode},
-        manager::{gitinfo_ingress_manager::GitInfoIngressManager, message_egress_manager::MessageEgressManager},
+        manager::{
+            gitinfo_ingress_manager::GitInfoIngressManager,
+            message_egress_manager::MessageEgressManager,
+        },
         options::commit::CommitOptions,
     },
     infrastructure::{
-        git_cli::GitCli, gitextra_manager_impl::GitExtraManagerImpl,
-        message_egress_manager_impl::MessageEgressManagerImpl, helper::prompt_helper::PromptHelper,
+        helper::prompt_helper::PromptHelper,
+        interface::{
+            git_cli::GitCli, gitextra_manager_impl::GitExtraManagerImpl,
+            message_egress_manager_impl::MessageEgressManagerImpl,
+        },
         subcommand::Subcommand,
     },
     usecases::type_aliases::AnyError,
@@ -53,9 +59,12 @@ impl Subcommand for CommitSubCommand {
         let git_cli = Rc::new(GitCli::new());
         let output_manager = Rc::new(MessageEgressManagerImpl::new());
         if let Err(e) = git_cli.git_dir() {
-            output_manager.error(&format!("Failed to retrieve git directory: {}", e.to_string()));
+            output_manager.error(&format!(
+                "Failed to retrieve git directory: {}",
+                e.to_string()
+            ));
             output_manager.error("commit subcommand can only be run inside a git project.");
-            return 1
+            return 1;
         }
         let gitextra_manager = Rc::new(GitExtraManagerImpl::new(git_cli.clone()));
         let prompt_manager = PromptHelper::new(gitextra_manager.clone(), gitextra_manager.clone());

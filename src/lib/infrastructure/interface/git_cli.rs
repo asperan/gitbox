@@ -15,10 +15,11 @@ use crate::{
         },
     },
     domain::semantic_version::SemanticVersion,
+    infrastructure::error::{
+        command_execution_error::CommandExecutionError, generic_cli_error::CliError,
+    },
     usecases::{metadata_spec::MetadataSpec, type_aliases::AnyError},
 };
-
-use super::error::{command_execution_error::CommandExecutionError, generic_cli_error::CliError};
 
 pub struct GitCli {}
 
