@@ -15,7 +15,7 @@ use crate::{
 };
 
 use super::{
-    gitextra_egress_helper::GitExtraEgressHelper, gitextra_ingress_manager::GitExtraIngressHelper,
+    gitextra_egress_helper::GitExtraEgressHelper, gitextra_ingress_helper::GitExtraIngressHelper,
 };
 
 const EXTRA_DIR_PATH: &str = "extra";
