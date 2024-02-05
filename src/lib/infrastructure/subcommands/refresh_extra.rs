@@ -11,7 +11,7 @@ use crate::{
     },
     infrastructure::{
         git_cli::GitCli, gitextra_manager_impl::GitExtraManagerImpl,
-        output_manager_impl::MessageEgressManagerImpl, subcommand::Subcommand,
+        message_egress_manager_impl::MessageEgressManagerImpl, subcommand::Subcommand,
     },
 };
 

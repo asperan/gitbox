@@ -10,7 +10,7 @@ use crate::{
         manager::gitinfo_ingress_manager::GitInfoIngressManager,
     },
     infrastructure::{
-        git_cli::GitCli, output_manager_impl::MessageEgressManagerImpl, subcommand::Subcommand,
+        git_cli::GitCli, message_egress_manager_impl::MessageEgressManagerImpl, subcommand::Subcommand,
     },
 };
 
