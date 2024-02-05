@@ -5,7 +5,7 @@ use clap::{builder::NonEmptyStringValueParser, Args};
 use crate::{
     application::{
         controller::{commit::CommitController, exit_code::ControllerExitCode},
-        manager::message_egress_manager::MessageEgressManager,
+        manager::{gitinfo_ingress_manager::GitInfoIngressManager, message_egress_manager::MessageEgressManager},
         options::commit::CommitOptions,
     },
     infrastructure::{
@@ -52,6 +52,11 @@ impl Subcommand for CommitSubCommand {
     fn execute(&self) -> i32 {
         let git_cli = Rc::new(GitCli::new());
         let output_manager = Rc::new(OutputManagerImpl::new());
+        if let Err(e) = git_cli.git_dir() {
+            output_manager.error(&format!("Failed to retrieve git directory: {}", e.to_string()));
+            output_manager.error("commit subcommand can only be run inside a git project.");
+            return 1
+        }
         let gitextra_manager = Rc::new(GitExtraManagerImpl::new(git_cli.clone()));
         let prompt_manager = PromptManager::new(gitextra_manager.clone(), gitextra_manager.clone());
         let options = match self.ask_missing_fields(prompt_manager) {
