@@ -2,12 +2,15 @@ use std::rc::Rc;
 
 use crate::{
     application::{
-        manager::{gitextra_egress_manager::GitExtraEgressManager, message_egress_manager::MessageEgressManager},
+        manager::full_commit_summary_history_ingress_manager::FullCommitSummaryHistoryIngressManager,
+        manager::{
+            gitextra_egress_manager::GitExtraEgressManager,
+            message_egress_manager::MessageEgressManager,
+        },
         repository_impl::{
             full_commit_summary_history_repository_impl::FullCommitSummaryHistoryRepositoryImpl,
             gitextra_egress_repository_impl::GitExtraEgressRepositoryImpl,
         },
-        manager::full_commit_summary_history_ingress_manager::FullCommitSummaryHistoryIngressManager,
     },
     usecases::usecases::{
         refresh_types_and_scopes::RefreshTypesAndScopesUseCase, usecase::UseCase,
