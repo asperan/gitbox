@@ -15,7 +15,7 @@ use crate::{
 };
 
 use super::{
-    gitextra_egress_helper::GitExtraEgressHelper, gitextra_ingress_manager::GitExtraIngressManager,
+    gitextra_egress_helper::GitExtraEgressHelper, gitextra_ingress_manager::GitExtraIngressHelper,
 };
 
 const EXTRA_DIR_PATH: &str = "extra";
@@ -69,7 +69,7 @@ impl GitExtraEgressManager for GitExtraManagerImpl {
     }
 }
 
-impl GitExtraIngressManager for GitExtraManagerImpl {
+impl GitExtraIngressHelper for GitExtraManagerImpl {
     fn get_types(&self) -> Result<Vec<String>, AnyError> {
         let path = Path::new(&self.gitinfo_manager.git_dir()?)
             .join(EXTRA_DIR_PATH)
