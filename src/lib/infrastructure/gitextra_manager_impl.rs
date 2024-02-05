@@ -15,7 +15,7 @@ use crate::{
 };
 
 use super::{
-    gitextra_append_manager::GitExtraAppendManager, gitextra_ingress_manager::GitExtraIngressManager,
+    gitextra_append_manager::GitExtraEgressHelper, gitextra_ingress_manager::GitExtraIngressManager,
 };
 
 const EXTRA_DIR_PATH: &str = "extra";
@@ -94,7 +94,7 @@ impl GitExtraIngressManager for GitExtraManagerImpl {
     }
 }
 
-impl GitExtraAppendManager for GitExtraManagerImpl {
+impl GitExtraEgressHelper for GitExtraManagerImpl {
     fn append_type(&self, new_type: &str) -> Result<(), AnyError> {
         let path = Path::new(&self.gitinfo_manager.git_dir()?)
             .join(EXTRA_DIR_PATH)

@@ -6,18 +6,18 @@ use requestty::{prompt_one, Answer, Question};
 use crate::usecases::type_aliases::AnyError;
 
 use super::{
-    gitextra_append_manager::GitExtraAppendManager, gitextra_ingress_manager::GitExtraIngressManager,
+    gitextra_append_manager::GitExtraEgressHelper, gitextra_ingress_manager::GitExtraIngressManager,
 };
 
 pub struct PromptManager {
     gitextra_read_manager: Rc<dyn GitExtraIngressManager>,
-    gitextra_append_manager: Rc<dyn GitExtraAppendManager>,
+    gitextra_append_manager: Rc<dyn GitExtraEgressHelper>,
 }
 
 impl PromptManager {
     pub fn new(
         gitextra_read_manager: Rc<dyn GitExtraIngressManager>,
-        gitextra_append_manager: Rc<dyn GitExtraAppendManager>,
+        gitextra_append_manager: Rc<dyn GitExtraEgressHelper>,
     ) -> PromptManager {
         PromptManager {
             gitextra_read_manager,
