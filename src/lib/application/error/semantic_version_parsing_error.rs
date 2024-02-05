@@ -12,6 +12,7 @@ impl SemanticVersionParsingError {
         }
     }
 
+    #[cfg(test)]
     pub fn wrong_version(&self) -> &str {
         &self.wrong_version
     }
