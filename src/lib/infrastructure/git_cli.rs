@@ -3,15 +3,15 @@ use std::{process::Command, str::FromStr};
 use crate::{
     application::{
         manager::{
-            conventional_commit_egress_manager::ConventionalCommitEgressManager, init_egress_manager::InitEgressManager,
-            tag_egress_manager::TagEgressManager,
-        },
-        manager::{
-            commit_metadata_ingress_manager::CommitMetadataIngressManager,
             bounded_commit_summary_ingress_manager::BoundedCommitSummaryIngressManager,
+            commit_metadata_ingress_manager::CommitMetadataIngressManager,
             full_commit_summary_history_ingress_manager::FullCommitSummaryHistoryIngressManager,
             gitinfo_ingress_manager::GitInfoIngressManager,
             version_ingress_manager::VersionIngressManager,
+        },
+        manager::{
+            conventional_commit_egress_manager::ConventionalCommitEgressManager,
+            init_egress_manager::InitEgressManager, tag_egress_manager::TagEgressManager,
         },
     },
     domain::semantic_version::SemanticVersion,
