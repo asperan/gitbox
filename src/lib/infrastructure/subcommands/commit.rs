@@ -10,7 +10,7 @@ use crate::{
     },
     infrastructure::{
         git_cli::GitCli, gitextra_manager_impl::GitExtraManagerImpl,
-        output_manager_impl::OutputManagerImpl, prompt_manager::PromptHelper,
+        output_manager_impl::OutputManagerImpl, prompt_helper::PromptHelper,
         subcommand::Subcommand,
     },
     usecases::type_aliases::AnyError,
