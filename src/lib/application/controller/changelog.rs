@@ -3,14 +3,14 @@ use std::{rc::Rc, str::FromStr};
 use crate::{
     application::{
         manager::message_egress_manager::MessageEgressManager,
+        manager::{
+            bounded_commit_summary_ingress_manager::BoundedCommitSummaryIngressManager,
+            version_ingress_manager::VersionIngressManager,
+        },
         options::changelog::{ChangelogOptions, FORMAT_PLACEHOLDER},
         repository_impl::{
             bounded_commit_summary_ingress_repository_impl::BoundedCommitSummaryIngressRepositoryImpl,
             semantic_version_ingress_repository_impl::SemanticVersionIngressRepositoryImpl,
-        },
-        manager::{
-            bounded_commit_summary_ingress_manager::BoundedCommitSummaryIngressManager,
-            version_ingress_manager::VersionIngressManager,
         },
     },
     domain::trigger::Trigger,
@@ -76,7 +76,9 @@ impl ChangelogController {
             Rc::new(BoundedCommitSummaryIngressRepositoryImpl::new(
                 self.commit_retriever.clone(),
             )),
-            Rc::new(SemanticVersionIngressRepositoryImpl::new(self.version_retriever.clone())),
+            Rc::new(SemanticVersionIngressRepositoryImpl::new(
+                self.version_retriever.clone(),
+            )),
         );
         match usecase.execute() {
             Ok(c) => {
@@ -99,11 +101,11 @@ mod tests {
         application::{
             controller::exit_code::ControllerExitCode,
             manager::message_egress_manager::MessageEgressManager,
-            options::changelog::ChangelogOptions,
             manager::{
                 bounded_commit_summary_ingress_manager::BoundedCommitSummaryIngressManager,
                 version_ingress_manager::VersionIngressManager,
             },
+            options::changelog::ChangelogOptions,
         },
         domain::semantic_version::SemanticVersion,
         usecases::type_aliases::AnyError,
