@@ -5,3 +5,4 @@ pub mod exit_code;
 pub mod init;
 pub mod license;
 pub mod refresh;
+pub mod tree;
