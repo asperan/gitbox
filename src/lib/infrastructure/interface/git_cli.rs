@@ -11,6 +11,7 @@ use crate::{
         },
         manager::{
             conventional_commit_egress_manager::ConventionalCommitEgressManager,
+            git_tree_ingress_manager::GitTreeIngressManager,
             init_egress_manager::InitEgressManager, tag_egress_manager::TagEgressManager,
         },
     },
@@ -177,5 +178,26 @@ impl CommitMetadataIngressManager for GitCli {
                 self.run_git_command(vec!["log", "-n", "1", "--pretty=format:%as"].into_iter())
             }
         }
+    }
+}
+
+impl GitTreeIngressManager for GitCli {
+    fn commit_tree(&self, format: &str) -> Result<Box<[String]>, AnyError> {
+        Ok(self
+            .run_git_command(
+                vec![
+                    "log",
+                    "--all",
+                    "--graph",
+                    "--decorate=short",
+                    "--date-order",
+                    "--color",
+                    &format!("--pretty=format:{}", format),
+                ]
+                .into_iter(),
+            )?
+            .split('\n')
+            .map(|it| it.to_string())
+            .collect())
     }
 }
