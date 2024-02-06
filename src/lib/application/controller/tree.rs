@@ -99,3 +99,11 @@ impl TreeController {
         .into()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn tree_controller() {
+        unimplemented!();
+    }
+}
