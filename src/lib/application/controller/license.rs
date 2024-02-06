@@ -1,12 +1,15 @@
 use std::rc::Rc;
 
 use crate::{
-    application::manager::{
-        license_choice_ingress_manager::LicenseChoiceIngressManager,
-        license_list_ingress_manager::LicenseListIngressManager,
-        license_text_egress_manager::LicenseTextEgressManager,
-        license_text_ingress_manager::LicenseTextIngressManager,
-        message_egress_manager::MessageEgressManager,
+    application::{
+        manager::{
+            license_choice_ingress_manager::LicenseChoiceIngressManager,
+            license_list_ingress_manager::LicenseListIngressManager,
+            license_text_egress_manager::LicenseTextEgressManager,
+            license_text_ingress_manager::LicenseTextIngressManager,
+            message_egress_manager::MessageEgressManager,
+        },
+        options::license::LicenseOptions,
     },
     usecases::type_aliases::AnyError,
 };
@@ -14,6 +17,7 @@ use crate::{
 use super::exit_code::ControllerExitCode;
 
 pub struct LicenseController {
+    options: LicenseOptions,
     license_list_ingress_manager: Rc<dyn LicenseListIngressManager>,
     license_choice_ingress_manager: Rc<dyn LicenseChoiceIngressManager>,
     license_text_ingress_manager: Rc<dyn LicenseTextIngressManager>,
@@ -23,6 +27,7 @@ pub struct LicenseController {
 
 impl LicenseController {
     pub fn new(
+        options: LicenseOptions,
         license_list_ingress_manager: Rc<dyn LicenseListIngressManager>,
         license_choice_ingress_manager: Rc<dyn LicenseChoiceIngressManager>,
         license_text_ingress_manager: Rc<dyn LicenseTextIngressManager>,
@@ -30,6 +35,7 @@ impl LicenseController {
         message_egress_manager: Rc<dyn MessageEgressManager>,
     ) -> Self {
         LicenseController {
+            options,
             license_list_ingress_manager,
             license_choice_ingress_manager,
             license_text_ingress_manager,
@@ -56,6 +62,7 @@ impl LicenseController {
         let list = self.license_list_ingress_manager.license_list()?;
         let choice = self.license_choice_ingress_manager.ask_license(list)?;
         let text = self.license_text_ingress_manager.license_text(choice)?;
-        self.license_text_egress_manager.write_license(&text)
+        self.license_text_egress_manager
+            .write_license(self.options.path(), &text)
     }
 }
