@@ -182,3 +182,11 @@ impl DescribeController {
         ))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn describe_controller() {
+        unimplemented!();
+    }
+}

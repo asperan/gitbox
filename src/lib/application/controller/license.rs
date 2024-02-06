@@ -66,3 +66,11 @@ impl LicenseController {
             .write_license(self.options.path(), &text)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn license_controller() {
+        unimplemented!();
+    }
+}

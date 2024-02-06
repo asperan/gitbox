@@ -28,3 +28,11 @@ impl CommitMetadataIngressRepository for CommitMetadataIngressRepositoryImpl {
         self.commit_metadata_retriever.get_metadata(spec)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn commit_metadata_ingress_repository_impl() {
+        unimplemented!();
+    }
+}

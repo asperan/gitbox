@@ -30,3 +30,11 @@ impl GitExtraEgressRepository for GitExtraEgressRepositoryImpl {
         self.gitextra_egress_manager.update_scopes(scopes)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn git_extra_egress_repository_impl() {
+        unimplemented!();
+    }
+}

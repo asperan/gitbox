@@ -60,3 +60,11 @@ impl RefreshController {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn refresh_controller() {
+        unimplemented!();
+    }
+}
