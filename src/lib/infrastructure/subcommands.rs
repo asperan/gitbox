@@ -6,4 +6,5 @@ pub mod grammar;
 pub mod init;
 pub mod license;
 pub mod refresh_extra;
+pub mod tree;
 
