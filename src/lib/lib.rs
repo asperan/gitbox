@@ -1,7 +1,11 @@
-mod common;
-mod subcommands;
+mod application;
+mod domain;
+mod infrastructure;
+mod usecases;
 
-use crate::{common::commons::print_error_and_exit, subcommands::Commands};
+use std::process::exit;
+
+use crate::infrastructure::{subcommand::Subcommand, subcommands::Commands};
 use clap::{CommandFactory, Parser};
 
 #[derive(Parser, Debug)]
@@ -20,17 +24,22 @@ pub fn run() {
     #[cfg(debug_assertions)]
     dbg!(&cli.command);
 
-    match &cli.command {
-        Commands::Changelog(c) => c.changelog(),
-        Commands::Commit(c) => c.commit(),
-        Commands::Complete(c) => c.print_completion_script(&mut CliParser::command_for_update()),
-        Commands::Describe(c) => c.describe(),
-        Commands::Init(c) => c.init_repository(),
-        Commands::License(c) => c.create_license(),
-        Commands::Tree(c) => c.print_tree(),
+    exit(match &cli.command {
+        Commands::Changelog(c) => c.execute(),
+        Commands::Init(c) => c.execute(),
+        Commands::Complete(c) => {
+            c.print_completion_script(&mut CliParser::command_for_update());
+            0
+        }
+        Commands::Commit(c) => c.execute(),
+        Commands::Describe(c) => c.execute(),
+        Commands::RefreshExtra(c) => c.execute(),
+        Commands::License(c) => c.execute(),
+        Commands::Tree(c) => c.execute(),
         // Catch-all branch for hidden commands
-        _ => print_error_and_exit(
-            "Unknown command. See '--help' or subcommand 'help' for available commands",
-        ),
-    }
+        _ => {
+            eprintln!("Unknown command. See '--help' or subcommand 'help' for available commands");
+            1
+        }
+    });
 }
