@@ -1,2 +1,2 @@
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct LicenseNameAndId(Box<str>, Box<str>);
+pub struct LicenseNameAndId(pub Box<str>, pub Box<str>);
