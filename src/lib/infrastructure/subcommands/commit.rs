@@ -12,7 +12,7 @@ use crate::{
         options::commit::CommitOptions,
     },
     infrastructure::{
-        helper::prompt_helper::PromptHelper,
+        helper::commit_prompt_helper::PromptHelper,
         interface::{
             git_cli::GitCli, gitextra_manager_impl::GitExtraManagerImpl,
             message_egress_manager_impl::MessageEgressManagerImpl,
