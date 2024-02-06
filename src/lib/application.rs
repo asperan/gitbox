@@ -4,3 +4,4 @@ pub mod manager;
 pub mod options;
 pub mod presenter;
 pub mod repository_impl;
+pub mod type_alias;
