@@ -14,18 +14,24 @@ pub struct ConventionalCommitEgressRepositoryImpl {
 }
 
 impl ConventionalCommitEgressRepositoryImpl {
-    pub fn new(conventional_commit_egress_manager: Rc<dyn ConventionalCommitEgressManager>) -> ConventionalCommitEgressRepositoryImpl {
-        ConventionalCommitEgressRepositoryImpl { conventional_commit_egress_manager }
+    pub fn new(
+        conventional_commit_egress_manager: Rc<dyn ConventionalCommitEgressManager>,
+    ) -> ConventionalCommitEgressRepositoryImpl {
+        ConventionalCommitEgressRepositoryImpl {
+            conventional_commit_egress_manager,
+        }
     }
 }
 
 impl ConventionalCommitEgressRepository for ConventionalCommitEgressRepositoryImpl {
     fn create_commit(&self, commit: &ConventionalCommit) -> Result<(), AnyError> {
-        self.conventional_commit_egress_manager.create_commit(&commit.to_string())
+        self.conventional_commit_egress_manager
+            .create_commit(&commit.to_string())
     }
 
     fn create_empty_commit(&self, commit: &ConventionalCommit) -> Result<(), AnyError> {
-        self.conventional_commit_egress_manager.create_empty_commit(&commit.to_string())
+        self.conventional_commit_egress_manager
+            .create_empty_commit(&commit.to_string())
     }
 }
 
@@ -35,7 +41,8 @@ mod tests {
 
     use crate::{
         application::{
-            manager::conventional_commit_egress_manager::ConventionalCommitEgressManager, repository_impl::conventional_commit_egress_repository_impl::ConventionalCommitEgressRepositoryImpl
+            manager::conventional_commit_egress_manager::ConventionalCommitEgressManager,
+            repository_impl::conventional_commit_egress_repository_impl::ConventionalCommitEgressRepositoryImpl,
         },
         domain::conventional_commit::ConventionalCommit,
         usecases::{

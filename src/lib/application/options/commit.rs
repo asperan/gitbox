@@ -1,4 +1,7 @@
-use crate::{application::error::commit_options_invariant_error::CommitOptionsInvariantError, usecases::type_aliases::AnyError};
+use crate::{
+    application::error::commit_options_invariant_error::CommitOptionsInvariantError,
+    usecases::type_aliases::AnyError,
+};
 
 pub struct CommitOptions {
     commit_type: String,
@@ -59,9 +62,15 @@ impl CommitOptions {
         }
     }
 
-    fn check_non_empty_if_present(o: &Option<String>, what: &str) -> Result<(), CommitOptionsInvariantError> {
+    fn check_non_empty_if_present(
+        o: &Option<String>,
+        what: &str,
+    ) -> Result<(), CommitOptionsInvariantError> {
         if o.as_ref().is_some_and(|it| it.is_empty()) {
-            Err(CommitOptionsInvariantError::new(what, "must not be empty when present"))
+            Err(CommitOptionsInvariantError::new(
+                what,
+                "must not be empty when present",
+            ))
         } else {
             Ok(())
         }

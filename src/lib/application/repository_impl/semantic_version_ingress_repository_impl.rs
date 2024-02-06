@@ -14,8 +14,12 @@ pub struct SemanticVersionIngressRepositoryImpl {
 }
 
 impl SemanticVersionIngressRepositoryImpl {
-    pub fn new(version_ingress_manager: Rc<dyn VersionIngressManager>) -> SemanticVersionIngressRepositoryImpl {
-        SemanticVersionIngressRepositoryImpl { version_ingress_manager }
+    pub fn new(
+        version_ingress_manager: Rc<dyn VersionIngressManager>,
+    ) -> SemanticVersionIngressRepositoryImpl {
+        SemanticVersionIngressRepositoryImpl {
+            version_ingress_manager,
+        }
     }
 }
 
@@ -43,8 +47,8 @@ mod tests {
 
     use crate::{
         application::{
-            repository_impl::semantic_version_ingress_repository_impl::SemanticVersionIngressRepositoryImpl,
             manager::version_ingress_manager::VersionIngressManager,
+            repository_impl::semantic_version_ingress_repository_impl::SemanticVersionIngressRepositoryImpl,
         },
         domain::semantic_version::SemanticVersion,
         usecases::{
@@ -91,7 +95,8 @@ mod tests {
 
     #[test]
     fn last_version_present() {
-        let repository = SemanticVersionIngressRepositoryImpl::new(Rc::new(MockFullVersionRetriever {}));
+        let repository =
+            SemanticVersionIngressRepositoryImpl::new(Rc::new(MockFullVersionRetriever {}));
         let expected = SemanticVersion::new(0, 1, 0, Some("dev1".to_string()), None);
         assert!(repository
             .last_version()
@@ -100,19 +105,22 @@ mod tests {
 
     #[test]
     fn last_version_empty() {
-        let repository = SemanticVersionIngressRepositoryImpl::new(Rc::new(MockEmptyVersionRetriever {}));
+        let repository =
+            SemanticVersionIngressRepositoryImpl::new(Rc::new(MockEmptyVersionRetriever {}));
         assert!(repository.last_version().is_ok_and(|it| it.is_none()));
     }
 
     #[test]
     fn last_version_wrong() {
-        let repository = SemanticVersionIngressRepositoryImpl::new(Rc::new(MockWrongVersionRetriever {}));
+        let repository =
+            SemanticVersionIngressRepositoryImpl::new(Rc::new(MockWrongVersionRetriever {}));
         assert!(repository.last_version().is_err());
     }
 
     #[test]
     fn last_stable_version_present() {
-        let repository = SemanticVersionIngressRepositoryImpl::new(Rc::new(MockFullVersionRetriever {}));
+        let repository =
+            SemanticVersionIngressRepositoryImpl::new(Rc::new(MockFullVersionRetriever {}));
         let expected = SemanticVersion::new(0, 1, 0, None, None);
         assert!(repository
             .last_stable_version()
@@ -121,7 +129,8 @@ mod tests {
 
     #[test]
     fn last_stable_version_empty() {
-        let repository = SemanticVersionIngressRepositoryImpl::new(Rc::new(MockEmptyVersionRetriever {}));
+        let repository =
+            SemanticVersionIngressRepositoryImpl::new(Rc::new(MockEmptyVersionRetriever {}));
         assert!(repository
             .last_stable_version()
             .is_ok_and(|it| it.is_none()));
@@ -129,7 +138,8 @@ mod tests {
 
     #[test]
     fn last_stable_version_wrong() {
-        let repository = SemanticVersionIngressRepositoryImpl::new(Rc::new(MockWrongVersionRetriever {}));
+        let repository =
+            SemanticVersionIngressRepositoryImpl::new(Rc::new(MockWrongVersionRetriever {}));
         assert!(repository.last_stable_version().is_err());
     }
 }

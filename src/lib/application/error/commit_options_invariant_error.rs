@@ -8,13 +8,20 @@ pub struct CommitOptionsInvariantError {
 
 impl CommitOptionsInvariantError {
     pub fn new(what: &str, message: &str) -> CommitOptionsInvariantError {
-        CommitOptionsInvariantError { what: what.to_string(), message: message.to_string() }
+        CommitOptionsInvariantError {
+            what: what.to_string(),
+            message: message.to_string(),
+        }
     }
 }
 
 impl Display for CommitOptionsInvariantError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Error while constructing commit options: {} {}", self.what, self.message)
+        write!(
+            f,
+            "Error while constructing commit options: {} {}",
+            self.what, self.message
+        )
     }
 }
 

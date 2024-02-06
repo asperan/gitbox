@@ -6,10 +6,16 @@ pub struct ConventionalCommit {
 }
 
 impl ConventionalCommit {
-    pub fn new(typ: String, scope: Option<String>, breaking: bool, summary: String, message: Option<String>) -> ConventionalCommit {
+    pub fn new(
+        typ: String,
+        scope: Option<String>,
+        breaking: bool,
+        summary: String,
+        message: Option<String>,
+    ) -> ConventionalCommit {
         ConventionalCommit {
             summary: ConventionalCommitSummary::new(typ, scope, breaking, summary),
-            message
+            message,
         }
     }
 

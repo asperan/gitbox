@@ -7,7 +7,9 @@ pub struct CommitSummaryParsingError {
 
 impl CommitSummaryParsingError {
     pub fn new(message: &str) -> CommitSummaryParsingError {
-        CommitSummaryParsingError { message: message.to_owned() }
+        CommitSummaryParsingError {
+            message: message.to_owned(),
+        }
     }
 }
 

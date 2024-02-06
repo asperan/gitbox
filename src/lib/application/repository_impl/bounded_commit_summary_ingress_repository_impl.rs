@@ -70,7 +70,8 @@ mod tests {
 
     #[test]
     fn get_commits_from_basic() {
-        let repository = BoundedCommitSummaryIngressRepositoryImpl::new(Rc::new(MockCommitRetriever {}));
+        let repository =
+            BoundedCommitSummaryIngressRepositoryImpl::new(Rc::new(MockCommitRetriever {}));
         let commit_list = repository.get_commits_from(&None);
         assert!(commit_list.is_ok());
         assert!(commit_list

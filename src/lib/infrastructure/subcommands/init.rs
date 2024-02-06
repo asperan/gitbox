@@ -10,7 +10,8 @@ use crate::{
         options::init::InitOptions,
     },
     infrastructure::{
-        interface::{git_cli::GitCli, message_egress_manager_impl::MessageEgressManagerImpl}, subcommand::Subcommand
+        interface::{git_cli::GitCli, message_egress_manager_impl::MessageEgressManagerImpl},
+        subcommand::Subcommand,
     },
 };
 
