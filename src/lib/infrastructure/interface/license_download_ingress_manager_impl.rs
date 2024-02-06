@@ -20,7 +20,7 @@ pub struct LicenseDownloadIngressManagerImpl {}
 
 impl LicenseDownloadIngressManagerImpl {
     pub fn new() -> Self {
-        LicenseDownloadIngressManagerImpl {  }
+        LicenseDownloadIngressManagerImpl {}
     }
 }
 
@@ -36,8 +36,8 @@ impl LicenseListIngressManager for LicenseDownloadIngressManagerImpl {
                 let captures = url_and_name_regex.captures(line);
                 captures.map(|c| {
                     LicenseNameAndId(
-                        c.get(1).unwrap().as_str().into(),
                         c.get(2).unwrap().as_str().into(),
+                        c.get(1).unwrap().as_str().into(),
                     )
                 })
             })
@@ -63,6 +63,8 @@ impl LicenseTextIngressManager for LicenseDownloadIngressManagerImpl {
                 .trim_start_matches(HTML_LICENSE_PREFIX)
                 .trim_end_matches(HTML_LICENSE_SUFFIX)
                 .trim()
+                .replace("&lt;", "<")
+                .replace("&gt;", ">")
                 .into()),
             None => Err(Box::new(LicenseTextRetrievalError::new(
                 "failed to parse license text",
