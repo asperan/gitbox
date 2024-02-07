@@ -33,7 +33,7 @@ impl LicenseTextEgressRepository for LicenseTextEgressRepositoryImpl {
 }
 
 #[cfg(test)]
-mod tests{
+mod tests {
     #[test]
     fn test_me() {
         unimplemented!();

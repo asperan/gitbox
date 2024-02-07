@@ -22,7 +22,10 @@ impl LicenseChoiceIngressRepositoryImpl {
 }
 
 impl LicenseChoiceIngressRepository for LicenseChoiceIngressRepositoryImpl {
-    fn ask_license<'a>(&self, list: &'a [LicenseMetadata]) -> Result<&'a LicenseMetadata, AnyError> {
+    fn ask_license<'a>(
+        &self,
+        list: &'a [LicenseMetadata],
+    ) -> Result<&'a LicenseMetadata, AnyError> {
         self.license_choice_ingress_manager.ask_license(list)
     }
 }

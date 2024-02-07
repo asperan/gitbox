@@ -7,7 +7,9 @@ pub struct TreeGraphLineFormatError {
 
 impl TreeGraphLineFormatError {
     pub fn new(message: &str) -> Self {
-        TreeGraphLineFormatError { message: message.to_owned() }
+        TreeGraphLineFormatError {
+            message: message.to_owned(),
+        }
     }
 }
 

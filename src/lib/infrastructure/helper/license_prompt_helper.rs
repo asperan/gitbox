@@ -14,7 +14,10 @@ impl LicensePromptHelper {
 }
 
 impl LicenseChoiceIngressManager for LicensePromptHelper {
-    fn ask_license<'a>(&self, list: &'a[LicenseMetadata]) -> Result<&'a LicenseMetadata, AnyError> {
+    fn ask_license<'a>(
+        &self,
+        list: &'a [LicenseMetadata],
+    ) -> Result<&'a LicenseMetadata, AnyError> {
         let choice_list = list.iter().map(|t| t.name());
         let answer = prompt_one(
             Question::raw_select("license")

@@ -12,9 +12,7 @@ use crate::{
             gitextra_egress_repository_impl::GitExtraEgressRepositoryImpl,
         },
     },
-    usecase::usecases::{
-        refresh_types_and_scopes::RefreshTypesAndScopesUseCase, usecase::UseCase,
-    },
+    usecase::usecases::{refresh_types_and_scopes::RefreshTypesAndScopesUseCase, usecase::UseCase},
 };
 
 use super::exit_code::ControllerExitCode;
