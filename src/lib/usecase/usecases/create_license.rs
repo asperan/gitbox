@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use crate::usecase::{
     repository::{
         license_choice_ingress_repository::LicenseChoiceIngressRepository,
@@ -11,18 +13,18 @@ use crate::usecase::{
 use super::usecase::UseCase;
 
 pub struct CreateLicenseUseCase {
-    license_list_ingress_repository: Box<dyn LicenseListIngressRepository>,
-    license_choice_ingress_repository: Box<dyn LicenseChoiceIngressRepository>,
-    license_text_ingress_repository: Box<dyn LicenseTextIngressRepository>,
-    license_text_egress_repository: Box<dyn LicenseTextEgressRepository>,
+    license_list_ingress_repository: Rc<dyn LicenseListIngressRepository>,
+    license_choice_ingress_repository: Rc<dyn LicenseChoiceIngressRepository>,
+    license_text_ingress_repository: Rc<dyn LicenseTextIngressRepository>,
+    license_text_egress_repository: Rc<dyn LicenseTextEgressRepository>,
 }
 
 impl CreateLicenseUseCase {
     pub fn new(
-        license_list_ingress_repository: Box<dyn LicenseListIngressRepository>,
-        license_choice_ingress_repository: Box<dyn LicenseChoiceIngressRepository>,
-        license_text_ingress_repository: Box<dyn LicenseTextIngressRepository>,
-        license_text_egress_repository: Box<dyn LicenseTextEgressRepository>,
+        license_list_ingress_repository: Rc<dyn LicenseListIngressRepository>,
+        license_choice_ingress_repository: Rc<dyn LicenseChoiceIngressRepository>,
+        license_text_ingress_repository: Rc<dyn LicenseTextIngressRepository>,
+        license_text_egress_repository: Rc<dyn LicenseTextEgressRepository>,
     ) -> Self {
         CreateLicenseUseCase {
             license_list_ingress_repository,

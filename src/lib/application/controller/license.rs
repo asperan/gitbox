@@ -51,16 +51,16 @@ impl LicenseController {
     }
 
     pub fn license(&self) -> ControllerExitCode {
-        let license_list_ingress_repository = Box::new(LicenseListIngressRepositoryImpl::new(
+        let license_list_ingress_repository = Rc::new(LicenseListIngressRepositoryImpl::new(
             self.license_list_ingress_manager.clone(),
         ));
-        let license_choice_ingress_repository = Box::new(LicenseChoiceIngressRepositoryImpl::new(
+        let license_choice_ingress_repository = Rc::new(LicenseChoiceIngressRepositoryImpl::new(
             self.license_choice_ingress_manager.clone(),
         ));
-        let license_text_ingress_repository = Box::new(LicenseTextIngressRepositoryImpl::new(
+        let license_text_ingress_repository = Rc::new(LicenseTextIngressRepositoryImpl::new(
             self.license_text_ingress_manager.clone(),
         ));
-        let license_text_egress_repository = Box::new(LicenseTextEgressRepositoryImpl::new(
+        let license_text_egress_repository = Rc::new(LicenseTextEgressRepositoryImpl::new(
             self.options.path(),
             self.license_text_egress_manager.clone(),
         ));
