@@ -3,3 +3,4 @@ pub mod commit_options_invariant_error;
 pub mod commit_summary_parsing_error;
 pub mod describe_options_invariant_error;
 pub mod semantic_version_parsing_error;
+pub mod treegraphline_format_error;
