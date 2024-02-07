@@ -1,6 +1,6 @@
 use crate::{
     domain::{commit_summary::CommitSummary, semantic_version::SemanticVersion},
-    usecases::type_aliases::AnyError,
+    usecase::type_aliases::AnyError,
 };
 
 pub trait BoundedCommitSummaryIngressRepository {

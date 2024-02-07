@@ -1,6 +1,6 @@
 use crate::{
     domain::semantic_version::SemanticVersion,
-    usecases::{
+    usecase::{
         error::tag_configuration_invariant_error::TagConfigurationInvariantError,
         type_aliases::AnyError,
     },

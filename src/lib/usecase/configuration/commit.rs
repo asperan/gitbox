@@ -1,4 +1,4 @@
-use crate::usecases::{
+use crate::usecase::{
     error::commit_configuration_invariant_error::CommitConfigurationInvariantError,
     type_aliases::AnyError,
 };

@@ -9,7 +9,7 @@ use crate::{
         options::init::InitOptions,
         repository_impl::conventional_commit_egress_repository_impl::ConventionalCommitEgressRepositoryImpl,
     },
-    usecases::{
+    usecase::{
         configuration::commit::CommitConfiguration,
         usecases::{create_conventional_commit::CreateConventionalCommitUseCase, usecase::UseCase},
     },
@@ -83,7 +83,7 @@ mod tests {
             },
             options::init::InitOptions,
         },
-        usecases::type_aliases::AnyError,
+        usecase::type_aliases::AnyError,
     };
 
     #[derive(Debug)]

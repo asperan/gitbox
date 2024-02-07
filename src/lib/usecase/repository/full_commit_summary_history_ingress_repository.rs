@@ -1,4 +1,4 @@
-use crate::{domain::commit_summary::CommitSummary, usecases::type_aliases::AnyError};
+use crate::{domain::commit_summary::CommitSummary, usecase::type_aliases::AnyError};
 
 pub trait FullCommitSummaryHistoryIngressRepository {
     fn get_all_commits(

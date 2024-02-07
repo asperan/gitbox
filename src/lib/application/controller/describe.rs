@@ -21,7 +21,7 @@ use crate::{
         },
     },
     domain::trigger::Trigger,
-    usecases::{
+    usecase::{
         configuration::{
             describe::{
                 DescribeConfiguration, DescribeMetadataConfiguration,

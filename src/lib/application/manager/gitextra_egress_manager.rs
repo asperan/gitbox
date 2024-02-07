@@ -1,4 +1,4 @@
-use crate::usecases::type_aliases::AnyError;
+use crate::usecase::type_aliases::AnyError;
 
 pub trait GitExtraEgressManager {
     fn update_types(&self, types: Box<dyn Iterator<Item = String>>) -> Result<(), AnyError>;

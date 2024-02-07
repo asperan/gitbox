@@ -15,7 +15,7 @@ use crate::{
         interface::{git_cli::GitCli, message_egress_manager_impl::MessageEgressManagerImpl},
         subcommand::Subcommand,
     },
-    usecases::metadata_spec::MetadataSpec,
+    usecase::metadata_spec::MetadataSpec,
 };
 
 #[derive(Args, Debug)]

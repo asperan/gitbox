@@ -2,7 +2,7 @@ use std::str::FromStr;
 
 use crate::{
     application::error::treegraphline_format_error::TreeGraphLineFormatError,
-    usecases::{tree_graph_line::TreeGraphLine, type_aliases::AnyError},
+    usecase::{tree_graph_line::TreeGraphLine, type_aliases::AnyError},
 };
 
 impl FromStr for TreeGraphLine {

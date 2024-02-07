@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use crate::{
     application::manager::license_list_ingress_manager::LicenseListIngressManager,
-    usecases::{
+    usecase::{
         license_metadata::LicenseMetadata,
         repository::license_list_ingress_repository::LicenseListIngressRepository,
         type_aliases::AnyError,

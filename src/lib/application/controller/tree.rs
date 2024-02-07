@@ -8,7 +8,7 @@ use crate::{
         },
         repository_impl::treegraphline_ingress_repository_impl::TreeGraphLineIngressRepositoryImpl,
     },
-    usecases::usecases::{format_tree_graph::FormatTreeGraphUseCase, usecase::UseCase},
+    usecase::usecases::{format_tree_graph::FormatTreeGraphUseCase, usecase::UseCase},
 };
 
 use super::exit_code::ControllerExitCode;

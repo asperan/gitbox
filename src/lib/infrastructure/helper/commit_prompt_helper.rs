@@ -3,7 +3,7 @@ use std::rc::Rc;
 use regex::Regex;
 use requestty::{prompt_one, Answer, Question};
 
-use crate::usecases::type_aliases::AnyError;
+use crate::usecase::type_aliases::AnyError;
 
 use super::{
     gitextra_egress_helper::GitExtraEgressHelper, gitextra_ingress_helper::GitExtraIngressHelper,

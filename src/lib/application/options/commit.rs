@@ -1,6 +1,6 @@
 use crate::{
     application::error::commit_options_invariant_error::CommitOptionsInvariantError,
-    usecases::type_aliases::AnyError,
+    usecase::type_aliases::AnyError,
 };
 
 pub struct CommitOptions {

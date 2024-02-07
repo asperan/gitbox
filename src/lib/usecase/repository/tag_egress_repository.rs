@@ -1,4 +1,4 @@
-use crate::{domain::semantic_version::SemanticVersion, usecases::type_aliases::AnyError};
+use crate::{domain::semantic_version::SemanticVersion, usecase::type_aliases::AnyError};
 
 pub trait TagEgressRepository {
     fn create_tag(

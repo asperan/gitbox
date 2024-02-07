@@ -14,7 +14,7 @@ use crate::{
         },
     },
     domain::trigger::Trigger,
-    usecases::{
+    usecase::{
         configuration::changelog::{ChangelogConfiguration, ChangelogFormat},
         usecases::{create_changelog::CreateChangelogUseCase, usecase::UseCase},
     },
@@ -108,7 +108,7 @@ mod tests {
             options::changelog::ChangelogOptions,
         },
         domain::semantic_version::SemanticVersion,
-        usecases::type_aliases::AnyError,
+        usecase::type_aliases::AnyError,
     };
 
     use super::ChangelogController;

@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use crate::{
     application::manager::license_choice_ingress_manager::LicenseChoiceIngressManager,
-    usecases::{
+    usecase::{
         license_metadata::LicenseMetadata,
         repository::license_choice_ingress_repository::LicenseChoiceIngressRepository,
         type_aliases::AnyError,

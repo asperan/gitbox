@@ -1,6 +1,6 @@
 use regex::Regex;
 
-use crate::usecases::{
+use crate::usecase::{
     repository::treegraphline_ingress_repository::TreeGraphLineIngressRepository,
     tree_graph_line::TreeGraphLine, type_aliases::AnyError,
 };
@@ -78,7 +78,7 @@ impl UseCase<Box<str>> for FormatTreeGraphUseCase {
 
 #[cfg(test)]
 mod tests {
-    use crate::usecases::{
+    use crate::usecase::{
         repository::treegraphline_ingress_repository::TreeGraphLineIngressRepository,
         tree_graph_line::TreeGraphLine,
         type_aliases::AnyError,

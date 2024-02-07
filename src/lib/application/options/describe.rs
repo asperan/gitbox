@@ -1,6 +1,6 @@
 use crate::{
     application::error::describe_options_invariant_error::DescribeOptionsInvariantError,
-    usecases::{metadata_spec::MetadataSpec, type_aliases::AnyError},
+    usecase::{metadata_spec::MetadataSpec, type_aliases::AnyError},
 };
 
 const PRERELEASE_NUM_PLACEHOLDER: &str = "%d";

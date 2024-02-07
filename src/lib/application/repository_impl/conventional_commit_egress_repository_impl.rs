@@ -3,7 +3,7 @@ use std::rc::Rc;
 use crate::{
     application::manager::conventional_commit_egress_manager::ConventionalCommitEgressManager,
     domain::conventional_commit::ConventionalCommit,
-    usecases::{
+    usecase::{
         repository::conventional_commit_egress_repository::ConventionalCommitEgressRepository,
         type_aliases::AnyError,
     },
@@ -45,7 +45,7 @@ mod tests {
             repository_impl::conventional_commit_egress_repository_impl::ConventionalCommitEgressRepositoryImpl,
         },
         domain::conventional_commit::ConventionalCommit,
-        usecases::{
+        usecase::{
             repository::conventional_commit_egress_repository::ConventionalCommitEgressRepository,
             type_aliases::AnyError,
         },

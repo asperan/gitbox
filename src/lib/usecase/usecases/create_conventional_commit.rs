@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use crate::{
     domain::conventional_commit::ConventionalCommit,
-    usecases::{
+    usecase::{
         configuration::commit::CommitConfiguration,
         repository::conventional_commit_egress_repository::ConventionalCommitEgressRepository,
         type_aliases::AnyError,
@@ -48,7 +48,7 @@ mod tests {
 
     use crate::{
         domain::conventional_commit::ConventionalCommit,
-        usecases::{
+        usecase::{
             configuration::commit::CommitConfiguration,
             repository::conventional_commit_egress_repository::ConventionalCommitEgressRepository,
             type_aliases::AnyError,

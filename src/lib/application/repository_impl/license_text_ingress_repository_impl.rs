@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use crate::{application::manager::license_text_ingress_manager::LicenseTextIngressManager, usecases::{license_metadata::LicenseMetadata, repository::license_text_ingress_repository::LicenseTextIngressRepository, type_aliases::AnyError}};
+use crate::{application::manager::license_text_ingress_manager::LicenseTextIngressManager, usecase::{license_metadata::LicenseMetadata, repository::license_text_ingress_repository::LicenseTextIngressRepository, type_aliases::AnyError}};
 
 pub struct LicenseTextIngressRepositoryImpl {
     license_text_ingress_manager: Rc<dyn LicenseTextIngressManager>,

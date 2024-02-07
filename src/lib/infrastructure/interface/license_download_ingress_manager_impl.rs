@@ -6,7 +6,7 @@ use crate::{
         license_text_ingress_manager::LicenseTextIngressManager,
     },
     infrastructure::error::license_text_retrieval_error::LicenseTextRetrievalError,
-    usecases::{license_metadata::LicenseMetadata, type_aliases::AnyError},
+    usecase::{license_metadata::LicenseMetadata, type_aliases::AnyError},
 };
 
 const BASE_LICENSE_URL: &str = "https://choosealicense.com";

@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use crate::{
     application::manager::gitextra_egress_manager::GitExtraEgressManager,
-    usecases::{
+    usecase::{
         repository::git_extra_egress_repository::GitExtraEgressRepository, type_aliases::AnyError,
     },
 };

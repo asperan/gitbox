@@ -7,7 +7,7 @@ use crate::{
         commit_summary::CommitSummary, conventional_commit_summary::ConventionalCommitSummary,
         semantic_version::SemanticVersion, trigger::Trigger,
     },
-    usecases::{
+    usecase::{
         configuration::changelog::{ChangelogConfiguration, ChangelogFormat},
         repository::{
             bounded_commit_summary_ingress_repository::BoundedCommitSummaryIngressRepository,
@@ -227,7 +227,7 @@ mod tests {
             semantic_version::SemanticVersion,
             trigger::{BasicStatement, Trigger},
         },
-        usecases::{
+        usecase::{
             configuration::changelog::{ChangelogConfiguration, ChangelogFormat},
             repository::{
                 bounded_commit_summary_ingress_repository::BoundedCommitSummaryIngressRepository,

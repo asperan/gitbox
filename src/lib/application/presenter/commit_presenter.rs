@@ -8,7 +8,7 @@ use crate::{
         commit_summary::CommitSummary, conventional_commit::ConventionalCommit,
         conventional_commit_summary::ConventionalCommitSummary,
     },
-    usecases::type_aliases::AnyError,
+    usecase::type_aliases::AnyError,
 };
 
 // Groups: 1 = type, 2 = scope with (), 3 = scope, 4 = breaking change, 5 = summary

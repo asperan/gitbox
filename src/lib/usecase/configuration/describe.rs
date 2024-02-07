@@ -1,4 +1,4 @@
-use crate::{domain::trigger::Trigger, usecases::metadata_spec::MetadataSpec};
+use crate::{domain::trigger::Trigger, usecase::metadata_spec::MetadataSpec};
 
 pub type PrereleasePattern<'a> = Box<dyn Fn(u32) -> String + 'a>;
 pub type OldPrereleasePattern<'a> = Box<dyn Fn(&String) -> u32 + 'a>;

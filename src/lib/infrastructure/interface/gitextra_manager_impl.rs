@@ -10,7 +10,7 @@ use crate::{
         manager::gitextra_egress_manager::GitExtraEgressManager,
         manager::gitinfo_ingress_manager::GitInfoIngressManager,
     },
-    usecases::type_aliases::AnyError,
+    usecase::type_aliases::AnyError,
 };
 use crate::{
     domain::constant::DEFAULT_COMMIT_TYPES,

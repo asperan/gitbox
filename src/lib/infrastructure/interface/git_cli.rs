@@ -19,7 +19,7 @@ use crate::{
     infrastructure::error::{
         command_execution_error::CommandExecutionError, generic_cli_error::CliError,
     },
-    usecases::{metadata_spec::MetadataSpec, type_aliases::AnyError},
+    usecase::{metadata_spec::MetadataSpec, type_aliases::AnyError},
 };
 
 pub struct GitCli {}

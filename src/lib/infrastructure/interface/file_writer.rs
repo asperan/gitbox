@@ -2,7 +2,7 @@ use std::{fs::create_dir_all, io::Write, path::Path};
 
 use crate::{
     application::manager::license_text_egress_manager::LicenseTextEgressManager,
-    usecases::type_aliases::AnyError,
+    usecase::type_aliases::AnyError,
 };
 
 pub struct FileWriter {}

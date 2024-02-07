@@ -17,7 +17,7 @@ use crate::{
             license_text_ingress_repository_impl::LicenseTextIngressRepositoryImpl,
         },
     },
-    usecases::usecases::{create_license::CreateLicenseUseCase, usecase::UseCase},
+    usecase::usecases::{create_license::CreateLicenseUseCase, usecase::UseCase},
 };
 
 use super::exit_code::ControllerExitCode;

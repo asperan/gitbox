@@ -1,7 +1,7 @@
 mod application;
 mod domain;
 mod infrastructure;
-mod usecases;
+mod usecase;
 
 use std::process::exit;
 

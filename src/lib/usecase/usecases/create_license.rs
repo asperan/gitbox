@@ -1,4 +1,4 @@
-use crate::usecases::{
+use crate::usecase::{
     repository::{
         license_choice_ingress_repository::LicenseChoiceIngressRepository,
         license_list_ingress_repository::LicenseListIngressRepository,

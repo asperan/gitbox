@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use crate::{
     domain::{commit_summary::CommitSummary, semantic_version::SemanticVersion},
-    usecases::{
+    usecase::{
         configuration::describe::DescribeConfiguration,
         error::describe_no_relevant_changes_error::DescribeNoRelevantChangesError,
         repository::{
@@ -234,7 +234,7 @@ mod tests {
                 TypeNode,
             },
         },
-        usecases::{
+        usecase::{
             configuration::describe::{
                 DescribeConfiguration, DescribeMetadataConfiguration,
                 DescribePrereleaseConfiguration, DescribeTriggerConfiguration,

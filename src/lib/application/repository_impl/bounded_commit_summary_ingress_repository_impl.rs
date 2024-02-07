@@ -3,7 +3,7 @@ use std::{rc::Rc, str::FromStr};
 use crate::{
     application::manager::bounded_commit_summary_ingress_manager::BoundedCommitSummaryIngressManager,
     domain::{commit_summary::CommitSummary, semantic_version::SemanticVersion},
-    usecases::{
+    usecase::{
         repository::bounded_commit_summary_ingress_repository::BoundedCommitSummaryIngressRepository,
         type_aliases::AnyError,
     },
@@ -45,7 +45,7 @@ mod tests {
     use crate::{
         application::manager::bounded_commit_summary_ingress_manager::BoundedCommitSummaryIngressManager,
         domain::{commit_summary::CommitSummary, semantic_version::SemanticVersion},
-        usecases::{
+        usecase::{
             repository::bounded_commit_summary_ingress_repository::BoundedCommitSummaryIngressRepository,
             type_aliases::AnyError,
         },

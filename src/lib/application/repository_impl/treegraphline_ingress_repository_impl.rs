@@ -2,7 +2,7 @@ use std::{rc::Rc, str::FromStr};
 
 use crate::{
     application::manager::git_tree_ingress_manager::GitTreeIngressManager,
-    usecases::{
+    usecase::{
         repository::treegraphline_ingress_repository::TreeGraphLineIngressRepository,
         tree_graph_line::TreeGraphLine, type_aliases::AnyError,
     },
@@ -41,7 +41,7 @@ mod tests {
             manager::git_tree_ingress_manager::GitTreeIngressManager,
             repository_impl::treegraphline_ingress_repository_impl::TreeGraphLineIngressRepositoryImpl,
         },
-        usecases::{
+        usecase::{
             repository::treegraphline_ingress_repository::TreeGraphLineIngressRepository,
             tree_graph_line::TreeGraphLine, type_aliases::AnyError,
         },

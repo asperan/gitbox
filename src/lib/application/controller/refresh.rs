@@ -12,7 +12,7 @@ use crate::{
             gitextra_egress_repository_impl::GitExtraEgressRepositoryImpl,
         },
     },
-    usecases::usecases::{
+    usecase::usecases::{
         refresh_types_and_scopes::RefreshTypesAndScopesUseCase, usecase::UseCase,
     },
 };

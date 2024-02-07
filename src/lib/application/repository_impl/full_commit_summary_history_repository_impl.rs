@@ -3,7 +3,7 @@ use std::{rc::Rc, str::FromStr};
 use crate::{
     application::manager::full_commit_summary_history_ingress_manager::FullCommitSummaryHistoryIngressManager,
     domain::commit_summary::CommitSummary,
-    usecases::{
+    usecase::{
         repository::full_commit_summary_history_ingress_repository::FullCommitSummaryHistoryIngressRepository,
         type_aliases::AnyError,
     },
@@ -44,7 +44,7 @@ mod tests {
     use crate::{
         application::manager::full_commit_summary_history_ingress_manager::FullCommitSummaryHistoryIngressManager,
         domain::commit_summary::CommitSummary,
-        usecases::{
+        usecase::{
             repository::full_commit_summary_history_ingress_repository::FullCommitSummaryHistoryIngressRepository,
             type_aliases::AnyError,
         },

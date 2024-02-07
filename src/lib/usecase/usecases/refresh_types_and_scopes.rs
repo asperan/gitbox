@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use crate::{
     domain::{commit_summary::CommitSummary, constant::DEFAULT_COMMIT_TYPES},
-    usecases::{
+    usecase::{
         repository::{
             full_commit_summary_history_ingress_repository::FullCommitSummaryHistoryIngressRepository,
             git_extra_egress_repository::GitExtraEgressRepository,
@@ -67,7 +67,7 @@ mod tests {
             commit_summary::CommitSummary, constant::DEFAULT_COMMIT_TYPES,
             conventional_commit_summary::ConventionalCommitSummary,
         },
-        usecases::{
+        usecase::{
             repository::{
                 full_commit_summary_history_ingress_repository::FullCommitSummaryHistoryIngressRepository,
                 git_extra_egress_repository::GitExtraEgressRepository,

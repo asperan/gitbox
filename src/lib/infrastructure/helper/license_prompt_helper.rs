@@ -2,7 +2,7 @@ use requestty::{prompt_one, Answer, Question};
 
 use crate::{
     application::manager::license_choice_ingress_manager::LicenseChoiceIngressManager,
-    usecases::{license_metadata::LicenseMetadata, type_aliases::AnyError},
+    usecase::{license_metadata::LicenseMetadata, type_aliases::AnyError},
 };
 
 pub struct LicensePromptHelper {}

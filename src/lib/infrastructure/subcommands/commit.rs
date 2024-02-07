@@ -19,7 +19,7 @@ use crate::{
         },
         subcommand::Subcommand,
     },
-    usecases::type_aliases::AnyError,
+    usecase::type_aliases::AnyError,
 };
 
 #[derive(Args, Debug)]

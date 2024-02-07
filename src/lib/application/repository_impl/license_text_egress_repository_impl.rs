@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use crate::{
     application::manager::license_text_egress_manager::LicenseTextEgressManager,
-    usecases::{
+    usecase::{
         repository::license_text_egress_repository::LicenseTextEgressRepository,
         type_aliases::AnyError,
     },
