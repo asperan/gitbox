@@ -10,8 +10,14 @@ use crate::{
             message_egress_manager::MessageEgressManager,
         },
         options::license::LicenseOptions,
+        repository_impl::{
+            license_choice_ingress_repository_impl::LicenseChoiceIngressRepositoryImpl,
+            license_list_ingress_repository_impl::LicenseListIngressRepositoryImpl,
+            license_text_egress_repository_impl::LicenseTextEgressRepositoryImpl,
+            license_text_ingress_repository_impl::LicenseTextIngressRepositoryImpl,
+        },
     },
-    usecases::type_aliases::AnyError,
+    usecases::usecases::{create_license::CreateLicenseUseCase, usecase::UseCase},
 };
 
 use super::exit_code::ControllerExitCode;
@@ -45,7 +51,26 @@ impl LicenseController {
     }
 
     pub fn license(&self) -> ControllerExitCode {
-        match self.run() {
+        let license_list_ingress_repository = Box::new(LicenseListIngressRepositoryImpl::new(
+            self.license_list_ingress_manager.clone(),
+        ));
+        let license_choice_ingress_repository = Box::new(LicenseChoiceIngressRepositoryImpl::new(
+            self.license_choice_ingress_manager.clone(),
+        ));
+        let license_text_ingress_repository = Box::new(LicenseTextIngressRepositoryImpl::new(
+            self.license_text_ingress_manager.clone(),
+        ));
+        let license_text_egress_repository = Box::new(LicenseTextEgressRepositoryImpl::new(
+            self.options.path(),
+            self.license_text_egress_manager.clone(),
+        ));
+        let usecase = CreateLicenseUseCase::new(
+            license_list_ingress_repository,
+            license_choice_ingress_repository,
+            license_text_ingress_repository,
+            license_text_egress_repository,
+        );
+        match usecase.execute() {
             Ok(_) => {
                 self.message_egress_manager.output("License file created successfully. Remember to change author and year reference.");
                 ControllerExitCode::Ok
@@ -56,14 +81,6 @@ impl LicenseController {
                 ControllerExitCode::Error(1)
             }
         }
-    }
-
-    fn run(&self) -> Result<(), AnyError> {
-        let list = self.license_list_ingress_manager.license_list()?;
-        let choice = self.license_choice_ingress_manager.ask_license(list)?;
-        let text = self.license_text_ingress_manager.license_text(choice)?;
-        self.license_text_egress_manager
-            .write_license(self.options.path(), &text)
     }
 }
 
