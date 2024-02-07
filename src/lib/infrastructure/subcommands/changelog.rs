@@ -84,7 +84,7 @@ impl Subcommand for ChangelogSubCommand {
         let output_manager = Rc::new(MessageEgressManagerImpl::new());
         let git_cli = Rc::new(GitCli::new());
         if let Err(e) = git_cli.git_dir() {
-            output_manager.error(&format!("Failed to retrieve git dir: {}", e.to_string()));
+            output_manager.error(&format!("Failed to retrieve git dir: {}", e));
             output_manager.error("changelog subcommand cannot be called outside of a git dir");
             return 1;
         }

@@ -78,7 +78,7 @@ impl ChangelogOptions {
     }
 
     fn ensure_format_has_placeholder(
-        format_string: &String,
+        format_string: &str,
         format_target: &str,
     ) -> Result<(), ChangelogOptionsInvariantError> {
         if !format_string.contains(FORMAT_PLACEHOLDER) {

@@ -79,7 +79,7 @@ impl GitExtraIngressHelper for GitExtraManagerImpl {
         Ok(read_to_string(path)?
             .split('\n')
             .filter(|it| !it.is_empty() && !DEFAULT_COMMIT_TYPES.contains(it))
-            .chain(DEFAULT_COMMIT_TYPES.into_iter())
+            .chain(DEFAULT_COMMIT_TYPES)
             .map(|it| it.to_string())
             .collect())
     }

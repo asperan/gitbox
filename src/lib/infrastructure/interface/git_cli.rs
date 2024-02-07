@@ -58,7 +58,7 @@ impl GitCli {
     }
 
     fn split_and_clean_commits(&self, list: String) -> Vec<String> {
-        list.split("\n")
+        list.split('\n')
             .filter(|it| !it.is_empty())
             .map(|it| it.to_string())
             .collect()
@@ -108,7 +108,7 @@ impl VersionIngressManager for GitCli {
                     Ok(None)
                 } else {
                     Ok(v.trim()
-                        .split("\n")
+                        .split('\n')
                         .filter_map(|it| SemanticVersion::from_str(it).ok())
                         .filter(|it| it.prerelease().is_none())
                         .max()
@@ -155,7 +155,7 @@ impl TagEgressManager for GitCli {
         args.push("-m");
         match message {
             Some(s) => {
-                args.push(&s);
+                args.push(s);
             }
             None => {
                 args.push("");

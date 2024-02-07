@@ -68,7 +68,7 @@ impl Display for ConventionalCommit {
         write!(
             f,
             "{}{}",
-            self.summary().to_string(),
+            self.summary(),
             self.message()
                 .as_ref()
                 .map_or_else(String::new, |it| format!("\n\n{}", it))

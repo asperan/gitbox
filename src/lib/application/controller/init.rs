@@ -42,7 +42,7 @@ impl InitController {
     pub fn init(&self) -> ControllerExitCode {
         if let Err(e) = self.init_manager.init_repository() {
             self.output_manager
-                .error(&format!("Failed to init repository: {}", e.to_string()));
+                .error(&format!("Failed to init repository: {}", e));
             return ControllerExitCode::Error(1);
         }
         if !self.options.empty() {

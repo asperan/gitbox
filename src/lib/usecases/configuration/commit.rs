@@ -53,8 +53,8 @@ impl CommitConfiguration {
         &self.message
     }
 
-    fn type_checks(t: &String) -> Result<(), CommitConfigurationInvariantError> {
-        if t.len() == 0 {
+    fn type_checks(t: &str) -> Result<(), CommitConfigurationInvariantError> {
+        if t.is_empty() {
             return Err(CommitConfigurationInvariantError::new(
                 "Type length cannot be 0",
             ));
@@ -63,7 +63,7 @@ impl CommitConfiguration {
     }
 
     fn scope_checks(s: &Option<String>) -> Result<(), CommitConfigurationInvariantError> {
-        if s.as_ref().is_some_and(|it| it.len() == 0) {
+        if s.as_ref().is_some_and(|it| it.is_empty()) {
             return Err(CommitConfigurationInvariantError::new(
                 "Scope length cannot be 0 if present",
             ));
@@ -71,8 +71,8 @@ impl CommitConfiguration {
         Ok(())
     }
 
-    fn summary_checks(s: &String) -> Result<(), CommitConfigurationInvariantError> {
-        if s.len() == 0 {
+    fn summary_checks(s: &str) -> Result<(), CommitConfigurationInvariantError> {
+        if s.is_empty() {
             return Err(CommitConfigurationInvariantError::new(
                 "Summary length cannot be 0",
             ));
@@ -81,7 +81,7 @@ impl CommitConfiguration {
     }
 
     fn message_checks(m: &Option<String>) -> Result<(), CommitConfigurationInvariantError> {
-        if m.as_ref().is_some_and(|it| it.len() == 0) {
+        if m.as_ref().is_some_and(|it| it.is_empty()) {
             return Err(CommitConfigurationInvariantError::new(
                 "Message length cannot be 0 if present",
             ));

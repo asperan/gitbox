@@ -40,7 +40,7 @@ impl UseCase<Box<str>> for FormatTreeGraphUseCase {
         let time_color_length = {
             let time_regex = Regex::new("\\([a-z0-9 ,]+\\)").unwrap();
             let first_line_time = &lines[0].date();
-            match time_regex.captures(&first_line_time) {
+            match time_regex.captures(first_line_time) {
                 Some(captures) => {
                     first_line_time.len()
                         - captures.get(0).expect("the groups should be there").len()

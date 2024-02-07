@@ -59,10 +59,7 @@ impl Subcommand for CommitSubCommand {
         let git_cli = Rc::new(GitCli::new());
         let output_manager = Rc::new(MessageEgressManagerImpl::new());
         if let Err(e) = git_cli.git_dir() {
-            output_manager.error(&format!(
-                "Failed to retrieve git directory: {}",
-                e.to_string()
-            ));
+            output_manager.error(&format!("Failed to retrieve git directory: {}", e));
             output_manager.error("commit subcommand can only be run inside a git project.");
             return 1;
         }

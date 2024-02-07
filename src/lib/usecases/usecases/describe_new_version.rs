@@ -114,7 +114,7 @@ impl<'a> CalculateNewVersionUseCase<'a> {
         Ok(if base_version.is_none() {
             StableVersion::first_stable()
         } else {
-            let greatest_change = self.greatest_change_from(&base_version)?;
+            let greatest_change = self.greatest_change_from(base_version)?;
             let base_version = base_version
                 .as_ref()
                 .expect("base version must be present in this branch");
@@ -169,7 +169,7 @@ impl<'a> CalculateNewVersionUseCase<'a> {
             } else {
                 let last_version_prerelease = last_version.as_ref().expect("stable is not updated, so last version is bound to exist").prerelease().as_ref().expect("prerelease is present, else this function would have returned an error already");
                 let old_prerelease_number =
-                    self.configuration.prerelease().old_pattern()(&last_version_prerelease);
+                    self.configuration.prerelease().old_pattern()(last_version_prerelease);
                 old_prerelease_number + 1
             };
             Ok(self.configuration.prerelease().pattern()(

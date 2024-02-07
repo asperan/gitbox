@@ -25,10 +25,10 @@ impl TreeGraphLineIngressRepository for TreeGraphLineIngressRepositoryImpl {
         let lines = self
             .treegraphline_ingress_manager
             .commit_tree(TreeGraphLine::format())?;
-        Ok(lines
-            .into_iter()
+        lines
+            .iter()
             .map(|it| TreeGraphLine::from_str(it))
-            .collect::<Result<Box<[TreeGraphLine]>, AnyError>>()?)
+            .collect::<Result<Box<[TreeGraphLine]>, AnyError>>()
     }
 }
 

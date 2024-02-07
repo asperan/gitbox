@@ -44,7 +44,7 @@ impl LicenseListIngressManager for LicenseDownloadIngressManagerImpl {
 
 impl LicenseTextIngressManager for LicenseDownloadIngressManagerImpl {
     fn license_text(&self, license: &LicenseMetadata) -> Result<Box<str>, AnyError> {
-        let raw_license_page = ureq::get(&license.reference()).call()?.into_string()?;
+        let raw_license_page = ureq::get(license.reference()).call()?.into_string()?;
         let license_text_regex = RegexBuilder::new(&format!(
             "{}(.*){}",
             HTML_LICENSE_PREFIX, HTML_LICENSE_SUFFIX

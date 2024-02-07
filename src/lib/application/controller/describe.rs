@@ -121,9 +121,9 @@ impl DescribeController {
     const DEFAULT_MINOR_TRIGGER_STR: &'static str = "type IN [ feat ]";
     const DEFAULT_PATCH_TRIGGER_STR: &'static str = "type IN [ fix ]";
 
-    fn generate_describe_configuration<'a>(
-        &'a self,
-    ) -> Result<DescribeConfiguration<'a>, AnyError> {
+    fn generate_describe_configuration(
+        &self,
+    ) -> Result<DescribeConfiguration, AnyError> {
         let prerelease_configuration = DescribePrereleaseConfiguration::new(
             self.options.prerelease(),
             Box::new(|it| {

@@ -88,7 +88,7 @@ impl Subcommand for DescribeSubCommand {
         let git_cli = Rc::new(GitCli::new());
         let output_manager = Rc::new(MessageEgressManagerImpl::new());
         if let Err(e) = git_cli.git_dir() {
-            output_manager.error(&format!("Failed to retrieve git dir: {}", e.to_string()));
+            output_manager.error(&format!("Failed to retrieve git dir: {}", e));
             output_manager.error("describe subcommand can only be run inside a git project");
             return 1;
         }
