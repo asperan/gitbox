@@ -1,11 +1,8 @@
 use requestty::{prompt_one, Answer, Question};
 
 use crate::{
-    application::{
-        manager::license_choice_ingress_manager::LicenseChoiceIngressManager,
-        type_alias::LicenseNameAndId,
-    },
-    usecases::type_aliases::AnyError,
+    application::manager::license_choice_ingress_manager::LicenseChoiceIngressManager,
+    usecases::{license_metadata::LicenseMetadata, type_aliases::AnyError},
 };
 
 pub struct LicensePromptHelper {}
@@ -17,11 +14,8 @@ impl LicensePromptHelper {
 }
 
 impl LicenseChoiceIngressManager for LicensePromptHelper {
-    fn ask_license(
-        &self,
-        list: Box<[LicenseNameAndId]>,
-    ) -> Result<Box<LicenseNameAndId>, AnyError> {
-        let choice_list = list.iter().map(|t| t.0.as_ref());
+    fn ask_license<'a>(&self, list: &'a[LicenseMetadata]) -> Result<&'a LicenseMetadata, AnyError> {
+        let choice_list = list.iter().map(|t| t.name());
         let answer = prompt_one(
             Question::raw_select("license")
                 .message("Choose a license:")
@@ -32,6 +26,6 @@ impl LicenseChoiceIngressManager for LicensePromptHelper {
             Answer::ListItem(choice) => choice.index,
             _ => panic!("Obtained non ListItem from a raw_select"),
         };
-        Ok(list[answer_index].clone().into())
+        Ok(&list[answer_index])
     }
 }

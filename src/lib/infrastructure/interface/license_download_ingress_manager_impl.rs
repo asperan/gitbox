@@ -1,15 +1,12 @@
 use regex::{Regex, RegexBuilder};
 
 use crate::{
-    application::{
-        manager::{
-            license_list_ingress_manager::LicenseListIngressManager,
-            license_text_ingress_manager::LicenseTextIngressManager,
-        },
-        type_alias::LicenseNameAndId,
+    application::manager::{
+        license_list_ingress_manager::LicenseListIngressManager,
+        license_text_ingress_manager::LicenseTextIngressManager,
     },
     infrastructure::error::license_text_retrieval_error::LicenseTextRetrievalError,
-    usecases::type_aliases::AnyError,
+    usecases::{license_metadata::LicenseMetadata, type_aliases::AnyError},
 };
 
 const BASE_LICENSE_URL: &str = "https://choosealicense.com";
@@ -25,7 +22,7 @@ impl LicenseDownloadIngressManagerImpl {
 }
 
 impl LicenseListIngressManager for LicenseDownloadIngressManagerImpl {
-    fn license_list(&self) -> Result<Box<[LicenseNameAndId]>, AnyError> {
+    fn license_list(&self) -> Result<Box<[LicenseMetadata]>, AnyError> {
         let list_url = BASE_LICENSE_URL.to_owned() + "/appendix";
         let raw_list = ureq::get(&list_url).call()?.into_string()?;
         let url_and_name_regex = Regex::new("<a href=\"(.*)\">(.*)</a>").unwrap();
@@ -35,9 +32,9 @@ impl LicenseListIngressManager for LicenseDownloadIngressManagerImpl {
             .filter_map(|line| {
                 let captures = url_and_name_regex.captures(line);
                 captures.map(|c| {
-                    LicenseNameAndId(
-                        c.get(2).unwrap().as_str().into(),
-                        c.get(1).unwrap().as_str().into(),
+                    LicenseMetadata::new(
+                        c.get(2).unwrap().as_str(),
+                        &(BASE_LICENSE_URL.to_owned() + c.get(1).unwrap().as_str()),
                     )
                 })
             })
@@ -46,9 +43,8 @@ impl LicenseListIngressManager for LicenseDownloadIngressManagerImpl {
 }
 
 impl LicenseTextIngressManager for LicenseDownloadIngressManagerImpl {
-    fn license_text(&self, license: Box<LicenseNameAndId>) -> Result<Box<str>, AnyError> {
-        let license_url = BASE_LICENSE_URL.to_owned() + &license.1;
-        let raw_license_page = ureq::get(&license_url).call()?.into_string()?;
+    fn license_text(&self, license: &LicenseMetadata) -> Result<Box<str>, AnyError> {
+        let raw_license_page = ureq::get(&license.reference()).call()?.into_string()?;
         let license_text_regex = RegexBuilder::new(&format!(
             "{}(.*){}",
             HTML_LICENSE_PREFIX, HTML_LICENSE_SUFFIX
