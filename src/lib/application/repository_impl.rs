@@ -5,3 +5,4 @@ pub mod full_commit_summary_history_repository_impl;
 pub mod gitextra_egress_repository_impl;
 pub mod semantic_version_ingress_repository_impl;
 pub mod tag_egress_repository_impl;
+pub mod treegraphline_ingress_repository_impl;
