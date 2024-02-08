@@ -17,7 +17,7 @@ impl<'a, 'b: 'a, 'c: 'a> LicenseTextEgressRepositoryImpl<'a> {
         license_text_egress_manager: &'c dyn LicenseTextEgressManager,
     ) -> Self {
         LicenseTextEgressRepositoryImpl {
-            filepath: filepath.into(),
+            filepath,
             license_text_egress_manager,
         }
     }
@@ -26,7 +26,7 @@ impl<'a, 'b: 'a, 'c: 'a> LicenseTextEgressRepositoryImpl<'a> {
 impl LicenseTextEgressRepository for LicenseTextEgressRepositoryImpl<'_> {
     fn consume(&self, text: &str) -> Result<(), AnyError> {
         self.license_text_egress_manager
-            .write_license(&self.filepath, text)
+            .write_license(self.filepath, text)
     }
 }
 
