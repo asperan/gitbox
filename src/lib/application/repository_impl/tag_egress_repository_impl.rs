@@ -1,22 +1,20 @@
-use std::rc::Rc;
-
 use crate::{
     application::manager::tag_egress_manager::TagEgressManager,
     domain::semantic_version::SemanticVersion,
     usecase::{repository::tag_egress_repository::TagEgressRepository, type_aliases::AnyError},
 };
 
-pub struct TagEgressRepositoryImpl {
-    tag_egress_manager: Rc<dyn TagEgressManager>,
+pub struct TagEgressRepositoryImpl<'a> {
+    tag_egress_manager: &'a dyn TagEgressManager,
 }
 
-impl TagEgressRepositoryImpl {
-    pub fn new(tag_egress_manager: Rc<dyn TagEgressManager>) -> TagEgressRepositoryImpl {
+impl<'a, 'b: 'a> TagEgressRepositoryImpl<'a> {
+    pub fn new(tag_egress_manager: &'b dyn TagEgressManager) -> Self {
         TagEgressRepositoryImpl { tag_egress_manager }
     }
 }
 
-impl TagEgressRepository for TagEgressRepositoryImpl {
+impl TagEgressRepository for TagEgressRepositoryImpl<'_> {
     fn create_tag(
         &self,
         version: &SemanticVersion,
@@ -30,7 +28,7 @@ impl TagEgressRepository for TagEgressRepositoryImpl {
 
 #[cfg(test)]
 mod tests {
-    use std::{cell::RefCell, rc::Rc};
+    use std::cell::RefCell;
 
     use crate::{
         application::{
@@ -59,10 +57,10 @@ mod tests {
     #[test]
     fn received_label_is_version_string() {
         let version = SemanticVersion::new(0, 1, 0, None, None);
-        let manager = Rc::new(MockTagEgressManager {
+        let manager = MockTagEgressManager {
             label: RefCell::new("".into()),
-        });
-        let repository = TagEgressRepositoryImpl::new(manager.clone());
+        };
+        let repository = TagEgressRepositoryImpl::new(&manager);
         let result = repository.create_tag(&version, &None, false);
         assert!(result.is_ok());
         assert_eq!(manager.label.borrow().as_ref(), version.to_string());

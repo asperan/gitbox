@@ -39,24 +39,24 @@ use crate::{
 
 use super::exit_code::ControllerExitCode;
 
-pub struct DescribeController {
+pub struct DescribeController<'a> {
     options: DescribeOptions,
-    commit_summary_manager: Rc<dyn BoundedCommitSummaryIngressManager>,
-    commit_metadata_manager: Rc<dyn CommitMetadataIngressManager>,
-    version_manager: Rc<dyn VersionIngressManager>,
-    tag_write_manager: Rc<dyn TagEgressManager>,
-    output_manager: Rc<dyn MessageEgressManager>,
+    commit_summary_manager: &'a dyn BoundedCommitSummaryIngressManager,
+    commit_metadata_manager: &'a dyn CommitMetadataIngressManager,
+    version_manager: &'a dyn VersionIngressManager,
+    tag_write_manager: &'a dyn TagEgressManager,
+    output_manager: &'a dyn MessageEgressManager,
 }
 
-impl DescribeController {
+impl<'a, 'b: 'a, 'c: 'a, 'd: 'a, 'e: 'a, 'f: 'a> DescribeController<'a> {
     pub fn new(
         options: DescribeOptions,
-        commit_summary_manager: Rc<dyn BoundedCommitSummaryIngressManager>,
-        commit_metadata_manager: Rc<dyn CommitMetadataIngressManager>,
-        version_manager: Rc<dyn VersionIngressManager>,
-        tag_write_manager: Rc<dyn TagEgressManager>,
-        output_manager: Rc<dyn MessageEgressManager>,
-    ) -> DescribeController {
+        commit_summary_manager: &'b dyn BoundedCommitSummaryIngressManager,
+        commit_metadata_manager: &'c dyn CommitMetadataIngressManager,
+        version_manager: &'d dyn VersionIngressManager,
+        tag_write_manager: &'e dyn TagEgressManager,
+        output_manager: &'f dyn MessageEgressManager,
+    ) -> Self {
         DescribeController {
             options,
             commit_summary_manager,
@@ -79,20 +79,16 @@ impl DescribeController {
 
     fn run(&self) -> Result<(), AnyError> {
         let describe_configuration = self.generate_describe_configuration()?;
-        let commit_summary_repository = Rc::new(BoundedCommitSummaryIngressRepositoryImpl::new(
-            self.commit_summary_manager.clone(),
-        ));
-        let commit_metadata_repository = Rc::new(CommitMetadataIngressRepositoryImpl::new(
-            self.commit_metadata_manager.clone(),
-        ));
-        let version_repository = Rc::new(SemanticVersionIngressRepositoryImpl::new(
-            self.version_manager.clone(),
-        ));
+        let commit_summary_repository =
+            BoundedCommitSummaryIngressRepositoryImpl::new(self.commit_summary_manager);
+        let commit_metadata_repository =
+            CommitMetadataIngressRepositoryImpl::new(self.commit_metadata_manager);
+        let version_repository = SemanticVersionIngressRepositoryImpl::new(self.version_manager);
         let describe_usecase = CalculateNewVersionUseCase::new(
             describe_configuration,
-            commit_summary_repository.clone(),
-            commit_metadata_repository.clone(),
-            version_repository,
+            &commit_summary_repository,
+            &commit_metadata_repository,
+            &version_repository,
         );
         let (new_version, old_version) = describe_usecase.execute()?;
         if self.options.diff() {
@@ -108,9 +104,8 @@ impl DescribeController {
                 self.options.tag_message().clone(),
                 self.options.sign_tag(),
             )?;
-            let tag_write_repository =
-                Rc::new(TagEgressRepositoryImpl::new(self.tag_write_manager.clone()));
-            let tag_usecase = CreateTagUseCase::new(tag_configuration, tag_write_repository);
+            let tag_write_repository = TagEgressRepositoryImpl::new(self.tag_write_manager);
+            let tag_usecase = CreateTagUseCase::new(tag_configuration, &tag_write_repository);
             tag_usecase.execute()?;
             self.output_manager.output("Tag created successfully");
         }
@@ -297,18 +292,18 @@ mod tests {
             false,
         )
         .expect("hand-crafted options are correct");
-        let commit_summary_manager = Rc::new(MockCommitSummaryManager {});
-        let commit_metadata_ingress_manager = Rc::new(MockCommitMetadataManager {});
-        let version_ingress_manager = Rc::new(MockSemanticVersionIngressManager {});
-        let tag_egress_manager = Rc::new(MockTagEgressManager::new());
-        let output_manager = Rc::new(MockOutputManager::new());
+        let commit_summary_manager = MockCommitSummaryManager {};
+        let commit_metadata_ingress_manager = MockCommitMetadataManager {};
+        let version_ingress_manager = MockSemanticVersionIngressManager {};
+        let tag_egress_manager = MockTagEgressManager::new();
+        let output_manager = MockOutputManager::new();
         let controller = DescribeController::new(
             options,
-            commit_summary_manager.clone(),
-            commit_metadata_ingress_manager.clone(),
-            version_ingress_manager.clone(),
-            tag_egress_manager.clone(),
-            output_manager.clone(),
+            &commit_summary_manager,
+            &commit_metadata_ingress_manager,
+            &version_ingress_manager,
+            &tag_egress_manager,
+            &output_manager,
         );
         let result = controller.describe();
         assert!(matches!(result, ControllerExitCode::Ok));
@@ -331,18 +326,18 @@ mod tests {
             false,
         )
         .expect("hand-crafted options are correct");
-        let commit_summary_manager = Rc::new(MockCommitSummaryManager {});
-        let commit_metadata_ingress_manager = Rc::new(MockCommitMetadataManager {});
-        let version_ingress_manager = Rc::new(MockSemanticVersionIngressManager {});
-        let tag_egress_manager = Rc::new(MockTagEgressManager::new());
-        let output_manager = Rc::new(MockOutputManager::new());
+        let commit_summary_manager = MockCommitSummaryManager {};
+        let commit_metadata_ingress_manager = MockCommitMetadataManager {};
+        let version_ingress_manager = MockSemanticVersionIngressManager {};
+        let tag_egress_manager = MockTagEgressManager::new();
+        let output_manager = MockOutputManager::new();
         let controller = DescribeController::new(
             options,
-            commit_summary_manager.clone(),
-            commit_metadata_ingress_manager.clone(),
-            version_ingress_manager.clone(),
-            tag_egress_manager.clone(),
-            output_manager.clone(),
+            &commit_summary_manager,
+            &commit_metadata_ingress_manager,
+            &version_ingress_manager,
+            &tag_egress_manager,
+            &output_manager,
         );
         let result = controller.describe();
         assert!(matches!(result, ControllerExitCode::Ok));
@@ -368,18 +363,18 @@ mod tests {
             false,
         )
         .expect("hand-crafted options are correct");
-        let commit_summary_manager = Rc::new(MockCommitSummaryManager {});
-        let commit_metadata_ingress_manager = Rc::new(MockCommitMetadataManager {});
-        let version_ingress_manager = Rc::new(MockSemanticVersionIngressManager {});
-        let tag_egress_manager = Rc::new(MockTagEgressManager::new());
-        let output_manager = Rc::new(MockOutputManager::new());
+        let commit_summary_manager = MockCommitSummaryManager {};
+        let commit_metadata_ingress_manager = MockCommitMetadataManager {};
+        let version_ingress_manager = MockSemanticVersionIngressManager {};
+        let tag_egress_manager = MockTagEgressManager::new();
+        let output_manager = MockOutputManager::new();
         let controller = DescribeController::new(
             options,
-            commit_summary_manager.clone(),
-            commit_metadata_ingress_manager.clone(),
-            version_ingress_manager.clone(),
-            tag_egress_manager.clone(),
-            output_manager.clone(),
+            &commit_summary_manager,
+            &commit_metadata_ingress_manager,
+            &version_ingress_manager,
+            &tag_egress_manager,
+            &output_manager,
         );
         let result = controller.describe();
         assert!(matches!(result, ControllerExitCode::Ok));

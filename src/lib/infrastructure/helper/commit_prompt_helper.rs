@@ -9,16 +9,16 @@ use super::{
     gitextra_egress_helper::GitExtraEgressHelper, gitextra_ingress_helper::GitExtraIngressHelper,
 };
 
-pub struct CommitPromptHelper {
-    gitextra_read_manager: Rc<dyn GitExtraIngressHelper>,
-    gitextra_append_manager: Rc<dyn GitExtraEgressHelper>,
+pub struct CommitPromptHelper<'a> {
+    gitextra_read_manager: &'a dyn GitExtraIngressHelper,
+    gitextra_append_manager: &'a dyn GitExtraEgressHelper,
 }
 
-impl CommitPromptHelper {
+impl<'a, 'b: 'a, 'c: 'a> CommitPromptHelper<'a> {
     pub fn new(
-        gitextra_read_manager: Rc<dyn GitExtraIngressHelper>,
-        gitextra_append_manager: Rc<dyn GitExtraEgressHelper>,
-    ) -> CommitPromptHelper {
+        gitextra_read_manager: &'b dyn GitExtraIngressHelper,
+        gitextra_append_manager: &'c dyn GitExtraEgressHelper,
+    ) -> Self {
         CommitPromptHelper {
             gitextra_read_manager,
             gitextra_append_manager,

@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use crate::{
     application::manager::license_choice_ingress_manager::LicenseChoiceIngressManager,
     usecase::{
@@ -9,19 +7,19 @@ use crate::{
     },
 };
 
-pub struct LicenseChoiceIngressRepositoryImpl {
-    license_choice_ingress_manager: Rc<dyn LicenseChoiceIngressManager>,
+pub struct LicenseChoiceIngressRepositoryImpl<'a> {
+    license_choice_ingress_manager: &'a dyn LicenseChoiceIngressManager,
 }
 
-impl LicenseChoiceIngressRepositoryImpl {
-    pub fn new(license_choice_ingress_manager: Rc<dyn LicenseChoiceIngressManager>) -> Self {
+impl<'a, 'b: 'a> LicenseChoiceIngressRepositoryImpl<'a> {
+    pub fn new(license_choice_ingress_manager: &'b dyn LicenseChoiceIngressManager) -> Self {
         LicenseChoiceIngressRepositoryImpl {
             license_choice_ingress_manager,
         }
     }
 }
 
-impl LicenseChoiceIngressRepository for LicenseChoiceIngressRepositoryImpl {
+impl LicenseChoiceIngressRepository for LicenseChoiceIngressRepositoryImpl<'_> {
     fn ask_license<'a>(
         &self,
         list: &'a [LicenseMetadata],
@@ -32,11 +30,18 @@ impl LicenseChoiceIngressRepository for LicenseChoiceIngressRepositoryImpl {
 
 #[cfg(test)]
 mod tests {
-    use std::{error::Error, fmt::Display, rc::Rc};
+    use std::{error::Error, fmt::Display};
 
     use crate::{
-        application::{manager::license_choice_ingress_manager::LicenseChoiceIngressManager, repository_impl::license_choice_ingress_repository_impl::LicenseChoiceIngressRepositoryImpl},
-        usecase::{license_metadata::LicenseMetadata, repository::license_choice_ingress_repository::LicenseChoiceIngressRepository, type_aliases::AnyError},
+        application::{
+            manager::license_choice_ingress_manager::LicenseChoiceIngressManager,
+            repository_impl::license_choice_ingress_repository_impl::LicenseChoiceIngressRepositoryImpl,
+        },
+        usecase::{
+            license_metadata::LicenseMetadata,
+            repository::license_choice_ingress_repository::LicenseChoiceIngressRepository,
+            type_aliases::AnyError,
+        },
     };
 
     #[derive(Debug)]
@@ -58,16 +63,19 @@ mod tests {
             if !list.is_empty() {
                 Ok(&list[0])
             } else {
-                Err(MockError{}.into())
+                Err(MockError {}.into())
             }
         }
     }
 
     #[test]
     fn ask_license_ok() {
-        let choice_list = [LicenseMetadata::new("MIT", "mit-license"), LicenseMetadata::new("MPL v2", "mpl-license")];
-        let license_choice_ingress_manager = Rc::new(MockLicenseChoiceIngressManager{});
-        let repository = LicenseChoiceIngressRepositoryImpl::new(license_choice_ingress_manager.clone());
+        let choice_list = [
+            LicenseMetadata::new("MIT", "mit-license"),
+            LicenseMetadata::new("MPL v2", "mpl-license"),
+        ];
+        let license_choice_ingress_manager = MockLicenseChoiceIngressManager {};
+        let repository = LicenseChoiceIngressRepositoryImpl::new(&license_choice_ingress_manager);
         let result = repository.ask_license(&choice_list);
         assert!(result.is_ok());
     }

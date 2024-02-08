@@ -17,18 +17,18 @@ use crate::{
 
 use super::exit_code::ControllerExitCode;
 
-pub struct RefreshController {
-    full_commit_summary_history_ingress_manager: Rc<dyn FullCommitSummaryHistoryIngressManager>,
-    gitextra_write_manager: Rc<dyn GitExtraEgressManager>,
-    output_manager: Rc<dyn MessageEgressManager>,
+pub struct RefreshController<'a> {
+    full_commit_summary_history_ingress_manager: &'a dyn FullCommitSummaryHistoryIngressManager,
+    gitextra_write_manager: &'a dyn GitExtraEgressManager,
+    output_manager: &'a dyn MessageEgressManager,
 }
 
-impl RefreshController {
+impl<'a: 'd, 'b: 'd, 'd, 'c: 'd> RefreshController<'d> {
     pub fn new(
-        full_commit_summary_history_ingress_manager: Rc<dyn FullCommitSummaryHistoryIngressManager>,
-        gitextra_write_manager: Rc<dyn GitExtraEgressManager>,
-        output_manager: Rc<dyn MessageEgressManager>,
-    ) -> RefreshController {
+        full_commit_summary_history_ingress_manager: &'c dyn FullCommitSummaryHistoryIngressManager,
+        gitextra_write_manager: &'a dyn GitExtraEgressManager,
+        output_manager: &'b dyn MessageEgressManager,
+    ) -> Self {
         RefreshController {
             full_commit_summary_history_ingress_manager,
             gitextra_write_manager,
@@ -37,13 +37,15 @@ impl RefreshController {
     }
 
     pub fn refresh(&self) -> ControllerExitCode {
+        let gitextra_write_repository =
+            GitExtraEgressRepositoryImpl::new(self.gitextra_write_manager);
+        let full_commit_summary_history_repository_impl =
+            FullCommitSummaryHistoryRepositoryImpl::new(
+                self.full_commit_summary_history_ingress_manager,
+            );
         let usecase = RefreshTypesAndScopesUseCase::new(
-            Rc::new(FullCommitSummaryHistoryRepositoryImpl::new(
-                self.full_commit_summary_history_ingress_manager.clone(),
-            )),
-            Rc::new(GitExtraEgressRepositoryImpl::new(
-                self.gitextra_write_manager.clone(),
-            )),
+            &full_commit_summary_history_repository_impl,
+            &gitextra_write_repository,
         );
         match usecase.execute() {
             Ok(_) => {
@@ -61,7 +63,7 @@ impl RefreshController {
 
 #[cfg(test)]
 mod tests {
-    use std::{cell::RefCell, rc::Rc};
+    use std::cell::RefCell;
 
     use crate::{
         application::{
@@ -122,13 +124,13 @@ mod tests {
 
     #[test]
     fn refresh_controller() {
-        let full_history_manager = Rc::new(MockFullCommitSummaryHistoryManager {});
-        let git_extra_manager = Rc::new(MockGitExtraEgressManager::new());
-        let void_output_manager = Rc::new(VoidMessageEgressManager {});
+        let full_history_manager = MockFullCommitSummaryHistoryManager {};
+        let git_extra_manager = MockGitExtraEgressManager::new();
+        let void_output_manager = VoidMessageEgressManager {};
         let controller = RefreshController::new(
-            full_history_manager.clone(),
-            git_extra_manager.clone(),
-            void_output_manager.clone(),
+            &full_history_manager,
+            &git_extra_manager,
+            &void_output_manager,
         );
         let result = controller.refresh();
         assert!(matches!(result, ControllerExitCode::Ok));

@@ -18,12 +18,12 @@ use super::usecase::UseCase;
 
 pub struct CalculateNewVersionUseCase<'a> {
     configuration: DescribeConfiguration<'a>,
-    commit_summary_repository: Rc<dyn BoundedCommitSummaryIngressRepository>,
-    commit_metadata_repository: Rc<dyn CommitMetadataIngressRepository>,
-    version_repository: Rc<dyn SemanticVersionIngressRepository>,
+    commit_summary_repository: &'a dyn BoundedCommitSummaryIngressRepository,
+    commit_metadata_repository: &'a dyn CommitMetadataIngressRepository,
+    version_repository: &'a dyn SemanticVersionIngressRepository,
 }
 
-impl<'a> UseCase<(SemanticVersion, Option<SemanticVersion>)> for CalculateNewVersionUseCase<'a> {
+impl UseCase<(SemanticVersion, Option<SemanticVersion>)> for CalculateNewVersionUseCase<'_> {
     fn execute(&self) -> Result<(SemanticVersion, Option<SemanticVersion>), AnyError> {
         let base_version = if self.configuration.prerelease().is_active() {
             self.version_repository.last_version()
@@ -50,13 +50,13 @@ impl<'a> UseCase<(SemanticVersion, Option<SemanticVersion>)> for CalculateNewVer
     }
 }
 
-impl<'a> CalculateNewVersionUseCase<'a> {
+impl<'a, 'b: 'a, 'c: 'a, 'd: 'a> CalculateNewVersionUseCase<'a> {
     pub fn new(
-        configuration: DescribeConfiguration,
-        commit_summary_repository: Rc<dyn BoundedCommitSummaryIngressRepository>,
-        commit_metadata_repository: Rc<dyn CommitMetadataIngressRepository>,
-        version_repository: Rc<dyn SemanticVersionIngressRepository>,
-    ) -> CalculateNewVersionUseCase {
+        configuration: DescribeConfiguration<'a>,
+        commit_summary_repository: &'b dyn BoundedCommitSummaryIngressRepository,
+        commit_metadata_repository: &'c dyn CommitMetadataIngressRepository,
+        version_repository: &'d dyn SemanticVersionIngressRepository,
+    ) -> Self {
         CalculateNewVersionUseCase {
             configuration,
             commit_summary_repository,
@@ -352,7 +352,7 @@ mod tests {
     #[test]
     fn greatest_change_from_list() {
         let configuration = basic_configuration();
-        let commit_summary_repository = Rc::new(MockCommitSummaryRepository::new(
+        let commit_summary_repository = MockCommitSummaryRepository::new(
             vec![
                 CommitSummary::Conventional(ConventionalCommitSummary::new(
                     "feat".to_string(),
@@ -374,17 +374,17 @@ mod tests {
                 )),
             ],
             vec![],
-        ));
-        let commit_metadata_repository = Rc::new(MockCommitMetadataRepository {});
-        let version_repository = Rc::new(MockVersionRepository {
+        );
+        let commit_metadata_repository = MockCommitMetadataRepository {};
+        let version_repository = MockVersionRepository {
             stable_version: None,
             last_version: None,
-        });
+        };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,
-            commit_summary_repository,
-            commit_metadata_repository,
-            version_repository,
+            &commit_summary_repository,
+            &commit_metadata_repository,
+            &version_repository,
         );
         let result = usecase
             .greatest_change_from(&Some(SemanticVersion::new(0, 1, 0, None, None)))
@@ -397,17 +397,17 @@ mod tests {
     #[test]
     fn greatest_change_from_empty_list() {
         let configuration = basic_configuration();
-        let commit_summary_repository = Rc::new(MockCommitSummaryRepository::new(vec![], vec![]));
-        let commit_metadata_repository = Rc::new(MockCommitMetadataRepository {});
-        let version_repository = Rc::new(MockVersionRepository {
+        let commit_summary_repository = MockCommitSummaryRepository::new(vec![], vec![]);
+        let commit_metadata_repository = MockCommitMetadataRepository {};
+        let version_repository = MockVersionRepository {
             stable_version: None,
             last_version: None,
-        });
+        };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,
-            commit_summary_repository,
-            commit_metadata_repository,
-            version_repository,
+            &commit_summary_repository,
+            &commit_metadata_repository,
+            &version_repository,
         );
         let result = usecase
             .greatest_change_from(&Some(SemanticVersion::new(0, 1, 0, None, None)))
@@ -420,17 +420,17 @@ mod tests {
     #[test]
     fn commit_to_change_freeform() {
         let configuration = basic_configuration();
-        let commit_summary_repository = Rc::new(MockCommitSummaryRepository::new(vec![], vec![]));
-        let commit_metadata_repository = Rc::new(MockCommitMetadataRepository {});
-        let version_repository = Rc::new(MockVersionRepository {
+        let commit_summary_repository = MockCommitSummaryRepository::new(vec![], vec![]);
+        let commit_metadata_repository = MockCommitMetadataRepository {};
+        let version_repository = MockVersionRepository {
             stable_version: None,
             last_version: None,
-        });
+        };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,
-            commit_summary_repository,
-            commit_metadata_repository,
-            version_repository,
+            &commit_summary_repository,
+            &commit_metadata_repository,
+            &version_repository,
         );
         let commit = CommitSummary::FreeForm("test freeform commit".to_string());
         let result = usecase.commit_to_change(&commit);
@@ -440,17 +440,17 @@ mod tests {
     #[test]
     fn commit_to_change_major() {
         let configuration = basic_configuration();
-        let commit_summary_repository = Rc::new(MockCommitSummaryRepository::new(vec![], vec![]));
-        let commit_metadata_repository = Rc::new(MockCommitMetadataRepository {});
-        let version_repository = Rc::new(MockVersionRepository {
+        let commit_summary_repository = MockCommitSummaryRepository::new(vec![], vec![]);
+        let commit_metadata_repository = MockCommitMetadataRepository {};
+        let version_repository = MockVersionRepository {
             stable_version: None,
             last_version: None,
-        });
+        };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,
-            commit_summary_repository,
-            commit_metadata_repository,
-            version_repository,
+            &commit_summary_repository,
+            &commit_metadata_repository,
+            &version_repository,
         );
         let commit = CommitSummary::Conventional(ConventionalCommitSummary::new(
             "chore".to_string(),
@@ -465,17 +465,17 @@ mod tests {
     #[test]
     fn commit_to_change_minor() {
         let configuration = basic_configuration();
-        let commit_summary_repository = Rc::new(MockCommitSummaryRepository::new(vec![], vec![]));
-        let commit_metadata_repository = Rc::new(MockCommitMetadataRepository {});
-        let version_repository = Rc::new(MockVersionRepository {
+        let commit_summary_repository = MockCommitSummaryRepository::new(vec![], vec![]);
+        let commit_metadata_repository = MockCommitMetadataRepository {};
+        let version_repository = MockVersionRepository {
             stable_version: None,
             last_version: None,
-        });
+        };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,
-            commit_summary_repository,
-            commit_metadata_repository,
-            version_repository,
+            &commit_summary_repository,
+            &commit_metadata_repository,
+            &version_repository,
         );
         let commit = CommitSummary::Conventional(ConventionalCommitSummary::new(
             "feat".to_string(),
@@ -490,17 +490,17 @@ mod tests {
     #[test]
     fn commit_to_change_patch() {
         let configuration = basic_configuration();
-        let commit_summary_repository = Rc::new(MockCommitSummaryRepository::new(vec![], vec![]));
-        let commit_metadata_repository = Rc::new(MockCommitMetadataRepository {});
-        let version_repository = Rc::new(MockVersionRepository {
+        let commit_summary_repository = MockCommitSummaryRepository::new(vec![], vec![]);
+        let commit_metadata_repository = MockCommitMetadataRepository {};
+        let version_repository = MockVersionRepository {
             stable_version: None,
             last_version: None,
-        });
+        };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,
-            commit_summary_repository,
-            commit_metadata_repository,
-            version_repository,
+            &commit_summary_repository,
+            &commit_metadata_repository,
+            &version_repository,
         );
         let commit = CommitSummary::Conventional(ConventionalCommitSummary::new(
             "fix".to_string(),
@@ -515,17 +515,17 @@ mod tests {
     #[test]
     fn commit_to_change_none() {
         let configuration = basic_configuration();
-        let commit_summary_repository = Rc::new(MockCommitSummaryRepository::new(vec![], vec![]));
-        let commit_metadata_repository = Rc::new(MockCommitMetadataRepository {});
-        let version_repository = Rc::new(MockVersionRepository {
+        let commit_summary_repository = MockCommitSummaryRepository::new(vec![], vec![]);
+        let commit_metadata_repository = MockCommitMetadataRepository {};
+        let version_repository = MockVersionRepository {
             stable_version: None,
             last_version: None,
-        });
+        };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,
-            commit_summary_repository,
-            commit_metadata_repository,
-            version_repository,
+            &commit_summary_repository,
+            &commit_metadata_repository,
+            &version_repository,
         );
         let commit = CommitSummary::Conventional(ConventionalCommitSummary::new(
             "chore".to_string(),
@@ -541,17 +541,17 @@ mod tests {
     #[test]
     fn first_stable_version_is_first_release() {
         let configuration = basic_configuration();
-        let commit_summary_repository = Rc::new(MockCommitSummaryRepository::new(vec![], vec![]));
-        let commit_metadata_repository = Rc::new(MockCommitMetadataRepository {});
-        let version_repository = Rc::new(MockVersionRepository {
+        let commit_summary_repository = MockCommitSummaryRepository::new(vec![], vec![]);
+        let commit_metadata_repository = MockCommitMetadataRepository {};
+        let version_repository = MockVersionRepository {
             stable_version: None,
             last_version: None,
-        });
+        };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,
-            commit_summary_repository,
-            commit_metadata_repository,
-            version_repository,
+            &commit_summary_repository,
+            &commit_metadata_repository,
+            &version_repository,
         );
         let result = usecase
             .execute()
@@ -574,17 +574,17 @@ mod tests {
             metadata_configuration,
             trigger_configuration,
         );
-        let commit_summary_repository = Rc::new(MockCommitSummaryRepository::new(vec![], vec![]));
-        let commit_metadata_repository = Rc::new(MockCommitMetadataRepository {});
-        let version_repository = Rc::new(MockVersionRepository {
+        let commit_summary_repository = MockCommitSummaryRepository::new(vec![], vec![]);
+        let commit_metadata_repository = MockCommitMetadataRepository {};
+        let version_repository = MockVersionRepository {
             stable_version: None,
             last_version: None,
-        });
+        };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,
-            commit_summary_repository,
-            commit_metadata_repository,
-            version_repository,
+            &commit_summary_repository,
+            &commit_metadata_repository,
+            &version_repository,
         );
         let result = usecase
             .execute()
@@ -615,7 +615,7 @@ mod tests {
             metadata_configuration,
             trigger_configuration,
         );
-        let commit_summary_repository = Rc::new(MockCommitSummaryRepository::new(
+        let commit_summary_repository = MockCommitSummaryRepository::new(
             vec![CommitSummary::Conventional(ConventionalCommitSummary::new(
                 "fix".to_owned(),
                 None,
@@ -623,17 +623,17 @@ mod tests {
                 "test".to_string(),
             ))],
             vec![],
-        ));
-        let commit_metadata_repository = Rc::new(MockCommitMetadataRepository {});
-        let version_repository = Rc::new(MockVersionRepository {
+        );
+        let commit_metadata_repository = MockCommitMetadataRepository {};
+        let version_repository = MockVersionRepository {
             stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)),
             last_version: None,
-        });
+        };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,
-            commit_summary_repository,
-            commit_metadata_repository,
-            version_repository,
+            &commit_summary_repository,
+            &commit_metadata_repository,
+            &version_repository,
         );
         let result = usecase
             .execute()
@@ -661,7 +661,7 @@ mod tests {
             metadata_configuration,
             trigger_configuration,
         );
-        let commit_summary_repository = Rc::new(MockCommitSummaryRepository::new(
+        let commit_summary_repository = MockCommitSummaryRepository::new(
             vec![CommitSummary::Conventional(ConventionalCommitSummary::new(
                 "feat".to_owned(),
                 None,
@@ -669,17 +669,17 @@ mod tests {
                 "test".to_string(),
             ))],
             vec![],
-        ));
-        let commit_metadata_repository = Rc::new(MockCommitMetadataRepository {});
-        let version_repository = Rc::new(MockVersionRepository {
+        );
+        let commit_metadata_repository = MockCommitMetadataRepository {};
+        let version_repository = MockVersionRepository {
             stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)),
             last_version: None,
-        });
+        };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,
-            commit_summary_repository,
-            commit_metadata_repository,
-            version_repository,
+            &commit_summary_repository,
+            &commit_metadata_repository,
+            &version_repository,
         );
         let result = usecase
             .execute()
@@ -707,7 +707,7 @@ mod tests {
             metadata_configuration,
             trigger_configuration,
         );
-        let commit_summary_repository = Rc::new(MockCommitSummaryRepository::new(
+        let commit_summary_repository = MockCommitSummaryRepository::new(
             vec![CommitSummary::Conventional(ConventionalCommitSummary::new(
                 "refactor".to_owned(),
                 None,
@@ -715,17 +715,17 @@ mod tests {
                 "test".to_string(),
             ))],
             vec![],
-        ));
-        let commit_metadata_repository = Rc::new(MockCommitMetadataRepository {});
-        let version_repository = Rc::new(MockVersionRepository {
+        );
+        let commit_metadata_repository = MockCommitMetadataRepository {};
+        let version_repository = MockVersionRepository {
             stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)),
             last_version: None,
-        });
+        };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,
-            commit_summary_repository,
-            commit_metadata_repository,
-            version_repository,
+            &commit_summary_repository,
+            &commit_metadata_repository,
+            &version_repository,
         );
         let result = usecase
             .execute()
@@ -753,7 +753,7 @@ mod tests {
             metadata_configuration,
             trigger_configuration,
         );
-        let commit_summary_repository = Rc::new(MockCommitSummaryRepository::new(
+        let commit_summary_repository = MockCommitSummaryRepository::new(
             vec![CommitSummary::Conventional(ConventionalCommitSummary::new(
                 "refactor".to_owned(),
                 None,
@@ -761,17 +761,17 @@ mod tests {
                 "test".to_string(),
             ))],
             vec![],
-        ));
-        let commit_metadata_repository = Rc::new(MockCommitMetadataRepository {});
-        let version_repository = Rc::new(MockVersionRepository {
+        );
+        let commit_metadata_repository = MockCommitMetadataRepository {};
+        let version_repository = MockVersionRepository {
             stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)),
             last_version: None,
-        });
+        };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,
-            commit_summary_repository,
-            commit_metadata_repository,
-            version_repository,
+            &commit_summary_repository,
+            &commit_metadata_repository,
+            &version_repository,
         );
         let result = usecase
             .execute()
@@ -800,7 +800,7 @@ mod tests {
             metadata_configuration,
             trigger_configuration,
         );
-        let commit_summary_repository = Rc::new(MockCommitSummaryRepository::new(
+        let commit_summary_repository = MockCommitSummaryRepository::new(
             vec![CommitSummary::Conventional(ConventionalCommitSummary::new(
                 "refactor".to_owned(),
                 None,
@@ -808,9 +808,9 @@ mod tests {
                 "test".to_string(),
             ))],
             vec![],
-        ));
-        let commit_metadata_repository = Rc::new(MockCommitMetadataRepository {});
-        let version_repository = Rc::new(MockVersionRepository {
+        );
+        let commit_metadata_repository = MockCommitMetadataRepository {};
+        let version_repository = MockVersionRepository {
             stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)),
             last_version: Some(SemanticVersion::new(
                 0,
@@ -819,12 +819,12 @@ mod tests {
                 Some("alpha1".to_string()),
                 None,
             )),
-        });
+        };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,
-            commit_summary_repository,
-            commit_metadata_repository,
-            version_repository,
+            &commit_summary_repository,
+            &commit_metadata_repository,
+            &version_repository,
         );
         let result = usecase.execute().expect("This calc should be correct");
         assert_eq!(
@@ -853,7 +853,7 @@ mod tests {
             metadata_configuration,
             trigger_configuration,
         );
-        let commit_summary_repository = Rc::new(MockCommitSummaryRepository::new(
+        let commit_summary_repository = MockCommitSummaryRepository::new(
             vec![CommitSummary::Conventional(ConventionalCommitSummary::new(
                 "fix".to_owned(),
                 None,
@@ -866,9 +866,9 @@ mod tests {
                 false,
                 "test".to_string(),
             ))],
-        ));
-        let commit_metadata_repository = Rc::new(MockCommitMetadataRepository {});
-        let version_repository = Rc::new(MockVersionRepository {
+        );
+        let commit_metadata_repository = MockCommitMetadataRepository {};
+        let version_repository = MockVersionRepository {
             stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)),
             last_version: Some(SemanticVersion::new(
                 0,
@@ -877,12 +877,12 @@ mod tests {
                 Some("dev1".to_string()),
                 None,
             )),
-        });
+        };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,
-            commit_summary_repository,
-            commit_metadata_repository,
-            version_repository,
+            &commit_summary_repository,
+            &commit_metadata_repository,
+            &version_repository,
         );
         let result = usecase.execute().expect("This calc should be correct");
         assert_eq!(
@@ -911,7 +911,7 @@ mod tests {
             metadata_configuration,
             trigger_configuration,
         );
-        let commit_summary_repository = Rc::new(MockCommitSummaryRepository::new(
+        let commit_summary_repository = MockCommitSummaryRepository::new(
             vec![CommitSummary::Conventional(ConventionalCommitSummary::new(
                 "chore".to_owned(),
                 None,
@@ -919,17 +919,17 @@ mod tests {
                 "test".to_string(),
             ))],
             vec![],
-        ));
-        let commit_metadata_repository = Rc::new(MockCommitMetadataRepository {});
-        let version_repository = Rc::new(MockVersionRepository {
+        );
+        let commit_metadata_repository = MockCommitMetadataRepository {};
+        let version_repository = MockVersionRepository {
             stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)),
             last_version: Some(SemanticVersion::new(0, 1, 0, None, None)),
-        });
+        };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,
-            commit_summary_repository,
-            commit_metadata_repository,
-            version_repository,
+            &commit_summary_repository,
+            &commit_metadata_repository,
+            &version_repository,
         );
         let result = usecase.execute();
         assert!(result.is_err_and(|it| it.is::<DescribeNoRelevantChangesError>()));
@@ -955,7 +955,7 @@ mod tests {
             metadata_configuration,
             trigger_configuration,
         );
-        let commit_summary_repository = Rc::new(MockCommitSummaryRepository::new(
+        let commit_summary_repository = MockCommitSummaryRepository::new(
             vec![CommitSummary::Conventional(ConventionalCommitSummary::new(
                 "chore".to_owned(),
                 None,
@@ -968,9 +968,9 @@ mod tests {
                 false,
                 "test".to_string(),
             ))],
-        ));
-        let commit_metadata_repository = Rc::new(MockCommitMetadataRepository {});
-        let version_repository = Rc::new(MockVersionRepository {
+        );
+        let commit_metadata_repository = MockCommitMetadataRepository {};
+        let version_repository = MockVersionRepository {
             stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)),
             last_version: Some(SemanticVersion::new(
                 0,
@@ -979,12 +979,12 @@ mod tests {
                 Some("dev1".to_string()),
                 None,
             )),
-        });
+        };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,
-            commit_summary_repository,
-            commit_metadata_repository,
-            version_repository,
+            &commit_summary_repository,
+            &commit_metadata_repository,
+            &version_repository,
         );
         let result = usecase.execute().expect("This calc should be correct");
         assert_eq!(
@@ -1015,17 +1015,17 @@ mod tests {
             metadata_configuration,
             trigger_configuration,
         );
-        let commit_summary_repository = Rc::new(MockCommitSummaryRepository::new(vec![], vec![]));
-        let commit_metadata_repository = Rc::new(MockCommitMetadataRepository {});
-        let version_repository = Rc::new(MockVersionRepository {
+        let commit_summary_repository = MockCommitSummaryRepository::new(vec![], vec![]);
+        let commit_metadata_repository = MockCommitMetadataRepository {};
+        let version_repository = MockVersionRepository {
             stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)),
             last_version: None,
-        });
+        };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,
-            commit_summary_repository,
-            commit_metadata_repository,
-            version_repository,
+            &commit_summary_repository,
+            &commit_metadata_repository,
+            &version_repository,
         );
         let result = usecase
             .generate_metadata()
@@ -1053,17 +1053,17 @@ mod tests {
             metadata_configuration,
             trigger_configuration,
         );
-        let commit_summary_repository = Rc::new(MockCommitSummaryRepository::new(vec![], vec![]));
-        let commit_metadata_repository = Rc::new(MockCommitMetadataRepository {});
-        let version_repository = Rc::new(MockVersionRepository {
+        let commit_summary_repository = MockCommitSummaryRepository::new(vec![], vec![]);
+        let commit_metadata_repository = MockCommitMetadataRepository {};
+        let version_repository = MockVersionRepository {
             stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)),
             last_version: None,
-        });
+        };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,
-            commit_summary_repository,
-            commit_metadata_repository,
-            version_repository,
+            &commit_summary_repository,
+            &commit_metadata_repository,
+            &version_repository,
         );
         let result = usecase
             .generate_metadata()
@@ -1092,17 +1092,17 @@ mod tests {
             metadata_configuration,
             trigger_configuration,
         );
-        let commit_summary_repository = Rc::new(MockCommitSummaryRepository::new(vec![], vec![]));
-        let commit_metadata_repository = Rc::new(MockCommitMetadataRepository {});
-        let version_repository = Rc::new(MockVersionRepository {
+        let commit_summary_repository = MockCommitSummaryRepository::new(vec![], vec![]);
+        let commit_metadata_repository = MockCommitMetadataRepository {};
+        let version_repository = MockVersionRepository {
             stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)),
             last_version: None,
-        });
+        };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,
-            commit_summary_repository,
-            commit_metadata_repository,
-            version_repository,
+            &commit_summary_repository,
+            &commit_metadata_repository,
+            &version_repository,
         );
         let result = usecase
             .generate_metadata()

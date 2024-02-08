@@ -22,23 +22,23 @@ use crate::{
 
 use super::exit_code::ControllerExitCode;
 
-pub struct LicenseController {
+pub struct LicenseController<'a> {
     options: LicenseOptions,
-    license_list_ingress_manager: Rc<dyn LicenseListIngressManager>,
-    license_choice_ingress_manager: Rc<dyn LicenseChoiceIngressManager>,
-    license_text_ingress_manager: Rc<dyn LicenseTextIngressManager>,
-    license_text_egress_manager: Rc<dyn LicenseTextEgressManager>,
-    message_egress_manager: Rc<dyn MessageEgressManager>,
+    license_list_ingress_manager: &'a dyn LicenseListIngressManager,
+    license_choice_ingress_manager: &'a dyn LicenseChoiceIngressManager,
+    license_text_ingress_manager: &'a dyn LicenseTextIngressManager,
+    license_text_egress_manager: &'a dyn LicenseTextEgressManager,
+    message_egress_manager: &'a dyn MessageEgressManager,
 }
 
-impl LicenseController {
+impl<'a, 'b: 'a, 'c: 'a, 'd: 'a, 'e: 'a, 'f: 'a> LicenseController<'a> {
     pub fn new(
         options: LicenseOptions,
-        license_list_ingress_manager: Rc<dyn LicenseListIngressManager>,
-        license_choice_ingress_manager: Rc<dyn LicenseChoiceIngressManager>,
-        license_text_ingress_manager: Rc<dyn LicenseTextIngressManager>,
-        license_text_egress_manager: Rc<dyn LicenseTextEgressManager>,
-        message_egress_manager: Rc<dyn MessageEgressManager>,
+        license_list_ingress_manager: &'b dyn LicenseListIngressManager,
+        license_choice_ingress_manager: &'c dyn LicenseChoiceIngressManager,
+        license_text_ingress_manager: &'d dyn LicenseTextIngressManager,
+        license_text_egress_manager: &'e dyn LicenseTextEgressManager,
+        message_egress_manager: &'f dyn MessageEgressManager,
     ) -> Self {
         LicenseController {
             options,
@@ -51,24 +51,24 @@ impl LicenseController {
     }
 
     pub fn license(&self) -> ControllerExitCode {
-        let license_list_ingress_repository = Rc::new(LicenseListIngressRepositoryImpl::new(
-            self.license_list_ingress_manager.clone(),
-        ));
-        let license_choice_ingress_repository = Rc::new(LicenseChoiceIngressRepositoryImpl::new(
-            self.license_choice_ingress_manager.clone(),
-        ));
-        let license_text_ingress_repository = Rc::new(LicenseTextIngressRepositoryImpl::new(
-            self.license_text_ingress_manager.clone(),
-        ));
-        let license_text_egress_repository = Rc::new(LicenseTextEgressRepositoryImpl::new(
+        let license_list_ingress_repository = LicenseListIngressRepositoryImpl::new(
+            self.license_list_ingress_manager,
+        );
+        let license_choice_ingress_repository = LicenseChoiceIngressRepositoryImpl::new(
+            self.license_choice_ingress_manager,
+        );
+        let license_text_ingress_repository = LicenseTextIngressRepositoryImpl::new(
+            self.license_text_ingress_manager,
+        );
+        let license_text_egress_repository = LicenseTextEgressRepositoryImpl::new(
             self.options.path(),
-            self.license_text_egress_manager.clone(),
-        ));
+            self.license_text_egress_manager,
+        );
         let usecase = CreateLicenseUseCase::new(
-            license_list_ingress_repository,
-            license_choice_ingress_repository,
-            license_text_ingress_repository,
-            license_text_egress_repository,
+            &license_list_ingress_repository,
+            &license_choice_ingress_repository,
+            &license_text_ingress_repository,
+            &license_text_egress_repository,
         );
         match usecase.execute() {
             Ok(_) => {
@@ -166,25 +166,25 @@ mod tests {
     #[test]
     fn license_controller() {
         let options = LicenseOptions::new("/tmp/test-path");
-        let license_list_ingress_manager = Rc::new(MockLicenseListIngressManager {
+        let license_list_ingress_manager = MockLicenseListIngressManager {
             list: vec![LicenseMetadata::new("MIT", "mit-license")],
-        });
-        let license_choice_ingress_manager = Rc::new(MockLicenseChoiceIngressManager {});
-        let license_text_ingress_manager = Rc::new(MockLicenseTextIngressManager {
+        };
+        let license_choice_ingress_manager = MockLicenseChoiceIngressManager {};
+        let license_text_ingress_manager = MockLicenseTextIngressManager {
             text: "License text".into(),
-        });
-        let license_text_egress_manager = Rc::new(MockLicenseTextEgressManager {
+        };
+        let license_text_egress_manager = MockLicenseTextEgressManager {
             text: RefCell::new("".into()),
             filepath: RefCell::new("".into()),
-        });
-        let message_egress_manager = Rc::new(VoidMessageEgressManager {});
+        };
+        let message_egress_manager = VoidMessageEgressManager {};
         let controller = LicenseController::new(
             options,
-            license_list_ingress_manager,
-            license_choice_ingress_manager,
-            license_text_ingress_manager,
-            license_text_egress_manager,
-            message_egress_manager,
+            &license_list_ingress_manager,
+            &license_choice_ingress_manager,
+            &license_text_ingress_manager,
+            &license_text_egress_manager,
+            &message_egress_manager,
         );
         let result = controller.license();
         assert!(matches!(result, ControllerExitCode::Ok));

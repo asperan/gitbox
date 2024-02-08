@@ -12,19 +12,19 @@ use crate::usecase::{
 
 use super::usecase::UseCase;
 
-pub struct CreateLicenseUseCase {
-    license_list_ingress_repository: Rc<dyn LicenseListIngressRepository>,
-    license_choice_ingress_repository: Rc<dyn LicenseChoiceIngressRepository>,
-    license_text_ingress_repository: Rc<dyn LicenseTextIngressRepository>,
-    license_text_egress_repository: Rc<dyn LicenseTextEgressRepository>,
+pub struct CreateLicenseUseCase<'a> {
+    license_list_ingress_repository: &'a dyn LicenseListIngressRepository,
+    license_choice_ingress_repository: &'a dyn LicenseChoiceIngressRepository,
+    license_text_ingress_repository: &'a dyn LicenseTextIngressRepository,
+    license_text_egress_repository: &'a dyn LicenseTextEgressRepository,
 }
 
-impl CreateLicenseUseCase {
+impl<'a, 'b: 'a, 'c: 'a, 'd: 'a, 'e: 'a> CreateLicenseUseCase<'a> {
     pub fn new(
-        license_list_ingress_repository: Rc<dyn LicenseListIngressRepository>,
-        license_choice_ingress_repository: Rc<dyn LicenseChoiceIngressRepository>,
-        license_text_ingress_repository: Rc<dyn LicenseTextIngressRepository>,
-        license_text_egress_repository: Rc<dyn LicenseTextEgressRepository>,
+        license_list_ingress_repository: &'b dyn LicenseListIngressRepository,
+        license_choice_ingress_repository: &'c dyn LicenseChoiceIngressRepository,
+        license_text_ingress_repository: &'d dyn LicenseTextIngressRepository,
+        license_text_egress_repository: &'e dyn LicenseTextEgressRepository,
     ) -> Self {
         CreateLicenseUseCase {
             license_list_ingress_repository,
@@ -35,7 +35,7 @@ impl CreateLicenseUseCase {
     }
 }
 
-impl UseCase<()> for CreateLicenseUseCase {
+impl UseCase<()> for CreateLicenseUseCase<'_> {
     fn execute(&self) -> Result<(), AnyError> {
         let license_list = self.license_list_ingress_repository.license_list()?;
         let chosen_license = self
@@ -107,17 +107,17 @@ mod tests {
 
     #[test]
     fn create_license_usecase() {
-        let license_list_ingress_repository = Rc::new(MockLicenseListIngressRepository {});
-        let license_choice_ingress_repository = Rc::new(MockLicenseChoiceIngressRepository {});
-        let license_text_ingress_repository = Rc::new(MockLicenseTextIngressRepository {});
-        let license_text_egress_repository = Rc::new(MockLicenseTextEgressRepository {
+        let license_list_ingress_repository = MockLicenseListIngressRepository {};
+        let license_choice_ingress_repository = MockLicenseChoiceIngressRepository {};
+        let license_text_ingress_repository = MockLicenseTextIngressRepository {};
+        let license_text_egress_repository = MockLicenseTextEgressRepository {
             consumed_text: RefCell::new("".into()),
-        });
+        };
         let usecase = CreateLicenseUseCase::new(
-            license_list_ingress_repository,
-            license_choice_ingress_repository,
-            license_text_ingress_repository,
-            license_text_egress_repository.clone(),
+            &license_list_ingress_repository,
+            &license_choice_ingress_repository,
+            &license_text_ingress_repository,
+            &license_text_egress_repository,
         );
         let _result = usecase.execute().expect("Repositories do not return Errs");
         assert_eq!(

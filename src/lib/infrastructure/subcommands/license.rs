@@ -33,17 +33,17 @@ pub struct LicenseSubCommand {
 impl Subcommand for LicenseSubCommand {
     fn execute(&self) -> i32 {
         let options = LicenseOptions::new(&self.filename);
-        let license_scraper = Rc::new(LicenseDownloadIngressManagerImpl::new());
-        let message_egress_manager = Rc::new(MessageEgressManagerImpl::new());
-        let license_choice_ingress_manager = Rc::new(LicensePromptHelper::new());
-        let license_text_egress_manager = Rc::new(FileWriter::new());
+        let license_scraper = LicenseDownloadIngressManagerImpl::new();
+        let message_egress_manager = MessageEgressManagerImpl::new();
+        let license_choice_ingress_manager = LicensePromptHelper::new();
+        let license_text_egress_manager = FileWriter::new();
         let controller = LicenseController::new(
             options,
-            license_scraper.clone(),
-            license_choice_ingress_manager.clone(),
-            license_scraper.clone(),
-            license_text_egress_manager.clone(),
-            message_egress_manager.clone(),
+            &license_scraper,
+            &license_choice_ingress_manager,
+            &license_scraper,
+            &license_text_egress_manager,
+            &message_egress_manager,
         );
         match controller.license() {
             ControllerExitCode::Ok => 0,

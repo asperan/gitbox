@@ -2,7 +2,6 @@ use std::{
     fs::{create_dir_all, read_to_string},
     io::Write,
     path::Path,
-    rc::Rc,
 };
 
 use crate::{
@@ -24,12 +23,12 @@ const EXTRA_DIR_PATH: &str = "extra";
 const TYPES_FILE_PATH: &str = "types.txt";
 const SCOPES_FILE_PATH: &str = "scopes.txt";
 
-pub struct GitExtraManagerImpl {
-    gitinfo_manager: Rc<dyn GitInfoIngressManager>,
+pub struct GitExtraManagerImpl<'a> {
+    gitinfo_manager: &'a dyn GitInfoIngressManager,
 }
 
-impl GitExtraManagerImpl {
-    pub fn new(gitinfo_manager: Rc<dyn GitInfoIngressManager>) -> GitExtraManagerImpl {
+impl<'b: 'a, 'a> GitExtraManagerImpl<'a> {
+    pub fn new(gitinfo_manager: &'b dyn GitInfoIngressManager) -> Self {
         GitExtraManagerImpl { gitinfo_manager }
     }
 
@@ -53,7 +52,7 @@ impl GitExtraManagerImpl {
     }
 }
 
-impl GitExtraEgressManager for GitExtraManagerImpl {
+impl GitExtraEgressManager for GitExtraManagerImpl<'_> {
     fn update_types(&self, types: Box<dyn Iterator<Item = String>>) -> Result<(), AnyError> {
         let content = types.fold(String::new(), |acc, e| acc + "\n" + &e);
         let path = Path::new(&self.gitinfo_manager.git_dir()?)
@@ -71,7 +70,7 @@ impl GitExtraEgressManager for GitExtraManagerImpl {
     }
 }
 
-impl GitExtraIngressHelper for GitExtraManagerImpl {
+impl GitExtraIngressHelper for GitExtraManagerImpl<'_> {
     fn get_types(&self) -> Result<Vec<String>, AnyError> {
         let path = Path::new(&self.gitinfo_manager.git_dir()?)
             .join(EXTRA_DIR_PATH)
@@ -96,7 +95,7 @@ impl GitExtraIngressHelper for GitExtraManagerImpl {
     }
 }
 
-impl GitExtraEgressHelper for GitExtraManagerImpl {
+impl GitExtraEgressHelper for GitExtraManagerImpl<'_> {
     fn append_type(&self, new_type: &str) -> Result<(), AnyError> {
         let path = Path::new(&self.gitinfo_manager.git_dir()?)
             .join(EXTRA_DIR_PATH)

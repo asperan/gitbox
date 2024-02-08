@@ -85,8 +85,8 @@ pub struct DescribeSubCommand {
 
 impl Subcommand for DescribeSubCommand {
     fn execute(&self) -> i32 {
-        let git_cli = Rc::new(GitCli::new());
-        let output_manager = Rc::new(MessageEgressManagerImpl::new());
+        let git_cli = GitCli::new();
+        let output_manager = MessageEgressManagerImpl::new();
         if let Err(e) = git_cli.git_dir() {
             output_manager.error(&format!("Failed to retrieve git dir: {}", e));
             output_manager.error("describe subcommand can only be run inside a git project");
@@ -110,11 +110,11 @@ impl Subcommand for DescribeSubCommand {
             Ok(options) => {
                 let controller = DescribeController::new(
                     options,
-                    git_cli.clone(),
-                    git_cli.clone(),
-                    git_cli.clone(),
-                    git_cli.clone(),
-                    output_manager.clone(),
+                    &git_cli,
+                    &git_cli,
+                    &git_cli,
+                    &git_cli,
+                    &output_manager,
                 );
                 match controller.describe() {
                     ControllerExitCode::Ok => 0,

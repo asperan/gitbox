@@ -1,4 +1,4 @@
-use std::{rc::Rc, str::FromStr};
+use std::str::FromStr;
 
 use crate::{
     application::manager::full_commit_summary_history_ingress_manager::FullCommitSummaryHistoryIngressManager,
@@ -9,21 +9,21 @@ use crate::{
     },
 };
 
-pub struct FullCommitSummaryHistoryRepositoryImpl {
-    full_commit_summary_history_ingress_manager: Rc<dyn FullCommitSummaryHistoryIngressManager>,
+pub struct FullCommitSummaryHistoryRepositoryImpl<'a> {
+    full_commit_summary_history_ingress_manager: &'a dyn FullCommitSummaryHistoryIngressManager,
 }
 
-impl FullCommitSummaryHistoryRepositoryImpl {
+impl<'a, 'b: 'a> FullCommitSummaryHistoryRepositoryImpl<'a> {
     pub fn new(
-        full_commit_summary_history_ingress_manager: Rc<dyn FullCommitSummaryHistoryIngressManager>,
-    ) -> FullCommitSummaryHistoryRepositoryImpl {
+        full_commit_summary_history_ingress_manager: &'b dyn FullCommitSummaryHistoryIngressManager,
+    ) -> Self {
         FullCommitSummaryHistoryRepositoryImpl {
             full_commit_summary_history_ingress_manager,
         }
     }
 }
 
-impl FullCommitSummaryHistoryIngressRepository for FullCommitSummaryHistoryRepositoryImpl {
+impl FullCommitSummaryHistoryIngressRepository for FullCommitSummaryHistoryRepositoryImpl<'_> {
     fn get_all_commits(
         &self,
     ) -> Result<Box<dyn DoubleEndedIterator<Item = CommitSummary>>, AnyError> {
@@ -38,9 +38,6 @@ impl FullCommitSummaryHistoryIngressRepository for FullCommitSummaryHistoryRepos
 
 #[cfg(test)]
 mod tests {
-
-    use std::rc::Rc;
-
     use crate::{
         application::manager::full_commit_summary_history_ingress_manager::FullCommitSummaryHistoryIngressManager,
         domain::commit_summary::CommitSummary,
@@ -66,9 +63,11 @@ mod tests {
 
     #[test]
     fn get_all_commits_basic() {
-        let repository = FullCommitSummaryHistoryRepositoryImpl::new(Rc::new(
-            MockFullCommitSummaryHistoryIngressManager {},
-        ));
+        let full_commit_summary_history_ingress_manager =
+            MockFullCommitSummaryHistoryIngressManager {};
+        let repository = FullCommitSummaryHistoryRepositoryImpl::new(
+            &full_commit_summary_history_ingress_manager,
+        );
         let commit_list = repository.get_all_commits();
         assert!(commit_list.is_ok());
         assert!(commit_list

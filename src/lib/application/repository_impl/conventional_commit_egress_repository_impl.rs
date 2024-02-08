@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use crate::{
     application::manager::conventional_commit_egress_manager::ConventionalCommitEgressManager,
     domain::conventional_commit::ConventionalCommit,
@@ -9,21 +7,21 @@ use crate::{
     },
 };
 
-pub struct ConventionalCommitEgressRepositoryImpl {
-    conventional_commit_egress_manager: Rc<dyn ConventionalCommitEgressManager>,
+pub struct ConventionalCommitEgressRepositoryImpl<'a> {
+    conventional_commit_egress_manager: &'a dyn ConventionalCommitEgressManager,
 }
 
-impl ConventionalCommitEgressRepositoryImpl {
+impl<'a, 'b: 'a> ConventionalCommitEgressRepositoryImpl<'a> {
     pub fn new(
-        conventional_commit_egress_manager: Rc<dyn ConventionalCommitEgressManager>,
-    ) -> ConventionalCommitEgressRepositoryImpl {
+        conventional_commit_egress_manager: &'b dyn ConventionalCommitEgressManager,
+    ) -> Self {
         ConventionalCommitEgressRepositoryImpl {
             conventional_commit_egress_manager,
         }
     }
 }
 
-impl ConventionalCommitEgressRepository for ConventionalCommitEgressRepositoryImpl {
+impl ConventionalCommitEgressRepository for ConventionalCommitEgressRepositoryImpl<'_> {
     fn create_commit(&self, commit: &ConventionalCommit) -> Result<(), AnyError> {
         self.conventional_commit_egress_manager
             .create_commit(&commit.to_string())
@@ -37,7 +35,7 @@ impl ConventionalCommitEgressRepository for ConventionalCommitEgressRepositoryIm
 
 #[cfg(test)]
 mod tests {
-    use std::{error::Error, fmt::Display, rc::Rc};
+    use std::{error::Error, fmt::Display};
 
     use crate::{
         application::{
@@ -87,8 +85,8 @@ mod tests {
     fn create_commit_ok() {
         let commit =
             ConventionalCommit::new("feat".to_string(), None, false, "test".to_string(), None);
-        let commit_manager = Rc::new(MockCommitManager { fail: false });
-        let commit_repository = ConventionalCommitEgressRepositoryImpl::new(commit_manager);
+        let commit_manager = MockCommitManager { fail: false };
+        let commit_repository = ConventionalCommitEgressRepositoryImpl::new(&commit_manager);
         let result = commit_repository.create_commit(&commit);
         assert!(result.is_ok());
     }
@@ -97,8 +95,8 @@ mod tests {
     fn create_commit_error() {
         let commit =
             ConventionalCommit::new("feat".to_string(), None, false, "test".to_string(), None);
-        let commit_manager = Rc::new(MockCommitManager { fail: true });
-        let commit_repository = ConventionalCommitEgressRepositoryImpl::new(commit_manager);
+        let commit_manager = MockCommitManager { fail: true };
+        let commit_repository = ConventionalCommitEgressRepositoryImpl::new(&commit_manager);
         let result = commit_repository.create_commit(&commit);
         assert!(result.is_err());
     }
@@ -107,8 +105,8 @@ mod tests {
     fn create_empty_commit_ok() {
         let commit =
             ConventionalCommit::new("feat".to_string(), None, false, "test".to_string(), None);
-        let commit_manager = Rc::new(MockCommitManager { fail: false });
-        let commit_repository = ConventionalCommitEgressRepositoryImpl::new(commit_manager);
+        let commit_manager = MockCommitManager { fail: false };
+        let commit_repository = ConventionalCommitEgressRepositoryImpl::new(&commit_manager);
         let result = commit_repository.create_empty_commit(&commit);
         assert!(result.is_ok());
     }
@@ -117,8 +115,8 @@ mod tests {
     fn create_empty_commit_error() {
         let commit =
             ConventionalCommit::new("feat".to_string(), None, false, "test".to_string(), None);
-        let commit_manager = Rc::new(MockCommitManager { fail: true });
-        let commit_repository = ConventionalCommitEgressRepositoryImpl::new(commit_manager);
+        let commit_manager = MockCommitManager { fail: true };
+        let commit_repository = ConventionalCommitEgressRepositoryImpl::new(&commit_manager);
         let result = commit_repository.create_empty_commit(&commit);
         assert!(result.is_err());
     }

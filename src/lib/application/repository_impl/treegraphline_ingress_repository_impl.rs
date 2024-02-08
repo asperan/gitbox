@@ -12,8 +12,8 @@ pub struct TreeGraphLineIngressRepositoryImpl<'a> {
     treegraphline_ingress_manager: &'a dyn GitTreeIngressManager,
 }
 
-impl<'a: 'b, 'b> TreeGraphLineIngressRepositoryImpl<'b> {
-    pub fn new(treegraphline_ingress_manager: &'a dyn GitTreeIngressManager) -> Self {
+impl<'a, 'b: 'a> TreeGraphLineIngressRepositoryImpl<'a> {
+    pub fn new(treegraphline_ingress_manager: &'b dyn GitTreeIngressManager) -> Self {
         TreeGraphLineIngressRepositoryImpl {
             treegraphline_ingress_manager,
         }

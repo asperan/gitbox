@@ -11,15 +11,15 @@ use crate::{
 
 use super::usecase::UseCase;
 
-pub struct CreateConventionalCommitUseCase {
+pub struct CreateConventionalCommitUseCase<'a> {
     configuration: CommitConfiguration,
-    commit_repository: Rc<dyn ConventionalCommitEgressRepository>,
+    commit_repository: &'a dyn ConventionalCommitEgressRepository,
 }
 
-impl CreateConventionalCommitUseCase {
+impl<'a, 'b: 'a> CreateConventionalCommitUseCase<'a> {
     pub fn new(
         configuration: CommitConfiguration,
-        commit_repository: Rc<dyn ConventionalCommitEgressRepository>,
+        commit_repository: &'b dyn ConventionalCommitEgressRepository,
     ) -> CreateConventionalCommitUseCase {
         CreateConventionalCommitUseCase {
             configuration,
@@ -28,7 +28,7 @@ impl CreateConventionalCommitUseCase {
     }
 }
 
-impl UseCase<ConventionalCommit> for CreateConventionalCommitUseCase {
+impl UseCase<ConventionalCommit> for CreateConventionalCommitUseCase<'_> {
     fn execute(&self) -> Result<ConventionalCommit, AnyError> {
         let commit = ConventionalCommit::new(
             self.configuration.typ().to_owned(),
@@ -104,8 +104,8 @@ mod tests {
     #[test]
     fn execute_usecase_correct() {
         let config = simple_configuration();
-        let commit_repository = Rc::new(MockCommitRepository {});
-        let usecase = CreateConventionalCommitUseCase::new(config, commit_repository);
+        let commit_repository = MockCommitRepository {};
+        let usecase = CreateConventionalCommitUseCase::new(config, &commit_repository);
         let result = usecase.execute();
         assert!(result.is_ok());
     }
@@ -113,8 +113,8 @@ mod tests {
     #[test]
     fn execute_usecase_error() {
         let config = full_configuration();
-        let commit_repository = Rc::new(MockCommitRepository {});
-        let usecase = CreateConventionalCommitUseCase::new(config, commit_repository);
+        let commit_repository = MockCommitRepository {};
+        let usecase = CreateConventionalCommitUseCase::new(config, &commit_repository);
         let result = usecase.execute();
         assert!(result.is_err());
     }

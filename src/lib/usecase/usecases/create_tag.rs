@@ -7,16 +7,16 @@ use crate::usecase::{
 
 use super::usecase::UseCase;
 
-pub struct CreateTagUseCase {
+pub struct CreateTagUseCase<'a> {
     configuration: TagConfiguration,
-    tag_write_repository: Rc<dyn TagEgressRepository>,
+    tag_write_repository: &'a dyn TagEgressRepository,
 }
 
-impl CreateTagUseCase {
+impl<'a, 'b: 'a> CreateTagUseCase<'a> {
     pub fn new(
         configuration: TagConfiguration,
-        tag_write_repository: Rc<dyn TagEgressRepository>,
-    ) -> CreateTagUseCase {
+        tag_write_repository: &'b dyn TagEgressRepository,
+    ) -> Self {
         CreateTagUseCase {
             configuration,
             tag_write_repository,
@@ -24,7 +24,7 @@ impl CreateTagUseCase {
     }
 }
 
-impl UseCase<()> for CreateTagUseCase {
+impl UseCase<()> for CreateTagUseCase<'_> {
     fn execute(&self) -> Result<(), AnyError> {
         self.tag_write_repository.create_tag(
             self.configuration.version(),
@@ -87,8 +87,8 @@ mod tests {
             true,
         )
         .expect("Hand made configuration should be correct");
-        let tag_write_repository = Rc::new(MockTagWriteRepository::new());
-        let usecase = CreateTagUseCase::new(tag_configuration, tag_write_repository.clone());
+        let tag_write_repository = MockTagWriteRepository::new();
+        let usecase = CreateTagUseCase::new(tag_configuration, &tag_write_repository);
         let _result = usecase.execute().expect("Mock does not return an error");
         assert_eq!(
             tag_write_repository.version.borrow().to_owned(),

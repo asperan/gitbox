@@ -24,18 +24,18 @@ pub struct RefreshExtraSubcommand {}
 
 impl Subcommand for RefreshExtraSubcommand {
     fn execute(&self) -> i32 {
-        let git_cli = Rc::new(GitCli::new());
-        let output_manager = Rc::new(MessageEgressManagerImpl::new());
+        let git_cli = GitCli::new();
+        let output_manager = MessageEgressManagerImpl::new();
         if let Err(e) = git_cli.git_dir() {
             output_manager.error(&format!("Failed to retrieve git dir: {}", e));
             output_manager.error("refresh-extra subcommand can only be run inside a git project");
             return 1;
         }
-        let gitextra_manager = Rc::new(GitExtraManagerImpl::new(git_cli.clone()));
+        let gitextra_manager = GitExtraManagerImpl::new(&git_cli);
         let controller = RefreshController::new(
-            git_cli.clone(),
-            gitextra_manager.clone(),
-            output_manager.clone(),
+            &git_cli,
+            &gitextra_manager,
+            &output_manager,
         );
         match controller.refresh() {
             ControllerExitCode::Ok => 0,

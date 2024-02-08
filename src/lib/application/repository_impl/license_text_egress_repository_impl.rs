@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use crate::{
     application::manager::license_text_egress_manager::LicenseTextEgressManager,
     usecase::{
@@ -8,15 +6,15 @@ use crate::{
     },
 };
 
-pub struct LicenseTextEgressRepositoryImpl {
-    filepath: Box<str>,
-    license_text_egress_manager: Rc<dyn LicenseTextEgressManager>,
+pub struct LicenseTextEgressRepositoryImpl<'a> {
+    filepath: &'a str,
+    license_text_egress_manager: &'a dyn LicenseTextEgressManager,
 }
 
-impl LicenseTextEgressRepositoryImpl {
+impl<'a, 'b: 'a, 'c: 'a> LicenseTextEgressRepositoryImpl<'a> {
     pub fn new(
-        filepath: &str,
-        license_text_egress_manager: Rc<dyn LicenseTextEgressManager>,
+        filepath: &'b str,
+        license_text_egress_manager: &'c dyn LicenseTextEgressManager,
     ) -> Self {
         LicenseTextEgressRepositoryImpl {
             filepath: filepath.into(),
@@ -25,7 +23,7 @@ impl LicenseTextEgressRepositoryImpl {
     }
 }
 
-impl LicenseTextEgressRepository for LicenseTextEgressRepositoryImpl {
+impl LicenseTextEgressRepository for LicenseTextEgressRepositoryImpl<'_> {
     fn consume(&self, text: &str) -> Result<(), AnyError> {
         self.license_text_egress_manager
             .write_license(&self.filepath, text)
@@ -34,7 +32,7 @@ impl LicenseTextEgressRepository for LicenseTextEgressRepositoryImpl {
 
 #[cfg(test)]
 mod tests {
-    use std::{cell::RefCell, rc::Rc};
+    use std::cell::RefCell;
 
     use crate::{
         application::{
@@ -63,11 +61,11 @@ mod tests {
     fn consume_forwards_filepath_and_text() {
         let text = "My text";
         let filepath = ".LICENSE";
-        let manager = Rc::new(MockLicenseTextEgressManager {
+        let manager = MockLicenseTextEgressManager {
             filepath: RefCell::new("".into()),
             text: RefCell::new("".into()),
-        });
-        let repository = LicenseTextEgressRepositoryImpl::new(filepath, manager.clone());
+        };
+        let repository = LicenseTextEgressRepositoryImpl::new(filepath, &manager);
         let result = repository.consume(text);
         assert!(result.is_ok());
         assert!(

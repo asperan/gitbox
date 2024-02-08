@@ -22,20 +22,20 @@ use crate::{
 
 use super::exit_code::ControllerExitCode;
 
-pub struct ChangelogController {
+pub struct ChangelogController<'a> {
     options: ChangelogOptions,
-    commit_retriever: Rc<dyn BoundedCommitSummaryIngressManager>,
-    version_retriever: Rc<dyn VersionIngressManager>,
-    output_manager: Rc<dyn MessageEgressManager>,
+    commit_retriever: &'a dyn BoundedCommitSummaryIngressManager,
+    version_retriever: &'a dyn VersionIngressManager,
+    output_manager: &'a dyn MessageEgressManager,
 }
 
-impl ChangelogController {
+impl<'a, 'b: 'a, 'c: 'a, 'd: 'a> ChangelogController<'a> {
     pub fn new(
         options: ChangelogOptions,
-        commit_retriever: Rc<dyn BoundedCommitSummaryIngressManager>,
-        version_retriever: Rc<dyn VersionIngressManager>,
-        output_manager: Rc<dyn MessageEgressManager>,
-    ) -> ChangelogController {
+        commit_retriever: &'b dyn BoundedCommitSummaryIngressManager,
+        version_retriever: &'c dyn VersionIngressManager,
+        output_manager: &'d dyn MessageEgressManager,
+    ) -> Self {
         ChangelogController {
             options,
             commit_retriever,
@@ -71,14 +71,14 @@ impl ChangelogController {
             ),
             trigger,
         );
+        let bounded_commit_summary_ingress_repository_impl =
+            BoundedCommitSummaryIngressRepositoryImpl::new(self.commit_retriever);
+        let semantic_version_ingress_repository_impl =
+            SemanticVersionIngressRepositoryImpl::new(self.version_retriever);
         let usecase = CreateChangelogUseCase::new(
             configuration,
-            Rc::new(BoundedCommitSummaryIngressRepositoryImpl::new(
-                self.commit_retriever.clone(),
-            )),
-            Rc::new(SemanticVersionIngressRepositoryImpl::new(
-                self.version_retriever.clone(),
-            )),
+            &bounded_commit_summary_ingress_repository_impl,
+            &semantic_version_ingress_repository_impl,
         );
         match usecase.execute() {
             Ok(c) => {
@@ -176,9 +176,9 @@ mod tests {
         let output_manager = MockOutputManager {};
         let controller = ChangelogController::new(
             options,
-            Rc::new(commit_retriever),
-            Rc::new(version_retriever),
-            Rc::new(output_manager),
+            &commit_retriever,
+            &version_retriever,
+            &output_manager,
         );
         let result = controller.changelog();
         assert!(matches!(result, ControllerExitCode::Error(..)));
@@ -202,9 +202,9 @@ mod tests {
         let output_manager = MockOutputManager {};
         let controller = ChangelogController::new(
             options,
-            Rc::new(commit_retriever),
-            Rc::new(version_retriever),
-            Rc::new(output_manager),
+            &commit_retriever,
+            &version_retriever,
+            &output_manager,
         );
         let result = controller.changelog();
         assert!(matches!(result, ControllerExitCode::Ok));
@@ -228,9 +228,9 @@ mod tests {
         let output_manager = MockOutputManager {};
         let controller = ChangelogController::new(
             options,
-            Rc::new(commit_retriever),
-            Rc::new(version_retriever),
-            Rc::new(output_manager),
+            &commit_retriever,
+            &version_retriever,
+            &output_manager,
         );
         let result = controller.changelog();
         assert!(matches!(result, ControllerExitCode::Error(..)));

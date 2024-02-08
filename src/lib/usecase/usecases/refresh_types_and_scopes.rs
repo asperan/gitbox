@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use crate::{
     domain::{commit_summary::CommitSummary, constant::DEFAULT_COMMIT_TYPES},
     usecase::{
@@ -13,16 +11,16 @@ use crate::{
 
 use super::usecase::UseCase;
 
-pub struct RefreshTypesAndScopesUseCase {
-    commit_history_repository: Rc<dyn FullCommitSummaryHistoryIngressRepository>,
-    gitextra_write_repository: Rc<dyn GitExtraEgressRepository>,
+pub struct RefreshTypesAndScopesUseCase<'a> {
+    commit_history_repository: &'a dyn FullCommitSummaryHistoryIngressRepository,
+    gitextra_write_repository: &'a dyn GitExtraEgressRepository,
 }
 
-impl RefreshTypesAndScopesUseCase {
+impl<'a, 'b: 'a, 'c: 'a> RefreshTypesAndScopesUseCase<'a> {
     pub fn new(
-        commit_history_repository: Rc<dyn FullCommitSummaryHistoryIngressRepository>,
-        gitextra_write_repository: Rc<dyn GitExtraEgressRepository>,
-    ) -> RefreshTypesAndScopesUseCase {
+        commit_history_repository: &'b dyn FullCommitSummaryHistoryIngressRepository,
+        gitextra_write_repository: &'c dyn GitExtraEgressRepository,
+    ) -> Self {
         RefreshTypesAndScopesUseCase {
             commit_history_repository,
             gitextra_write_repository,
@@ -30,7 +28,7 @@ impl RefreshTypesAndScopesUseCase {
     }
 }
 
-impl UseCase<()> for RefreshTypesAndScopesUseCase {
+impl UseCase<()> for RefreshTypesAndScopesUseCase<'_> {
     fn execute(&self) -> Result<(), AnyError> {
         let commits = self.commit_history_repository.get_all_commits()?;
         let mut types: Vec<String> = Vec::from(DEFAULT_COMMIT_TYPES.map(|it| it.to_string()));
@@ -60,7 +58,7 @@ impl UseCase<()> for RefreshTypesAndScopesUseCase {
 
 #[cfg(test)]
 mod tests {
-    use std::{cell::RefCell, error::Error, fmt::Display, rc::Rc};
+    use std::{cell::RefCell, error::Error, fmt::Display};
 
     use crate::{
         domain::{
@@ -149,11 +147,11 @@ mod tests {
 
     #[test]
     fn refresh_adds_only_distinct_values() {
-        let commit_summary_repository = Rc::new(MockFullCommitSummaryHistoryIngressRepository {});
-        let gitextra_write_repository = Rc::new(MockGitExtraWriteRepository::new());
+        let commit_summary_repository = MockFullCommitSummaryHistoryIngressRepository {};
+        let gitextra_write_repository = MockGitExtraWriteRepository::new();
         let usecase = RefreshTypesAndScopesUseCase::new(
-            commit_summary_repository.clone(),
-            gitextra_write_repository.clone(),
+            &commit_summary_repository,
+            &gitextra_write_repository,
         );
         let result = usecase.execute();
         assert!(result.is_ok());

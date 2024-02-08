@@ -13,8 +13,8 @@ pub struct FormatTreeGraphUseCase<'a> {
     treegraphline_ingress_repository: &'a dyn TreeGraphLineIngressRepository,
 }
 
-impl<'a: 'b, 'b> FormatTreeGraphUseCase<'b> {
-    pub fn new(treegraphline_ingress_repository: &'a dyn TreeGraphLineIngressRepository) -> Self {
+impl<'a, 'b: 'a> FormatTreeGraphUseCase<'a> {
+    pub fn new(treegraphline_ingress_repository: &'b dyn TreeGraphLineIngressRepository) -> Self {
         FormatTreeGraphUseCase {
             treegraphline_ingress_repository,
         }

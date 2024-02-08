@@ -20,16 +20,16 @@ use crate::{
 
 pub struct CreateChangelogUseCase<'a> {
     configuration: ChangelogConfiguration<'a>,
-    commit_repository: Rc<dyn BoundedCommitSummaryIngressRepository>,
-    version_repository: Rc<dyn SemanticVersionIngressRepository>,
+    commit_repository: &'a dyn BoundedCommitSummaryIngressRepository,
+    version_repository: &'a dyn SemanticVersionIngressRepository,
 }
 
-impl<'a> CreateChangelogUseCase<'a> {
+impl<'a, 'b: 'a, 'c: 'a> CreateChangelogUseCase<'a> {
     pub fn new(
-        configuration: ChangelogConfiguration,
-        commit_repository: Rc<dyn BoundedCommitSummaryIngressRepository>,
-        version_repository: Rc<dyn SemanticVersionIngressRepository>,
-    ) -> CreateChangelogUseCase {
+        configuration: ChangelogConfiguration<'a>,
+        commit_repository: &'b dyn BoundedCommitSummaryIngressRepository,
+        version_repository: &'c dyn SemanticVersionIngressRepository,
+    ) -> Self {
         CreateChangelogUseCase {
             configuration,
             commit_repository,
@@ -659,8 +659,8 @@ mod tests {
         let version_repository = MockVersionRepository {};
         let usecase = CreateChangelogUseCase::new(
             configuration,
-            Rc::new(commit_repository),
-            Rc::new(version_repository),
+            &commit_repository,
+            &version_repository,
         );
         let changelog = usecase.execute();
         assert!(changelog.is_ok());
@@ -674,8 +674,8 @@ mod tests {
         let version_repository = MockVersionRepository {};
         let usecase = CreateChangelogUseCase::new(
             configuration,
-            Rc::new(commit_repository),
-            Rc::new(version_repository),
+            &commit_repository,
+            &version_repository,
         );
         let changelog = usecase.execute();
         assert!(changelog.is_ok());
@@ -699,8 +699,8 @@ mod tests {
         let version_repository = MockVersionRepository {};
         let usecase = CreateChangelogUseCase::new(
             configuration,
-            Rc::new(commit_repository),
-            Rc::new(version_repository),
+            &commit_repository,
+            &version_repository,
         );
         let changelog = usecase.execute();
         assert!(changelog.is_ok());
@@ -724,8 +724,8 @@ mod tests {
         let version_repository = MockVersionRepository {};
         let usecase = CreateChangelogUseCase::new(
             configuration,
-            Rc::new(commit_repository),
-            Rc::new(version_repository),
+            &commit_repository,
+            &version_repository,
         );
         let changelog = usecase.execute();
         assert!(changelog.is_ok());

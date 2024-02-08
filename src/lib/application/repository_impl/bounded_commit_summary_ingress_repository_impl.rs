@@ -1,4 +1,4 @@
-use std::{rc::Rc, str::FromStr};
+use std::str::FromStr;
 
 use crate::{
     application::manager::bounded_commit_summary_ingress_manager::BoundedCommitSummaryIngressManager,
@@ -9,21 +9,21 @@ use crate::{
     },
 };
 
-pub struct BoundedCommitSummaryIngressRepositoryImpl {
-    bounded_commit_summary_ingress_manager: Rc<dyn BoundedCommitSummaryIngressManager>,
+pub struct BoundedCommitSummaryIngressRepositoryImpl<'a> {
+    bounded_commit_summary_ingress_manager: &'a dyn BoundedCommitSummaryIngressManager,
 }
 
-impl BoundedCommitSummaryIngressRepositoryImpl {
+impl<'a, 'b: 'a> BoundedCommitSummaryIngressRepositoryImpl<'a> {
     pub fn new(
-        bounded_commit_summary_ingress_manager: Rc<dyn BoundedCommitSummaryIngressManager>,
-    ) -> BoundedCommitSummaryIngressRepositoryImpl {
+        bounded_commit_summary_ingress_manager: &'b dyn BoundedCommitSummaryIngressManager,
+    ) -> Self {
         BoundedCommitSummaryIngressRepositoryImpl {
             bounded_commit_summary_ingress_manager,
         }
     }
 }
 
-impl BoundedCommitSummaryIngressRepository for BoundedCommitSummaryIngressRepositoryImpl {
+impl BoundedCommitSummaryIngressRepository for BoundedCommitSummaryIngressRepositoryImpl<'_> {
     fn get_commits_from(
         &self,
         version: &Option<SemanticVersion>,
@@ -39,9 +39,6 @@ impl BoundedCommitSummaryIngressRepository for BoundedCommitSummaryIngressReposi
 
 #[cfg(test)]
 mod tests {
-
-    use std::rc::Rc;
-
     use crate::{
         application::manager::bounded_commit_summary_ingress_manager::BoundedCommitSummaryIngressManager,
         domain::{commit_summary::CommitSummary, semantic_version::SemanticVersion},
@@ -70,8 +67,8 @@ mod tests {
 
     #[test]
     fn get_commits_from_basic() {
-        let repository =
-            BoundedCommitSummaryIngressRepositoryImpl::new(Rc::new(MockCommitRetriever {}));
+        let mock_commit_retriever = MockCommitRetriever {};
+        let repository = BoundedCommitSummaryIngressRepositoryImpl::new(&mock_commit_retriever);
         let commit_list = repository.get_commits_from(&None);
         assert!(commit_list.is_ok());
         assert!(commit_list

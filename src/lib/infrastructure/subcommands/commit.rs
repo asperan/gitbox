@@ -56,16 +56,16 @@ pub struct CommitSubCommand {
 
 impl Subcommand for CommitSubCommand {
     fn execute(&self) -> i32 {
-        let git_cli = Rc::new(GitCli::new());
-        let output_manager = Rc::new(MessageEgressManagerImpl::new());
+        let git_cli = GitCli::new();
+        let output_manager = MessageEgressManagerImpl::new();
         if let Err(e) = git_cli.git_dir() {
             output_manager.error(&format!("Failed to retrieve git directory: {}", e));
             output_manager.error("commit subcommand can only be run inside a git project.");
             return 1;
         }
-        let gitextra_manager = Rc::new(GitExtraManagerImpl::new(git_cli.clone()));
+        let gitextra_manager = GitExtraManagerImpl::new(&git_cli);
         let prompt_manager =
-            CommitPromptHelper::new(gitextra_manager.clone(), gitextra_manager.clone());
+            CommitPromptHelper::new(&gitextra_manager, &gitextra_manager);
         let options = match self.ask_missing_fields(prompt_manager) {
             Ok(o) => o,
             Err(e) => {
@@ -73,8 +73,7 @@ impl Subcommand for CommitSubCommand {
                 return 1;
             }
         };
-        let commit_manager = git_cli.clone();
-        let controller = CommitController::new(options, commit_manager, output_manager);
+        let controller = CommitController::new(options, &git_cli, &output_manager);
         match controller.commit() {
             ControllerExitCode::Ok => 0,
             ControllerExitCode::Error(i) => i,

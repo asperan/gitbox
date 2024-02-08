@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use crate::{
     application::manager::gitextra_egress_manager::GitExtraEgressManager,
     usecase::{
@@ -7,21 +5,21 @@ use crate::{
     },
 };
 
-pub struct GitExtraEgressRepositoryImpl {
-    gitextra_egress_manager: Rc<dyn GitExtraEgressManager>,
+pub struct GitExtraEgressRepositoryImpl<'a> {
+    gitextra_egress_manager: &'a dyn GitExtraEgressManager,
 }
 
-impl GitExtraEgressRepositoryImpl {
+impl<'a, 'b: 'a> GitExtraEgressRepositoryImpl<'a> {
     pub fn new(
-        gitextra_egress_manager: Rc<dyn GitExtraEgressManager>,
-    ) -> GitExtraEgressRepositoryImpl {
+        gitextra_egress_manager: &'b dyn GitExtraEgressManager,
+    ) -> Self {
         GitExtraEgressRepositoryImpl {
             gitextra_egress_manager,
         }
     }
 }
 
-impl GitExtraEgressRepository for GitExtraEgressRepositoryImpl {
+impl GitExtraEgressRepository for GitExtraEgressRepositoryImpl<'_> {
     fn update_types(&self, types: Box<dyn Iterator<Item = String>>) -> Result<(), AnyError> {
         self.gitextra_egress_manager.update_types(types)
     }
@@ -33,7 +31,7 @@ impl GitExtraEgressRepository for GitExtraEgressRepositoryImpl {
 
 #[cfg(test)]
 mod tests {
-    use std::{cell::RefCell, error::Error, fmt::Display, rc::Rc};
+    use std::{cell::RefCell, error::Error, fmt::Display};
 
     use crate::{
         application::{
@@ -83,12 +81,12 @@ mod tests {
     #[test]
     fn update_types_ok() {
         let types = ["type1".to_string(), "type2".to_string()];
-        let git_extra_egress_manager = Rc::new(MockGitExtraEgressManager {
+        let git_extra_egress_manager = MockGitExtraEgressManager {
             fail: false,
             types: RefCell::new(vec![]),
             scopes: RefCell::new(vec![]),
-        });
-        let repository = GitExtraEgressRepositoryImpl::new(git_extra_egress_manager.clone());
+        };
+        let repository = GitExtraEgressRepositoryImpl::new(&git_extra_egress_manager);
         let result = repository.update_types(Box::new(types.clone().into_iter()));
         assert!(result.is_ok() && git_extra_egress_manager.types.borrow().as_slice() == &types);
     }
@@ -96,12 +94,12 @@ mod tests {
     #[test]
     fn update_types_err() {
         let types = ["type1".to_string(), "type2".to_string()];
-        let git_extra_egress_manager = Rc::new(MockGitExtraEgressManager {
+        let git_extra_egress_manager = MockGitExtraEgressManager {
             fail: true,
             types: RefCell::new(vec![]),
             scopes: RefCell::new(vec![]),
-        });
-        let repository = GitExtraEgressRepositoryImpl::new(git_extra_egress_manager.clone());
+        };
+        let repository = GitExtraEgressRepositoryImpl::new(&git_extra_egress_manager);
         let result = repository.update_types(Box::new(types.clone().into_iter()));
         assert!(result.is_err());
     }
@@ -109,12 +107,12 @@ mod tests {
     #[test]
     fn update_scopes_ok() {
         let scopes = ["scope1".to_string(), "scope2".to_string()];
-        let git_extra_egress_manager = Rc::new(MockGitExtraEgressManager {
+        let git_extra_egress_manager = MockGitExtraEgressManager {
             fail: false,
             types: RefCell::new(vec![]),
             scopes: RefCell::new(vec![]),
-        });
-        let repository = GitExtraEgressRepositoryImpl::new(git_extra_egress_manager.clone());
+        };
+        let repository = GitExtraEgressRepositoryImpl::new(&git_extra_egress_manager);
         let result = repository.update_scopes(Box::new(scopes.clone().into_iter()));
         assert!(result.is_ok() && git_extra_egress_manager.scopes.borrow().as_slice() == &scopes);
     }
@@ -122,12 +120,12 @@ mod tests {
     #[test]
     fn update_scopes_err() {
         let scopes = ["scope1".to_string(), "scope2".to_string()];
-        let git_extra_egress_manager = Rc::new(MockGitExtraEgressManager {
+        let git_extra_egress_manager = MockGitExtraEgressManager {
             fail: true,
             types: RefCell::new(vec![]),
             scopes: RefCell::new(vec![]),
-        });
-        let repository = GitExtraEgressRepositoryImpl::new(git_extra_egress_manager.clone());
+        };
+        let repository = GitExtraEgressRepositoryImpl::new(&git_extra_egress_manager);
         let result = repository.update_scopes(Box::new(scopes.clone().into_iter()));
         assert!(result.is_err());
     }

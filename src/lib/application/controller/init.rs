@@ -17,20 +17,20 @@ use crate::{
 
 use super::exit_code::ControllerExitCode;
 
-pub struct InitController {
+pub struct InitController<'a> {
     options: InitOptions,
-    init_manager: Rc<dyn InitEgressManager>,
-    commit_manager: Rc<dyn ConventionalCommitEgressManager>,
-    output_manager: Rc<dyn MessageEgressManager>,
+    init_manager: &'a dyn InitEgressManager,
+    commit_manager: &'a dyn ConventionalCommitEgressManager,
+    output_manager: &'a dyn MessageEgressManager,
 }
 
-impl InitController {
+impl<'a, 'b: 'a, 'c: 'a, 'd: 'a> InitController<'a> {
     pub fn new(
         options: InitOptions,
-        init_manager: Rc<dyn InitEgressManager>,
-        commit_manager: Rc<dyn ConventionalCommitEgressManager>,
-        output_manager: Rc<dyn MessageEgressManager>,
-    ) -> InitController {
+        init_manager: &'b dyn InitEgressManager,
+        commit_manager: &'c dyn ConventionalCommitEgressManager,
+        output_manager: &'d dyn MessageEgressManager,
+    ) -> Self {
         InitController {
             options,
             init_manager,
@@ -54,10 +54,9 @@ impl InitController {
                 None,
             )
             .expect("Init commit configuration is hand-made");
-            let commit_repository = Rc::new(ConventionalCommitEgressRepositoryImpl::new(
-                self.commit_manager.clone(),
-            ));
-            let usecase = CreateConventionalCommitUseCase::new(configuration, commit_repository);
+            let commit_repository =
+                ConventionalCommitEgressRepositoryImpl::new(self.commit_manager);
+            let usecase = CreateConventionalCommitUseCase::new(configuration, &commit_repository);
             if let Err(e) = usecase.execute() {
                 self.output_manager.error(&e.to_string());
                 return ControllerExitCode::Error(1);
@@ -144,10 +143,11 @@ mod tests {
     #[test]
     fn failed_init() {
         let options = InitOptions::new(false);
-        let init_manager = Rc::new(MockInitManager { fail: true });
-        let commit_manager = Rc::new(MockCommitManager { fail: true });
-        let output_manager = Rc::new(MockOutputManager {});
-        let controller = InitController::new(options, init_manager, commit_manager, output_manager);
+        let init_manager = MockInitManager { fail: true };
+        let commit_manager = MockCommitManager { fail: true };
+        let output_manager = MockOutputManager {};
+        let controller =
+            InitController::new(options, &init_manager, &commit_manager, &output_manager);
         let result = controller.init();
         assert!(matches!(result, ControllerExitCode::Error(..)));
     }
@@ -155,10 +155,11 @@ mod tests {
     #[test]
     fn correct_init_empty() {
         let options = InitOptions::new(true);
-        let init_manager = Rc::new(MockInitManager { fail: false });
-        let commit_manager = Rc::new(MockCommitManager { fail: false });
-        let output_manager = Rc::new(MockOutputManager {});
-        let controller = InitController::new(options, init_manager, commit_manager, output_manager);
+        let init_manager = MockInitManager { fail: false };
+        let commit_manager = MockCommitManager { fail: false };
+        let output_manager = MockOutputManager {};
+        let controller =
+            InitController::new(options, &init_manager, &commit_manager, &output_manager);
         let result = controller.init();
         assert!(matches!(result, ControllerExitCode::Ok));
     }
@@ -166,10 +167,11 @@ mod tests {
     #[test]
     fn failed_commit() {
         let options = InitOptions::new(false);
-        let init_manager = Rc::new(MockInitManager { fail: false });
-        let commit_manager = Rc::new(MockCommitManager { fail: true });
-        let output_manager = Rc::new(MockOutputManager {});
-        let controller = InitController::new(options, init_manager, commit_manager, output_manager);
+        let init_manager = MockInitManager { fail: false };
+        let commit_manager = MockCommitManager { fail: true };
+        let output_manager = MockOutputManager {};
+        let controller =
+            InitController::new(options, &init_manager, &commit_manager, &output_manager);
         let result = controller.init();
         assert!(matches!(result, ControllerExitCode::Error(..)));
     }
@@ -177,10 +179,11 @@ mod tests {
     #[test]
     fn full_init() {
         let options = InitOptions::new(false);
-        let init_manager = Rc::new(MockInitManager { fail: false });
-        let commit_manager = Rc::new(MockCommitManager { fail: false });
-        let output_manager = Rc::new(MockOutputManager {});
-        let controller = InitController::new(options, init_manager, commit_manager, output_manager);
+        let init_manager = MockInitManager { fail: false };
+        let commit_manager = MockCommitManager { fail: false };
+        let output_manager = MockOutputManager {};
+        let controller =
+            InitController::new(options, &init_manager, &commit_manager, &output_manager);
         let result = controller.init();
         assert!(matches!(result, ControllerExitCode::Ok));
     }

@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use crate::{
     application::manager::license_list_ingress_manager::LicenseListIngressManager,
     usecase::{
@@ -9,19 +7,19 @@ use crate::{
     },
 };
 
-pub struct LicenseListIngressRepositoryImpl {
-    license_list_ingress_manager: Rc<dyn LicenseListIngressManager>,
+pub struct LicenseListIngressRepositoryImpl<'a> {
+    license_list_ingress_manager: &'a dyn LicenseListIngressManager,
 }
 
-impl LicenseListIngressRepositoryImpl {
-    pub fn new(license_list_ingress_manager: Rc<dyn LicenseListIngressManager>) -> Self {
+impl<'a, 'b: 'a> LicenseListIngressRepositoryImpl<'a> {
+    pub fn new(license_list_ingress_manager: &'b dyn LicenseListIngressManager) -> Self {
         LicenseListIngressRepositoryImpl {
             license_list_ingress_manager,
         }
     }
 }
 
-impl LicenseListIngressRepository for LicenseListIngressRepositoryImpl {
+impl LicenseListIngressRepository for LicenseListIngressRepositoryImpl<'_> {
     fn license_list(&self) -> Result<Box<[LicenseMetadata]>, AnyError> {
         self.license_list_ingress_manager.license_list()
     }
@@ -29,8 +27,6 @@ impl LicenseListIngressRepository for LicenseListIngressRepositoryImpl {
 
 #[cfg(test)]
 mod tests {
-    use std::rc::Rc;
-
     use crate::{
         application::{
             manager::license_list_ingress_manager::LicenseListIngressManager,
@@ -58,10 +54,10 @@ mod tests {
             LicenseMetadata::new("MIT", "mit"),
             LicenseMetadata::new("Apache2", "apache2"),
         ];
-        let manager = Rc::new(MockLicenseListIngressManager {
+        let manager = MockLicenseListIngressManager {
             list: list.clone().into(),
-        });
-        let repository = LicenseListIngressRepositoryImpl::new(manager);
+        };
+        let repository = LicenseListIngressRepositoryImpl::new(&manager);
         let result = repository.license_list();
         assert!(result.is_ok_and(
             |it| it.iter().all(|e| list.contains(e)) && list.iter().all(|e| it.contains(e))

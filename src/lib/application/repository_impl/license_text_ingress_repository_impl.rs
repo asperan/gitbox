@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use crate::{
     application::manager::license_text_ingress_manager::LicenseTextIngressManager,
     usecase::{
@@ -9,19 +7,19 @@ use crate::{
     },
 };
 
-pub struct LicenseTextIngressRepositoryImpl {
-    license_text_ingress_manager: Rc<dyn LicenseTextIngressManager>,
+pub struct LicenseTextIngressRepositoryImpl<'a> {
+    license_text_ingress_manager: &'a dyn LicenseTextIngressManager,
 }
 
-impl LicenseTextIngressRepositoryImpl {
-    pub fn new(license_text_ingress_manager: Rc<dyn LicenseTextIngressManager>) -> Self {
+impl<'a, 'b: 'a> LicenseTextIngressRepositoryImpl<'a> {
+    pub fn new(license_text_ingress_manager: &'b dyn LicenseTextIngressManager) -> Self {
         LicenseTextIngressRepositoryImpl {
             license_text_ingress_manager,
         }
     }
 }
 
-impl LicenseTextIngressRepository for LicenseTextIngressRepositoryImpl {
+impl LicenseTextIngressRepository for LicenseTextIngressRepositoryImpl<'_> {
     fn text(&self, license: &LicenseMetadata) -> Result<Box<str>, AnyError> {
         self.license_text_ingress_manager.license_text(license)
     }
@@ -29,8 +27,6 @@ impl LicenseTextIngressRepository for LicenseTextIngressRepositoryImpl {
 
 #[cfg(test)]
 mod tests {
-    use std::rc::Rc;
-
     use crate::{
         application::{
             manager::license_text_ingress_manager::LicenseTextIngressManager,
@@ -55,8 +51,8 @@ mod tests {
     #[test]
     fn license_text() {
         let text = "License test text";
-        let manager = Rc::new(MockLicenseTextIngressManager { text: text.into() });
-        let repository = LicenseTextIngressRepositoryImpl::new(manager.clone());
+        let manager = MockLicenseTextIngressManager { text: text.into() };
+        let repository = LicenseTextIngressRepositoryImpl::new(&manager);
         let result = repository.text(&LicenseMetadata::new("Stub", "stub"));
         assert!(result.is_ok());
         assert_eq!(result.expect("Just asserted the OK-ness"), text.into());
