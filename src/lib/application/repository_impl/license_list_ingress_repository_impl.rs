@@ -29,8 +29,42 @@ impl LicenseListIngressRepository for LicenseListIngressRepositoryImpl {
 
 #[cfg(test)]
 mod tests {
+    use std::rc::Rc;
+
+    use crate::{
+        application::{
+            manager::license_list_ingress_manager::LicenseListIngressManager,
+            repository_impl::license_list_ingress_repository_impl::LicenseListIngressRepositoryImpl,
+        },
+        usecase::{
+            license_metadata::LicenseMetadata,
+            repository::license_list_ingress_repository::LicenseListIngressRepository,
+            type_aliases::AnyError,
+        },
+    };
+
+    struct MockLicenseListIngressManager {
+        list: Vec<LicenseMetadata>,
+    }
+    impl LicenseListIngressManager for MockLicenseListIngressManager {
+        fn license_list(&self) -> Result<Box<[LicenseMetadata]>, AnyError> {
+            Ok(self.list.as_slice().into())
+        }
+    }
+
     #[test]
-    fn license_list_ingress_repository_impl() {
-        unimplemented!();
+    fn license_list_ok() {
+        let list = [
+            LicenseMetadata::new("MIT", "mit"),
+            LicenseMetadata::new("Apache2", "apache2"),
+        ];
+        let manager = Rc::new(MockLicenseListIngressManager {
+            list: list.clone().into(),
+        });
+        let repository = LicenseListIngressRepositoryImpl::new(manager);
+        let result = repository.license_list();
+        assert!(result.is_ok_and(
+            |it| it.iter().all(|e| list.contains(e)) && list.iter().all(|e| it.contains(e))
+        ));
     }
 }

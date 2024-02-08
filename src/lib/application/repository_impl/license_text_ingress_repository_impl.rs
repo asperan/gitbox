@@ -29,8 +29,36 @@ impl LicenseTextIngressRepository for LicenseTextIngressRepositoryImpl {
 
 #[cfg(test)]
 mod tests {
+    use std::rc::Rc;
+
+    use crate::{
+        application::{
+            manager::license_text_ingress_manager::LicenseTextIngressManager,
+            repository_impl::license_text_ingress_repository_impl::LicenseTextIngressRepositoryImpl,
+        },
+        usecase::{
+            license_metadata::LicenseMetadata,
+            repository::license_text_ingress_repository::LicenseTextIngressRepository,
+            type_aliases::AnyError,
+        },
+    };
+
+    struct MockLicenseTextIngressManager {
+        text: Box<str>,
+    }
+    impl LicenseTextIngressManager for MockLicenseTextIngressManager {
+        fn license_text(&self, _license: &LicenseMetadata) -> Result<Box<str>, AnyError> {
+            Ok(self.text.clone())
+        }
+    }
+
     #[test]
-    fn test_me() {
-        unimplemented!();
+    fn license_text() {
+        let text = "License test text";
+        let manager = Rc::new(MockLicenseTextIngressManager { text: text.into() });
+        let repository = LicenseTextIngressRepositoryImpl::new(manager.clone());
+        let result = repository.text(&LicenseMetadata::new("Stub", "stub"));
+        assert!(result.is_ok());
+        assert_eq!(result.expect("Just asserted the OK-ness"), text.into());
     }
 }
