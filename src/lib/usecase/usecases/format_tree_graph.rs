@@ -9,12 +9,12 @@ use super::usecase::UseCase;
 
 const TIME_MINIMUM_PADDING: usize = 2;
 
-pub struct FormatTreeGraphUseCase {
-    treegraphline_ingress_repository: Box<dyn TreeGraphLineIngressRepository>,
+pub struct FormatTreeGraphUseCase<'a> {
+    treegraphline_ingress_repository: &'a dyn TreeGraphLineIngressRepository,
 }
 
-impl FormatTreeGraphUseCase {
-    pub fn new(treegraphline_ingress_repository: Box<dyn TreeGraphLineIngressRepository>) -> Self {
+impl<'a: 'b, 'b> FormatTreeGraphUseCase<'b> {
+    pub fn new(treegraphline_ingress_repository: &'a dyn TreeGraphLineIngressRepository) -> Self {
         FormatTreeGraphUseCase {
             treegraphline_ingress_repository,
         }
@@ -34,7 +34,7 @@ impl FormatTreeGraphUseCase {
     }
 }
 
-impl UseCase<Box<str>> for FormatTreeGraphUseCase {
+impl UseCase<Box<str>> for FormatTreeGraphUseCase<'_> {
     fn execute(&self) -> Result<Box<str>, AnyError> {
         let lines = self.treegraphline_ingress_repository.graph_lines()?;
         let time_color_length = {
@@ -128,7 +128,7 @@ mod tests {
             "( HEAD -> main )".to_owned(),
             String::new(),
         );
-        let usecase = FormatTreeGraphUseCase::new(Box::new(MockTreeGraphLineIngressRepository {}));
+        let usecase = FormatTreeGraphUseCase::new(&MockTreeGraphLineIngressRepository {});
         let result = usecase.format_line(&t, padding);
         let expected = " ( sample date ) * abcdef ( HEAD -> main ) ";
         assert_eq!(result, expected.into());
@@ -143,7 +143,7 @@ mod tests {
             "".to_owned(),
             "asperan: test message".to_owned(),
         );
-        let usecase = FormatTreeGraphUseCase::new(Box::new(MockTreeGraphLineIngressRepository {}));
+        let usecase = FormatTreeGraphUseCase::new(&MockTreeGraphLineIngressRepository {});
         let result = usecase.format_line(&t, padding);
         let expected = "                 |   asperan: test message";
         assert_eq!(result, expected.into());
@@ -151,7 +151,7 @@ mod tests {
 
     #[test]
     fn execute_complete() {
-        let usecase = FormatTreeGraphUseCase::new(Box::new(MockTreeGraphLineIngressRepository {}));
+        let usecase = FormatTreeGraphUseCase::new(&MockTreeGraphLineIngressRepository {});
         let result = usecase
             .execute()
             .expect("The usecase should execute correctly");

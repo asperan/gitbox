@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use crate::{
     application::{
         manager::{
@@ -13,15 +11,15 @@ use crate::{
 
 use super::exit_code::ControllerExitCode;
 
-pub struct TreeController {
-    git_tree_ingress_manager: Rc<dyn GitTreeIngressManager>,
-    message_egress_manager: Rc<dyn MessageEgressManager>,
+pub struct TreeController<'a> {
+    git_tree_ingress_manager: &'a dyn GitTreeIngressManager,
+    message_egress_manager: &'a dyn MessageEgressManager,
 }
 
-impl TreeController {
+impl<'a: 'c, 'b: 'c, 'c> TreeController<'c> {
     pub fn new(
-        git_tree_ingress_manager: Rc<dyn GitTreeIngressManager>,
-        message_egress_manager: Rc<dyn MessageEgressManager>,
+        git_tree_ingress_manager: &'a dyn GitTreeIngressManager,
+        message_egress_manager: &'b dyn MessageEgressManager,
     ) -> Self {
         TreeController {
             git_tree_ingress_manager,
@@ -30,9 +28,8 @@ impl TreeController {
     }
 
     pub fn commit_tree(&self) -> ControllerExitCode {
-        let usecase = FormatTreeGraphUseCase::new(Box::new(
-            TreeGraphLineIngressRepositoryImpl::new(self.git_tree_ingress_manager.clone()),
-        ));
+        let repository_impl = TreeGraphLineIngressRepositoryImpl::new(self.git_tree_ingress_manager);
+        let usecase = FormatTreeGraphUseCase::new(&repository_impl);
         match usecase.execute() {
             Ok(tree_graph) => {
                 self.message_egress_manager.output(&tree_graph);
@@ -49,7 +46,7 @@ impl TreeController {
 
 #[cfg(test)]
 mod tests {
-    use std::{cell::RefCell, rc::Rc};
+    use std::cell::RefCell;
 
     use crate::{
         application::{
@@ -114,9 +111,9 @@ mod tests {
 
     #[test]
     fn basic_usage() {
-        let tree_ingress_manager = Rc::new(MockTreeIngressManager {});
-        let output_manager = Rc::new(MockMessageEgressManager::new());
-        let controller = TreeController::new(tree_ingress_manager.clone(), output_manager.clone());
+        let tree_ingress_manager = MockTreeIngressManager {};
+        let output_manager = MockMessageEgressManager::new();
+        let controller = TreeController::new(&tree_ingress_manager, &output_manager);
         let result = controller.commit_tree();
         assert!(matches!(result, ControllerExitCode::Ok));
         let expected_output = concat!(

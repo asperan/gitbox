@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use clap::Args;
 
 use crate::{
@@ -16,9 +14,9 @@ pub struct TreeSubCommand {}
 
 impl Subcommand for TreeSubCommand {
     fn execute(&self) -> i32 {
-        let git_cli = Rc::new(GitCli::new());
-        let message_egress_manager = Rc::new(MessageEgressManagerImpl::new());
-        let controller = TreeController::new(git_cli.clone(), message_egress_manager.clone());
+        let git_cli = GitCli::new();
+        let message_egress_manager = MessageEgressManagerImpl::new();
+        let controller = TreeController::new(&git_cli, &message_egress_manager);
         match controller.commit_tree() {
             ControllerExitCode::Ok => 0,
             ControllerExitCode::Error(i) => i,

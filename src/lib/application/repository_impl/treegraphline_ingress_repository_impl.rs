@@ -1,4 +1,4 @@
-use std::{rc::Rc, str::FromStr};
+use std::str::FromStr;
 
 use crate::{
     application::manager::git_tree_ingress_manager::GitTreeIngressManager,
@@ -8,19 +8,19 @@ use crate::{
     },
 };
 
-pub struct TreeGraphLineIngressRepositoryImpl {
-    treegraphline_ingress_manager: Rc<dyn GitTreeIngressManager>,
+pub struct TreeGraphLineIngressRepositoryImpl<'a> {
+    treegraphline_ingress_manager: &'a dyn GitTreeIngressManager,
 }
 
-impl TreeGraphLineIngressRepositoryImpl {
-    pub fn new(treegraphline_ingress_manager: Rc<dyn GitTreeIngressManager>) -> Self {
+impl<'a: 'b, 'b> TreeGraphLineIngressRepositoryImpl<'b> {
+    pub fn new(treegraphline_ingress_manager: &'a dyn GitTreeIngressManager) -> Self {
         TreeGraphLineIngressRepositoryImpl {
             treegraphline_ingress_manager,
         }
     }
 }
 
-impl TreeGraphLineIngressRepository for TreeGraphLineIngressRepositoryImpl {
+impl TreeGraphLineIngressRepository for TreeGraphLineIngressRepositoryImpl<'_> {
     fn graph_lines(&self) -> Result<Box<[TreeGraphLine]>, AnyError> {
         let lines = self
             .treegraphline_ingress_manager
@@ -34,8 +34,6 @@ impl TreeGraphLineIngressRepository for TreeGraphLineIngressRepositoryImpl {
 
 #[cfg(test)]
 mod tests {
-    use std::rc::Rc;
-
     use crate::{
         application::{
             manager::git_tree_ingress_manager::GitTreeIngressManager,
@@ -69,10 +67,10 @@ mod tests {
 
     #[test]
     fn correct_deserialization_of_tree_lines() {
-        let git_tree_ingress_manager = Rc::new(MockGitTreeIngressManager {
+        let git_tree_ingress_manager = MockGitTreeIngressManager {
             produce_bad_lines: false,
-        });
-        let repository_impl = TreeGraphLineIngressRepositoryImpl::new(git_tree_ingress_manager);
+        };
+        let repository_impl = TreeGraphLineIngressRepositoryImpl::new(&git_tree_ingress_manager);
         let result = repository_impl.graph_lines();
         assert!(result.is_ok());
         let expected = [
@@ -106,10 +104,10 @@ mod tests {
 
     #[test]
     fn wrong_lines() {
-        let git_tree_ingress_manager = Rc::new(MockGitTreeIngressManager {
+        let git_tree_ingress_manager = MockGitTreeIngressManager {
             produce_bad_lines: true,
-        });
-        let repository_impl = TreeGraphLineIngressRepositoryImpl::new(git_tree_ingress_manager);
+        };
+        let repository_impl = TreeGraphLineIngressRepositoryImpl::new(&git_tree_ingress_manager);
         let result = repository_impl.graph_lines();
         assert!(result.is_err());
     }
