@@ -183,8 +183,206 @@ impl DescribeController {
 
 #[cfg(test)]
 mod tests {
+    use std::{cell::RefCell, rc::Rc};
+
+    use crate::{
+        application::{
+            controller::{describe::DescribeController, exit_code::ControllerExitCode},
+            manager::{
+                bounded_commit_summary_ingress_manager::BoundedCommitSummaryIngressManager,
+                commit_metadata_ingress_manager::CommitMetadataIngressManager,
+                message_egress_manager::MessageEgressManager, tag_egress_manager::TagEgressManager,
+                version_ingress_manager::VersionIngressManager,
+            },
+            options::describe::DescribeOptions,
+        },
+        domain::semantic_version::SemanticVersion,
+        usecase::{metadata_spec::MetadataSpec, type_aliases::AnyError},
+    };
+
+    struct MockCommitSummaryManager {}
+    impl BoundedCommitSummaryIngressManager for MockCommitSummaryManager {
+        fn get_commits_from(
+            &self,
+            _version: &Option<SemanticVersion>,
+        ) -> Result<Box<dyn DoubleEndedIterator<Item = String>>, AnyError> {
+            Ok(Box::new(
+                vec![
+                    "feat: add a feature".to_string(),
+                    "test(api): add test for API".to_string(),
+                    "refactor: refactor struct".to_string(),
+                ]
+                .into_iter(),
+            ))
+        }
+    }
+
+    struct MockCommitMetadataManager {}
+    impl CommitMetadataIngressManager for MockCommitMetadataManager {
+        fn get_metadata(&self, metadata_spec: &MetadataSpec) -> Result<String, AnyError> {
+            Ok(match metadata_spec {
+                MetadataSpec::Sha => "sha",
+                MetadataSpec::Date => "date",
+            }
+            .to_string())
+        }
+    }
+
+    struct MockSemanticVersionIngressManager {}
+    impl VersionIngressManager for MockSemanticVersionIngressManager {
+        fn last_version(&self) -> Result<Option<String>, AnyError> {
+            Ok(None)
+        }
+        fn last_stable_version(&self) -> Result<Option<String>, AnyError> {
+            Ok(None)
+        }
+    }
+
+    struct MockTagEgressManager {
+        label: RefCell<Box<str>>,
+    }
+    impl MockTagEgressManager {
+        pub fn new() -> Self {
+            MockTagEgressManager {
+                label: RefCell::new("".into()),
+            }
+        }
+    }
+    impl TagEgressManager for MockTagEgressManager {
+        fn create_tag(
+            &self,
+            label: &str,
+            _message: &Option<String>,
+            _sign: bool,
+        ) -> Result<(), AnyError> {
+            self.label.replace(label.into());
+            Ok(())
+        }
+    }
+
+    struct MockOutputManager {
+        output_buffer: RefCell<Vec<String>>,
+        error_buffer: RefCell<Vec<String>>,
+    }
+    impl MockOutputManager {
+        pub fn new() -> Self {
+            MockOutputManager {
+                output_buffer: RefCell::new(vec![]),
+                error_buffer: RefCell::new(vec![]),
+            }
+        }
+    }
+    impl MessageEgressManager for MockOutputManager {
+        fn output(&self, message: &str) {
+            self.output_buffer.borrow_mut().push(message.to_string());
+        }
+        fn error(&self, error: &str) {
+            self.error_buffer.borrow_mut().push(error.to_string());
+        }
+    }
+
     #[test]
-    fn describe_controller() {
-        unimplemented!();
+    fn basic_usage() {
+        let options = DescribeOptions::new(
+            false,
+            "dev%d".to_string(),
+            "dev%d".to_string(),
+            false,
+            vec![],
+            None,
+            None,
+            None,
+            false,
+            None,
+            false,
+        )
+        .expect("hand-crafted options are correct");
+        let commit_summary_manager = Rc::new(MockCommitSummaryManager {});
+        let commit_metadata_ingress_manager = Rc::new(MockCommitMetadataManager {});
+        let version_ingress_manager = Rc::new(MockSemanticVersionIngressManager {});
+        let tag_egress_manager = Rc::new(MockTagEgressManager::new());
+        let output_manager = Rc::new(MockOutputManager::new());
+        let controller = DescribeController::new(
+            options,
+            commit_summary_manager.clone(),
+            commit_metadata_ingress_manager.clone(),
+            version_ingress_manager.clone(),
+            tag_egress_manager.clone(),
+            output_manager.clone(),
+        );
+        let result = controller.describe();
+        assert!(matches!(result, ControllerExitCode::Ok));
+        assert_eq!(output_manager.output_buffer.borrow().as_ref(), ["0.1.0"]);
+    }
+
+    #[test]
+    fn diff_enabled() {
+        let options = DescribeOptions::new(
+            false,
+            "dev%d".to_string(),
+            "dev%d".to_string(),
+            true,
+            vec![],
+            None,
+            None,
+            None,
+            false,
+            None,
+            false,
+        )
+        .expect("hand-crafted options are correct");
+        let commit_summary_manager = Rc::new(MockCommitSummaryManager {});
+        let commit_metadata_ingress_manager = Rc::new(MockCommitMetadataManager {});
+        let version_ingress_manager = Rc::new(MockSemanticVersionIngressManager {});
+        let tag_egress_manager = Rc::new(MockTagEgressManager::new());
+        let output_manager = Rc::new(MockOutputManager::new());
+        let controller = DescribeController::new(
+            options,
+            commit_summary_manager.clone(),
+            commit_metadata_ingress_manager.clone(),
+            version_ingress_manager.clone(),
+            tag_egress_manager.clone(),
+            output_manager.clone(),
+        );
+        let result = controller.describe();
+        assert!(matches!(result, ControllerExitCode::Ok));
+        assert_eq!(
+            output_manager.output_buffer.borrow().as_ref(),
+            ["Previous version: None", "0.1.0"]
+        );
+    }
+
+    #[test]
+    fn tag_enabled() {
+        let options = DescribeOptions::new(
+            false,
+            "dev%d".to_string(),
+            "dev%d".to_string(),
+            false,
+            vec![],
+            None,
+            None,
+            None,
+            true,
+            None,
+            false,
+        )
+        .expect("hand-crafted options are correct");
+        let commit_summary_manager = Rc::new(MockCommitSummaryManager {});
+        let commit_metadata_ingress_manager = Rc::new(MockCommitMetadataManager {});
+        let version_ingress_manager = Rc::new(MockSemanticVersionIngressManager {});
+        let tag_egress_manager = Rc::new(MockTagEgressManager::new());
+        let output_manager = Rc::new(MockOutputManager::new());
+        let controller = DescribeController::new(
+            options,
+            commit_summary_manager.clone(),
+            commit_metadata_ingress_manager.clone(),
+            version_ingress_manager.clone(),
+            tag_egress_manager.clone(),
+            output_manager.clone(),
+        );
+        let result = controller.describe();
+        assert!(matches!(result, ControllerExitCode::Ok));
+        assert_eq!(tag_egress_manager.label.borrow().as_ref(), "0.1.0");
     }
 }
