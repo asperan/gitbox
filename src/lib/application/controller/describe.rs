@@ -12,7 +12,7 @@ use crate::{
         manager::{
             message_egress_manager::MessageEgressManager, tag_egress_manager::TagEgressManager,
         },
-        options::describe::DescribeOptions,
+        options::describe::{DescribeOptions, PRERELEASE_NUM_PLACEHOLDER},
         repository_impl::{
             bounded_commit_summary_ingress_repository_impl::BoundedCommitSummaryIngressRepositoryImpl,
             commit_metadata_ingress_repository_impl::CommitMetadataIngressRepositoryImpl,
@@ -127,14 +127,14 @@ impl DescribeController {
             Box::new(|it| {
                 self.options
                     .prerelease_pattern()
-                    .replace("%d", &it.to_string())
+                    .replace(PRERELEASE_NUM_PLACEHOLDER, &it.to_string())
             }),
             Box::new(|it| {
                 let regex = Regex::new(
                     &self
                         .options
                         .old_prerelease_pattern()
-                        .replace("%d", "(\\d+)"),
+                        .replace(PRERELEASE_NUM_PLACEHOLDER, "(\\d+)"),
                 )
                 .unwrap();
                 regex

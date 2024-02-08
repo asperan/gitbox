@@ -3,7 +3,7 @@ use crate::{
     usecase::{metadata_spec::MetadataSpec, type_aliases::AnyError},
 };
 
-const PRERELEASE_NUM_PLACEHOLDER: &str = "%d";
+pub const PRERELEASE_NUM_PLACEHOLDER: &str = "%d";
 
 pub struct DescribeOptions {
     prerelease: bool,
