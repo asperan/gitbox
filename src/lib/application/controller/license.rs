@@ -94,7 +94,7 @@ mod tests {
             manager::{
                 license_choice_ingress_manager::LicenseChoiceIngressManager,
                 license_list_ingress_manager::LicenseListIngressManager,
-                license_text_egress_manager::{self, LicenseTextEgressManager},
+                license_text_egress_manager::LicenseTextEgressManager,
                 license_text_ingress_manager::LicenseTextIngressManager,
                 message_egress_manager::MessageEgressManager,
             },
