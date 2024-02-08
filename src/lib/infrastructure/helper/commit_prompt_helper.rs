@@ -1,5 +1,3 @@
-
-
 use regex::Regex;
 use requestty::{prompt_one, Answer, Question};
 

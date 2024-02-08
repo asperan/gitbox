@@ -1,5 +1,3 @@
-
-
 use crate::usecase::{
     repository::{
         license_choice_ingress_repository::LicenseChoiceIngressRepository,

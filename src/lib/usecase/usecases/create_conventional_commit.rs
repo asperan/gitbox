@@ -1,5 +1,3 @@
-
-
 use crate::{
     domain::conventional_commit::ConventionalCommit,
     usecase::{

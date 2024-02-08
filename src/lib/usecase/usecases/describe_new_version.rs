@@ -1,5 +1,3 @@
-
-
 use crate::{
     domain::{commit_summary::CommitSummary, semantic_version::SemanticVersion},
     usecase::{

@@ -1,6 +1,5 @@
 use clap::Args;
 
-
 use crate::{
     application::{
         controller::{exit_code::ControllerExitCode, refresh::RefreshController},
@@ -32,11 +31,7 @@ impl Subcommand for RefreshExtraSubcommand {
             return 1;
         }
         let gitextra_manager = GitExtraManagerImpl::new(&git_cli);
-        let controller = RefreshController::new(
-            &git_cli,
-            &gitextra_manager,
-            &output_manager,
-        );
+        let controller = RefreshController::new(&git_cli, &gitextra_manager, &output_manager);
         match controller.refresh() {
             ControllerExitCode::Ok => 0,
             ControllerExitCode::Error(i) => i,

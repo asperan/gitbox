@@ -1,5 +1,3 @@
-
-
 use ahash::{AHashMap, RandomState};
 
 use crate::{
@@ -657,11 +655,8 @@ mod tests {
         let configuration = ChangelogConfiguration::new(false, format(), None);
         let commit_repository = MockCommitRepository {};
         let version_repository = MockVersionRepository {};
-        let usecase = CreateChangelogUseCase::new(
-            configuration,
-            &commit_repository,
-            &version_repository,
-        );
+        let usecase =
+            CreateChangelogUseCase::new(configuration, &commit_repository, &version_repository);
         let changelog = usecase.execute();
         assert!(changelog.is_ok());
         assert_eq!(changelog.expect("Just asserted it OK-ness"), "# Changes from version 0.1.0\n## feat\n### API\n:\n* test message #1\n### General\n:\n* test message #6\n\n## fix\n### API\n:\n* test message #2\n\n## docs\n### General\n:\n* test message #5\n\n## test\n### API\n:\n* test message #7\n### General\n:\n* test message #3\n\n## refactor\n### exclude\n:\n* test message #4\n");
@@ -672,11 +667,8 @@ mod tests {
         let configuration = ChangelogConfiguration::new(true, format(), None);
         let commit_repository = MockCommitRepository {};
         let version_repository = MockVersionRepository {};
-        let usecase = CreateChangelogUseCase::new(
-            configuration,
-            &commit_repository,
-            &version_repository,
-        );
+        let usecase =
+            CreateChangelogUseCase::new(configuration, &commit_repository, &version_repository);
         let changelog = usecase.execute();
         assert!(changelog.is_ok());
         assert_eq!(changelog.expect("Just asserted its OK-ness"), "# Changes from version 0.1.0-dev1\n## feat\n### API\n:\n* test message #1\n### General\n:\n* test message #6\n\n## fix\n### API\n:\n* test message #2\n\n## docs\n### General\n:\n* test message #5\n\n## test\n### API\n:\n* test message #7\n### General\n:\n* test message #3\n\n## refactor\n### exclude\n:\n* test message #4\n");
@@ -697,11 +689,8 @@ mod tests {
         let configuration = ChangelogConfiguration::new(false, format(), trigger);
         let commit_repository = MockCommitRepository {};
         let version_repository = MockVersionRepository {};
-        let usecase = CreateChangelogUseCase::new(
-            configuration,
-            &commit_repository,
-            &version_repository,
-        );
+        let usecase =
+            CreateChangelogUseCase::new(configuration, &commit_repository, &version_repository);
         let changelog = usecase.execute();
         assert!(changelog.is_ok());
         assert_eq!(changelog.expect("Just asserted its OK-ness"), "# Changes from version 0.1.0\n## feat\n### API\n:\n* test message #1\n### General\n:\n* test message #6\n\n## fix\n### API\n:\n* test message #2\n\n## docs\n### General\n:\n* test message #5\n\n## test\n### API\n:\n* test message #7\n### General\n:\n* test message #3\n");
@@ -722,11 +711,8 @@ mod tests {
         let configuration = ChangelogConfiguration::new(true, format(), trigger);
         let commit_repository = MockCommitRepository {};
         let version_repository = MockVersionRepository {};
-        let usecase = CreateChangelogUseCase::new(
-            configuration,
-            &commit_repository,
-            &version_repository,
-        );
+        let usecase =
+            CreateChangelogUseCase::new(configuration, &commit_repository, &version_repository);
         let changelog = usecase.execute();
         assert!(changelog.is_ok());
         assert_eq!(changelog.expect("Just asserted its OK-ness"), "# Changes from version 0.1.0-dev1\n## feat\n### API\n:\n* test message #1\n### General\n:\n* test message #6\n\n## fix\n### API\n:\n* test message #2\n\n## docs\n### General\n:\n* test message #5\n\n## test\n### API\n:\n* test message #7\n### General\n:\n* test message #3\n");

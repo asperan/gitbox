@@ -1,5 +1,3 @@
-
-
 use crate::{
     application::{
         manager::{
@@ -51,15 +49,12 @@ impl<'a, 'b: 'a, 'c: 'a, 'd: 'a, 'e: 'a, 'f: 'a> LicenseController<'a> {
     }
 
     pub fn license(&self) -> ControllerExitCode {
-        let license_list_ingress_repository = LicenseListIngressRepositoryImpl::new(
-            self.license_list_ingress_manager,
-        );
-        let license_choice_ingress_repository = LicenseChoiceIngressRepositoryImpl::new(
-            self.license_choice_ingress_manager,
-        );
-        let license_text_ingress_repository = LicenseTextIngressRepositoryImpl::new(
-            self.license_text_ingress_manager,
-        );
+        let license_list_ingress_repository =
+            LicenseListIngressRepositoryImpl::new(self.license_list_ingress_manager);
+        let license_choice_ingress_repository =
+            LicenseChoiceIngressRepositoryImpl::new(self.license_choice_ingress_manager);
+        let license_text_ingress_repository =
+            LicenseTextIngressRepositoryImpl::new(self.license_text_ingress_manager);
         let license_text_egress_repository = LicenseTextEgressRepositoryImpl::new(
             self.options.path(),
             self.license_text_egress_manager,

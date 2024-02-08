@@ -1,5 +1,3 @@
-
-
 use clap::{builder::NonEmptyStringValueParser, Args};
 
 use crate::{
@@ -64,8 +62,7 @@ impl Subcommand for CommitSubCommand {
             return 1;
         }
         let gitextra_manager = GitExtraManagerImpl::new(&git_cli);
-        let prompt_manager =
-            CommitPromptHelper::new(&gitextra_manager, &gitextra_manager);
+        let prompt_manager = CommitPromptHelper::new(&gitextra_manager, &gitextra_manager);
         let options = match self.ask_missing_fields(prompt_manager) {
             Ok(o) => o,
             Err(e) => {

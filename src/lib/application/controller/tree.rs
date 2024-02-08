@@ -28,7 +28,8 @@ impl<'a: 'c, 'b: 'c, 'c> TreeController<'c> {
     }
 
     pub fn commit_tree(&self) -> ControllerExitCode {
-        let repository_impl = TreeGraphLineIngressRepositoryImpl::new(self.git_tree_ingress_manager);
+        let repository_impl =
+            TreeGraphLineIngressRepositoryImpl::new(self.git_tree_ingress_manager);
         let usecase = FormatTreeGraphUseCase::new(&repository_impl);
         match usecase.execute() {
             Ok(tree_graph) => {

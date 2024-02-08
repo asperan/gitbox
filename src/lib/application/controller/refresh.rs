@@ -1,5 +1,3 @@
-
-
 use crate::{
     application::{
         manager::full_commit_summary_history_ingress_manager::FullCommitSummaryHistoryIngressManager,

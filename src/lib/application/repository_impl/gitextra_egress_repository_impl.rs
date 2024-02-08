@@ -10,9 +10,7 @@ pub struct GitExtraEgressRepositoryImpl<'a> {
 }
 
 impl<'a, 'b: 'a> GitExtraEgressRepositoryImpl<'a> {
-    pub fn new(
-        gitextra_egress_manager: &'b dyn GitExtraEgressManager,
-    ) -> Self {
+    pub fn new(gitextra_egress_manager: &'b dyn GitExtraEgressManager) -> Self {
         GitExtraEgressRepositoryImpl {
             gitextra_egress_manager,
         }

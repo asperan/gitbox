@@ -1,5 +1,3 @@
-
-
 use clap::Args;
 
 use crate::{
@@ -99,12 +97,8 @@ impl Subcommand for ChangelogSubCommand {
             self.exclude_trigger.clone(),
         ) {
             Ok(options) => {
-                let controller = ChangelogController::new(
-                    options,
-                    &git_cli,
-                    &git_cli,
-                    &output_manager,
-                );
+                let controller =
+                    ChangelogController::new(options, &git_cli, &git_cli, &output_manager);
                 match controller.changelog() {
                     ControllerExitCode::Ok => 0,
                     ControllerExitCode::Error(i) => i,
