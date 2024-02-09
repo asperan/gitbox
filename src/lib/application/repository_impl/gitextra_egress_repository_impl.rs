@@ -86,7 +86,7 @@ mod tests {
         };
         let repository = GitExtraEgressRepositoryImpl::new(&git_extra_egress_manager);
         let result = repository.update_types(Box::new(types.clone().into_iter()));
-        assert!(result.is_ok() && git_extra_egress_manager.types.borrow().as_slice() == &types);
+        assert!(result.is_ok() && git_extra_egress_manager.types.borrow().as_slice() == types);
     }
 
     #[test]
@@ -112,7 +112,7 @@ mod tests {
         };
         let repository = GitExtraEgressRepositoryImpl::new(&git_extra_egress_manager);
         let result = repository.update_scopes(Box::new(scopes.clone().into_iter()));
-        assert!(result.is_ok() && git_extra_egress_manager.scopes.borrow().as_slice() == &scopes);
+        assert!(result.is_ok() && git_extra_egress_manager.scopes.borrow().as_slice() == scopes);
     }
 
     #[test]

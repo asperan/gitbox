@@ -71,64 +71,46 @@ mod tests {
     fn parse_simple_semantic_version() {
         let s = "1.3.15";
         let v = SemanticVersion::from_str(s);
-        match v {
-            Ok(version) => {
-                assert_eq!(version.major(), 1);
-                assert_eq!(version.minor(), 3);
-                assert_eq!(version.patch(), 15);
-                assert_eq!(version.prerelease(), &None);
-                assert_eq!(version.metadata(), &None);
-            }
-            Err(_) => assert!(false, "The version should be parsable correctly"),
-        }
+        assert_eq!(
+            v.expect("The version should be parsable correctly"),
+            SemanticVersion::new(1, 3, 15, None, None)
+        );
     }
 
     #[test]
     fn parse_semantic_prerelease() {
         let s = "1.3.15-alpha1";
         let v = SemanticVersion::from_str(s);
-        match v {
-            Ok(version) => {
-                assert_eq!(version.major(), 1);
-                assert_eq!(version.minor(), 3);
-                assert_eq!(version.patch(), 15);
-                assert_eq!(version.prerelease(), &Some("alpha1".to_string()));
-                assert_eq!(version.metadata(), &None);
-            }
-            Err(_) => assert!(false, "The version should be parsable correctly"),
-        }
+        assert_eq!(
+            v.expect("The version should be parsable correctly"),
+            SemanticVersion::new(1, 3, 15, Some("alpha1".to_string()), None)
+        );
     }
 
     #[test]
     fn parse_semantic_version_with_metadata() {
         let s = "1.3.15+test";
         let v = SemanticVersion::from_str(s);
-        match v {
-            Ok(version) => {
-                assert_eq!(version.major(), 1);
-                assert_eq!(version.minor(), 3);
-                assert_eq!(version.patch(), 15);
-                assert_eq!(version.prerelease(), &None);
-                assert_eq!(version.metadata(), &Some("test".to_string()));
-            }
-            Err(_) => assert!(false, "The version should be parsable correctly"),
-        }
+        assert_eq!(
+            v.expect("The version should be parsable correctly"),
+            SemanticVersion::new(1, 3, 15, None, Some("test".to_string()))
+        );
     }
 
     #[test]
     fn parse_semantic_prerelease_with_metadata() {
         let s = "1.3.15-alpha1+test";
         let v = SemanticVersion::from_str(s);
-        match v {
-            Ok(version) => {
-                assert_eq!(version.major(), 1);
-                assert_eq!(version.minor(), 3);
-                assert_eq!(version.patch(), 15);
-                assert_eq!(version.prerelease(), &Some("alpha1".to_string()));
-                assert_eq!(version.metadata(), &Some("test".to_string()));
-            }
-            Err(_) => assert!(false, "The version should be parsable correctly"),
-        }
+        assert_eq!(
+            v.expect("The version should be parsable correctly"),
+            SemanticVersion::new(
+                1,
+                3,
+                15,
+                Some("alpha1".to_string()),
+                Some("test".to_string())
+            )
+        );
     }
 
     #[test]

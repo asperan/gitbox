@@ -95,7 +95,7 @@ mod tests {
     fn equal_versions_ordering() {
         let v1 = first_release();
         let v2 = first_release();
-        assert_eq!(&v1.partial_cmp(&v2) == &Some(Ordering::Equal), v1 == v2);
+        assert_eq!(v1.partial_cmp(&v2) == Some(Ordering::Equal), v1 == v2);
     }
 
     #[test]
