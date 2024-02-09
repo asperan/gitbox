@@ -149,22 +149,19 @@ impl<'a, 'b: 'a, 'c: 'a, 'd: 'a, 'e: 'a, 'f: 'a> DescribeController<'a> {
             DescribeMetadataConfiguration::new(self.options.metadata().specs().to_vec());
         let trigger_configuration = DescribeTriggerConfiguration::new(
             Trigger::from_str(
-                self
-                    .options
+                self.options
                     .triggers()
                     .major()
                     .unwrap_or(Self::DEFAULT_MAJOR_TRIGGER_STR),
             )?,
             Trigger::from_str(
-                self
-                    .options
+                self.options
                     .triggers()
                     .minor()
                     .unwrap_or(Self::DEFAULT_MINOR_TRIGGER_STR),
             )?,
             Trigger::from_str(
-                self
-                    .options
+                self.options
                     .triggers()
                     .patch()
                     .unwrap_or(Self::DEFAULT_PATCH_TRIGGER_STR),
