@@ -114,7 +114,7 @@ mod tests {
     fn ensure_format_has_placeholder_correct() {
         let format_string = "= %s";
         let result = ChangelogFormatOptions::ensure_format_has_placeholder(
-            &format_string.to_owned(),
+            format_string,
             "test",
         );
         assert!(result.is_ok());
@@ -124,7 +124,7 @@ mod tests {
     fn ensure_format_has_placeholder_wrong() {
         let format_string = "not a correct format string";
         let result = ChangelogFormatOptions::ensure_format_has_placeholder(
-            &format_string.to_owned(),
+            format_string,
             "test",
         );
         assert!(result.is_err());

@@ -46,7 +46,7 @@ impl UseCase<()> for CreateLicenseUseCase<'_> {
 
 #[cfg(test)]
 mod tests {
-    use std::{cell::RefCell, rc::Rc};
+    use std::{cell::RefCell};
 
     use crate::usecase::{
         license_metadata::LicenseMetadata,
@@ -117,7 +117,7 @@ mod tests {
             &license_text_ingress_repository,
             &license_text_egress_repository,
         );
-        let _result = usecase.execute().expect("Repositories do not return Errs");
+        usecase.execute().expect("Repositories do not return Errs");
         assert_eq!(
             license_text_egress_repository.consumed_text.take(),
             "Name: MIT\nReference: mit-license\n".into()

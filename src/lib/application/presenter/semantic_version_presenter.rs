@@ -135,7 +135,7 @@ mod tests {
     fn try_parse_non_semantic_version() {
         let s = "1970-01-01";
         let v = SemanticVersion::from_str(s);
-        assert!(v.is_err() && v.unwrap_err().wrong_version() == s.to_string());
+        assert!(v.is_err() && v.unwrap_err().wrong_version() == s);
     }
 
     #[test]

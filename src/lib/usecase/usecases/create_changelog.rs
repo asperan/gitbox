@@ -214,7 +214,7 @@ fn scope_or_general(s: &Option<String>) -> String {
 
 #[cfg(test)]
 mod tests {
-    use std::rc::Rc;
+    
 
     use ahash::AHashMap;
 
@@ -362,7 +362,7 @@ mod tests {
 
     #[test]
     fn format_list_empty() {
-        let s = format_list(&format(), vec![].iter());
+        let s = format_list(&format(), [].iter());
         assert_eq!(s, ":\n".to_string());
     }
 

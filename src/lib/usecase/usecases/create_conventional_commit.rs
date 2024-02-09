@@ -42,7 +42,7 @@ impl UseCase<ConventionalCommit> for CreateConventionalCommitUseCase<'_> {
 
 #[cfg(test)]
 mod tests {
-    use std::{error::Error, fmt::Display, rc::Rc};
+    use std::{error::Error, fmt::Display};
 
     use crate::{
         domain::conventional_commit::ConventionalCommit,

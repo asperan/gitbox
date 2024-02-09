@@ -91,7 +91,7 @@ mod tests {
         let c = CommitSummary::from_str(free_form_commit);
         assert!(c.is_ok());
         assert!(match c.expect("Just asserted its OK-ness") {
-            CommitSummary::FreeForm(s) if s == free_form_commit.to_owned() => true,
+            CommitSummary::FreeForm(s) if s == *free_form_commit => true,
             _ => false,
         });
     }

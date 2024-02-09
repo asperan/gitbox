@@ -34,7 +34,7 @@ impl UseCase<()> for CreateTagUseCase<'_> {
 
 #[cfg(test)]
 mod tests {
-    use std::{cell::RefCell, rc::Rc};
+    use std::{cell::RefCell};
 
     use crate::{
         domain::semantic_version::SemanticVersion,
@@ -87,7 +87,7 @@ mod tests {
         .expect("Hand made configuration should be correct");
         let tag_write_repository = MockTagWriteRepository::new();
         let usecase = CreateTagUseCase::new(tag_configuration, &tag_write_repository);
-        let _result = usecase.execute().expect("Mock does not return an error");
+        usecase.execute().expect("Mock does not return an error");
         assert_eq!(
             tag_write_repository.version.borrow().to_owned(),
             SemanticVersion::new(1, 0, 0, None, None)
@@ -96,6 +96,6 @@ mod tests {
             tag_write_repository.message.borrow().to_owned(),
             Some("test".to_string())
         );
-        assert_eq!(tag_write_repository.sign.borrow().to_owned(), true);
+        assert!(tag_write_repository.sign.borrow().to_owned());
     }
 }

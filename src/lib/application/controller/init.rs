@@ -68,7 +68,7 @@ impl<'a, 'b: 'a, 'c: 'a, 'd: 'a> InitController<'a> {
 
 #[cfg(test)]
 mod tests {
-    use std::{error::Error, fmt::Display, rc::Rc};
+    use std::{error::Error, fmt::Display};
 
     use crate::{
         application::{
