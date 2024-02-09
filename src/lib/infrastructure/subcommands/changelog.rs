@@ -5,7 +5,7 @@ use crate::{
         controller::{changelog::ChangelogController, exit_code::ControllerExitCode},
         manager::gitinfo_ingress_manager::GitInfoIngressManager,
         manager::message_egress_manager::MessageEgressManager,
-        options::changelog::ChangelogOptions,
+        options::changelog::{ChangelogFormatOptions, ChangelogOptions},
     },
     infrastructure::{
         interface::{git_cli::GitCli, message_egress_manager_impl::MessageEgressManagerImpl},
@@ -86,17 +86,20 @@ impl Subcommand for ChangelogSubCommand {
             output_manager.error("changelog subcommand cannot be called outside of a git dir");
             return 1;
         }
-        match ChangelogOptions::new(
-            self.from_latest_version,
+        match ChangelogFormatOptions::new(
             self.title_format.clone(),
             self.type_format.clone(),
             self.scope_format.clone(),
             self.list_format.clone(),
             self.item_format.clone(),
             self.breaking_format.clone(),
-            self.exclude_trigger.clone(),
         ) {
-            Ok(options) => {
+            Ok(format_options) => {
+                let options = ChangelogOptions::new(
+                    self.from_latest_version,
+                    format_options,
+                    self.exclude_trigger.clone(),
+                );
                 let controller =
                     ChangelogController::new(options, &git_cli, &git_cli, &output_manager);
                 match controller.changelog() {

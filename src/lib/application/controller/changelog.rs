@@ -58,14 +58,25 @@ impl<'a, 'b: 'a, 'c: 'a, 'd: 'a> ChangelogController<'a> {
         let configuration = ChangelogConfiguration::new(
             self.options.generate_from_latest_version(),
             ChangelogFormat::new(
-                Box::new(|it| self.options.title_format().replace(FORMAT_PLACEHOLDER, it)),
-                Box::new(|it| self.options.type_format().replace(FORMAT_PLACEHOLDER, it)),
-                Box::new(|it| self.options.scope_format().replace(FORMAT_PLACEHOLDER, it)),
-                Box::new(|it| self.options.list_format().replace(FORMAT_PLACEHOLDER, it)),
-                Box::new(|it| self.options.item_format().replace(FORMAT_PLACEHOLDER, it)),
                 Box::new(|it| {
                     self.options
-                        .breaking_format()
+                        .format()
+                        .title()
+                        .replace(FORMAT_PLACEHOLDER, it)
+                }),
+                Box::new(|it| self.options.format().typ().replace(FORMAT_PLACEHOLDER, it)),
+                Box::new(|it| {
+                    self.options
+                        .format()
+                        .scope()
+                        .replace(FORMAT_PLACEHOLDER, it)
+                }),
+                Box::new(|it| self.options.format().list().replace(FORMAT_PLACEHOLDER, it)),
+                Box::new(|it| self.options.format().item().replace(FORMAT_PLACEHOLDER, it)),
+                Box::new(|it| {
+                    self.options
+                        .format()
+                        .breaking()
                         .replace(FORMAT_PLACEHOLDER, it)
                 }),
             ),
@@ -105,7 +116,7 @@ mod tests {
                 bounded_commit_summary_ingress_manager::BoundedCommitSummaryIngressManager,
                 version_ingress_manager::VersionIngressManager,
             },
-            options::changelog::ChangelogOptions,
+            options::changelog::{ChangelogFormatOptions, ChangelogOptions},
         },
         domain::semantic_version::SemanticVersion,
         usecase::type_aliases::AnyError,
@@ -162,15 +173,17 @@ mod tests {
     fn wrong_trigger_exits_with_error() {
         let options = ChangelogOptions::new(
             false,
-            String::from("%s"),
-            String::from("%s"),
-            String::from("%s"),
-            String::from("%s"),
-            String::from("%s"),
-            String::from("%s"),
+            ChangelogFormatOptions::new(
+                String::from("%s"),
+                String::from("%s"),
+                String::from("%s"),
+                String::from("%s"),
+                String::from("%s"),
+                String::from("%s"),
+            )
+            .expect("hand-crafted options are correct"),
             Some("abc".to_string()),
-        )
-        .expect("Changelog options should be correct");
+        );
         let commit_retriever = MockCommitRetriever {};
         let version_retriever = MockVersionRetriever {};
         let output_manager = MockOutputManager {};
@@ -188,15 +201,17 @@ mod tests {
     fn correct_usecase_execution() {
         let options = ChangelogOptions::new(
             false,
-            String::from("%s"),
-            String::from("%s"),
-            String::from("%s"),
-            String::from("%s"),
-            String::from("%s"),
-            String::from("%s"),
+            ChangelogFormatOptions::new(
+                String::from("%s"),
+                String::from("%s"),
+                String::from("%s"),
+                String::from("%s"),
+                String::from("%s"),
+                String::from("%s"),
+            )
+            .expect("hand-crafted options should be correct"),
             None,
-        )
-        .expect("Changelog options should be correct");
+        );
         let commit_retriever = MockCommitRetriever {};
         let version_retriever = MockVersionRetriever {};
         let output_manager = MockOutputManager {};
@@ -214,15 +229,17 @@ mod tests {
     fn failed_execution_of_usecase() {
         let options = ChangelogOptions::new(
             true,
-            String::from("%s"),
-            String::from("%s"),
-            String::from("%s"),
-            String::from("%s"),
-            String::from("%s"),
-            String::from("%s"),
+            ChangelogFormatOptions::new(
+                String::from("%s"),
+                String::from("%s"),
+                String::from("%s"),
+                String::from("%s"),
+                String::from("%s"),
+                String::from("%s"),
+            )
+            .expect("hand-crafted options should be correct"),
             None,
-        )
-        .expect("Changelog options should be correct");
+        );
         let commit_retriever = MockCommitRetriever {};
         let version_retriever = MockVersionRetriever {};
         let output_manager = MockOutputManager {};
