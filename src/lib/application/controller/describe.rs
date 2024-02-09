@@ -98,11 +98,11 @@ impl<'a, 'b: 'a, 'c: 'a, 'd: 'a, 'e: 'a, 'f: 'a> DescribeController<'a> {
             ));
         }
         self.output_manager.output(&new_version.to_string());
-        if self.options.create_tag() {
+        if self.options.tag().enabled() {
             let tag_configuration = TagConfiguration::new(
                 new_version,
-                self.options.tag_message().clone(),
-                self.options.sign_tag(),
+                self.options.tag().message().map(|it| it.to_owned()),
+                self.options.tag().sign_enabled(),
             )?;
             let tag_write_repository = TagEgressRepositoryImpl::new(self.tag_write_manager);
             let tag_usecase = CreateTagUseCase::new(tag_configuration, &tag_write_repository);
@@ -118,17 +118,19 @@ impl<'a, 'b: 'a, 'c: 'a, 'd: 'a, 'e: 'a, 'f: 'a> DescribeController<'a> {
 
     fn generate_describe_configuration(&self) -> Result<DescribeConfiguration, AnyError> {
         let prerelease_configuration = DescribePrereleaseConfiguration::new(
-            self.options.prerelease(),
+            self.options.prerelease().enabled(),
             Box::new(|it| {
                 self.options
-                    .prerelease_pattern()
+                    .prerelease()
+                    .pattern()
                     .replace(PRERELEASE_NUM_PLACEHOLDER, &it.to_string())
             }),
             Box::new(|it| {
                 let regex = Regex::new(
                     &self
                         .options
-                        .old_prerelease_pattern()
+                        .prerelease()
+                        .old_pattern()
                         .replace(PRERELEASE_NUM_PLACEHOLDER, "(\\d+)"),
                 )
                 .unwrap();
@@ -141,31 +143,31 @@ impl<'a, 'b: 'a, 'c: 'a, 'd: 'a, 'e: 'a, 'f: 'a> DescribeController<'a> {
                     .parse()
                     .unwrap()
             }),
-            self.options.prerelease_pattern() != self.options.old_prerelease_pattern(),
+            self.options.prerelease().pattern() != self.options.prerelease().old_pattern(),
         );
         let metadata_configuration =
-            DescribeMetadataConfiguration::new(self.options.metadata().to_vec());
+            DescribeMetadataConfiguration::new(self.options.metadata().specs().to_vec());
         let trigger_configuration = DescribeTriggerConfiguration::new(
             Trigger::from_str(
-                &self
+                self
                     .options
-                    .major_trigger()
-                    .clone()
-                    .unwrap_or_else(|| String::from(Self::DEFAULT_MAJOR_TRIGGER_STR)),
+                    .triggers()
+                    .major()
+                    .unwrap_or(Self::DEFAULT_MAJOR_TRIGGER_STR),
             )?,
             Trigger::from_str(
-                &self
+                self
                     .options
-                    .minor_trigger()
-                    .clone()
-                    .unwrap_or_else(|| String::from(Self::DEFAULT_MINOR_TRIGGER_STR)),
+                    .triggers()
+                    .minor()
+                    .unwrap_or(Self::DEFAULT_MINOR_TRIGGER_STR),
             )?,
             Trigger::from_str(
-                &self
+                self
                     .options
-                    .patch_trigger()
-                    .clone()
-                    .unwrap_or_else(|| String::from(Self::DEFAULT_PATCH_TRIGGER_STR)),
+                    .triggers()
+                    .patch()
+                    .unwrap_or(Self::DEFAULT_PATCH_TRIGGER_STR),
             )?,
         );
         Ok(DescribeConfiguration::new(
@@ -189,7 +191,10 @@ mod tests {
                 message_egress_manager::MessageEgressManager, tag_egress_manager::TagEgressManager,
                 version_ingress_manager::VersionIngressManager,
             },
-            options::describe::DescribeOptions,
+            options::describe::{
+                DescribeMetadataOptions, DescribeOptions, DescribePrereleaseOptions,
+                DescribeTagOptions, DescribeTriggerOptions,
+            },
         },
         domain::semantic_version::SemanticVersion,
         usecase::{metadata_spec::MetadataSpec, type_aliases::AnyError},
@@ -279,19 +284,13 @@ mod tests {
     #[test]
     fn basic_usage() {
         let options = DescribeOptions::new(
+            DescribePrereleaseOptions::new(false, "dev%d".to_string(), "dev%d".to_string())
+                .expect("hand-crafted options are correct"),
             false,
-            "dev%d".to_string(),
-            "dev%d".to_string(),
-            false,
-            vec![],
-            None,
-            None,
-            None,
-            false,
-            None,
-            false,
-        )
-        .expect("hand-crafted options are correct");
+            DescribeMetadataOptions::new(vec![]),
+            DescribeTriggerOptions::new(None, None, None),
+            DescribeTagOptions::new(false, None, false),
+        );
         let commit_summary_manager = MockCommitSummaryManager {};
         let commit_metadata_ingress_manager = MockCommitMetadataManager {};
         let version_ingress_manager = MockSemanticVersionIngressManager {};
@@ -313,19 +312,13 @@ mod tests {
     #[test]
     fn diff_enabled() {
         let options = DescribeOptions::new(
-            false,
-            "dev%d".to_string(),
-            "dev%d".to_string(),
+            DescribePrereleaseOptions::new(false, "dev%d".to_string(), "dev%d".to_string())
+                .expect("hand-crafted options are correct"),
             true,
-            vec![],
-            None,
-            None,
-            None,
-            false,
-            None,
-            false,
-        )
-        .expect("hand-crafted options are correct");
+            DescribeMetadataOptions::new(vec![]),
+            DescribeTriggerOptions::new(None, None, None),
+            DescribeTagOptions::new(false, None, false),
+        );
         let commit_summary_manager = MockCommitSummaryManager {};
         let commit_metadata_ingress_manager = MockCommitMetadataManager {};
         let version_ingress_manager = MockSemanticVersionIngressManager {};
@@ -350,19 +343,13 @@ mod tests {
     #[test]
     fn tag_enabled() {
         let options = DescribeOptions::new(
+            DescribePrereleaseOptions::new(false, "dev%d".to_string(), "dev%d".to_string())
+                .expect("hand-crafted options are correct"),
             false,
-            "dev%d".to_string(),
-            "dev%d".to_string(),
-            false,
-            vec![],
-            None,
-            None,
-            None,
-            true,
-            None,
-            false,
-        )
-        .expect("hand-crafted options are correct");
+            DescribeMetadataOptions::new(vec![]),
+            DescribeTriggerOptions::new(None, None, None),
+            DescribeTagOptions::new(true, None, false),
+        );
         let commit_summary_manager = MockCommitSummaryManager {};
         let commit_metadata_ingress_manager = MockCommitMetadataManager {};
         let version_ingress_manager = MockSemanticVersionIngressManager {};

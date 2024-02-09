@@ -7,7 +7,7 @@ use crate::{
             gitinfo_ingress_manager::GitInfoIngressManager,
             message_egress_manager::MessageEgressManager,
         },
-        options::describe::DescribeOptions,
+        options::describe::{DescribeMetadataOptions, DescribeOptions, DescribePrereleaseOptions, DescribeTagOptions, DescribeTriggerOptions},
     },
     infrastructure::{
         interface::{git_cli::GitCli, message_egress_manager_impl::MessageEgressManagerImpl},
@@ -90,22 +90,16 @@ impl Subcommand for DescribeSubCommand {
             output_manager.error("describe subcommand can only be run inside a git project");
             return 1;
         }
-        match DescribeOptions::new(
-            self.prerelease,
-            self.prerelease_pattern.clone(),
-            self.old_prerelease_pattern
-                .clone()
-                .unwrap_or(self.prerelease_pattern.clone()),
-            self.diff,
-            self.metadata.clone(),
-            self.major_trigger.clone(),
-            self.minor_trigger.clone(),
-            self.patch_trigger.clone(),
-            self.create_tag,
-            self.tag_message.clone(),
-            self.sign_tag,
-        ) {
-            Ok(options) => {
+        match DescribePrereleaseOptions::new(self.prerelease, self.prerelease_pattern.clone(), self.old_prerelease_pattern.clone().unwrap_or(self.prerelease_pattern.clone()))
+            {
+                    Ok(prerelease_options) => {
+                    let options = DescribeOptions::new(
+                        prerelease_options,
+                        self.diff,
+                        DescribeMetadataOptions::new(self.metadata.clone()),
+                        DescribeTriggerOptions::new(self.major_trigger.clone(), self.minor_trigger.clone(), self.patch_trigger.clone()),
+                        DescribeTagOptions::new(self.create_tag, self.tag_message.clone(), self.sign_tag),
+                    );
                 let controller = DescribeController::new(
                     options,
                     &git_cli,
