@@ -1,5 +1,8 @@
 use std::cmp::Ordering;
 
+/*
+A [semantic version](https://semver.org/).
+*/
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct SemanticVersion {
     major: u32,

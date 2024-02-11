@@ -1,3 +1,11 @@
+/*
+A Trigger can be seen as a function which takes the type, the optional scope and the breaking-ness
+of a [CommitSummary] and outputs a boolean value, i.e. whether the trigger has been activated by the
+commit (or, the commit is accepted by the Trigger).
+
+Triggers can be used for checking whether a commit procs a major, minor or patch increase; or
+if it must be hidden in a changelog.
+*/
 #[derive(Debug, PartialEq, Eq)]
 pub struct Trigger {
     start_node: Start,

@@ -1,3 +1,14 @@
+/*
+Summary of a conventional commit.
+
+It contains the type, the optional scope, the breaking-ness
+and the first line of the commit message.
+
+For more information about the specification of a conventional commit,
+see [the official documentation](https://www.conventionalcommits.org/en/v1.0.0/).
+
+If the complete message is needed, see [ConventionalCommit].
+*/
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ConventionalCommitSummary {
     typ: String,
