@@ -6,7 +6,7 @@ commit (or, the commit is accepted by the Trigger).
 Triggers can be used for checking whether a commit procs a major, minor or patch increase; or
 if it must be hidden in a changelog.
 */
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Trigger {
     start_node: Start,
 }
@@ -25,7 +25,7 @@ trait Visitable<'a, T> {
     fn visit(&self, commit_type: &str, scope: Option<&'a str>, breaking: bool) -> T;
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct TypeNode {}
 impl Visitable<'_, String> for TypeNode {
     fn visit(&self, commit_type: &str, _scope: Option<&str>, _breaking: bool) -> String {
@@ -33,7 +33,7 @@ impl Visitable<'_, String> for TypeNode {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct ScopeNode {}
 impl<'a> Visitable<'a, Option<&'a str>> for ScopeNode {
     fn visit(
@@ -46,13 +46,13 @@ impl<'a> Visitable<'a, Option<&'a str>> for ScopeNode {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum ObjectNode {
     Scope(ScopeNode),
     Type(TypeNode),
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct BreakingNode {}
 impl Visitable<'_, bool> for BreakingNode {
     fn visit(&self, _commit_type: &str, _scope: Option<&str>, breaking: bool) -> bool {
@@ -60,7 +60,7 @@ impl Visitable<'_, bool> for BreakingNode {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct LiteralNode {
     value: String,
 }
@@ -75,7 +75,7 @@ impl Visitable<'_, String> for LiteralNode {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct ArrayNode {
     pub values: Vec<String>,
 }
@@ -85,7 +85,7 @@ impl Visitable<'_, Vec<String>> for ArrayNode {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct InNode {
     pub object: ObjectNode,
     pub array: ArrayNode,
@@ -108,7 +108,7 @@ impl Visitable<'_, bool> for InNode {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum BasicStatement {
     In(InNode),
     Breaking(BreakingNode),
@@ -123,7 +123,7 @@ impl Visitable<'_, bool> for BasicStatement {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum FirstAndValue {
     Basic(BasicStatement),
     Priority(Box<PriorityStatement>),
@@ -138,7 +138,7 @@ impl Visitable<'_, bool> for FirstAndValue {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum SecondAndValue {
     Basic(BasicStatement),
     Priority(Box<PriorityStatement>),
@@ -155,7 +155,7 @@ impl Visitable<'_, bool> for SecondAndValue {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct AndStatement {
     pub left: FirstAndValue,
     pub right: SecondAndValue,
@@ -168,7 +168,7 @@ impl Visitable<'_, bool> for AndStatement {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum FirstOrValue {
     And(AndStatement),
     Basic(BasicStatement),
@@ -183,7 +183,7 @@ impl Visitable<'_, bool> for FirstOrValue {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum SecondOrValue {
     And(AndStatement),
     Basic(BasicStatement),
@@ -200,7 +200,7 @@ impl Visitable<'_, bool> for SecondOrValue {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct OrStatement {
     pub left: FirstOrValue,
     pub right: SecondOrValue,
@@ -213,7 +213,7 @@ impl Visitable<'_, bool> for OrStatement {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct PriorityStatement {
     pub internal_node: OrStatement,
 }
@@ -224,7 +224,7 @@ impl Visitable<'_, bool> for PriorityStatement {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Start {
     And(AndStatement),
     Or(OrStatement),
@@ -262,11 +262,7 @@ mod tests {
     fn type_node() {
         let n = TypeNode {};
         assert_eq!(
-            n.visit(
-                TEST_VALUES1.0,
-                TEST_VALUES1.1,
-                TEST_VALUES1.2
-            ),
+            n.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2),
             TEST_VALUES1.0
         );
     }
@@ -275,11 +271,7 @@ mod tests {
     fn scope_node_empty() {
         let n = ScopeNode {};
         assert_eq!(
-            n.visit(
-                TEST_VALUES2.0,
-                TEST_VALUES2.1,
-                TEST_VALUES2.2
-            ),
+            n.visit(TEST_VALUES2.0, TEST_VALUES2.1, TEST_VALUES2.2),
             None
         );
     }
@@ -288,11 +280,7 @@ mod tests {
     fn scope_node() {
         let n = ScopeNode {};
         assert_eq!(
-            n.visit(
-                TEST_VALUES1.0,
-                TEST_VALUES1.1,
-                TEST_VALUES1.2
-            ),
+            n.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2),
             Some("scope")
         );
     }
@@ -300,21 +288,13 @@ mod tests {
     #[test]
     fn breaking_node() {
         let n = BreakingNode {};
-        assert!(n.visit(
-            TEST_VALUES1.0,
-            TEST_VALUES1.1,
-            TEST_VALUES1.2
-        ));
+        assert!(n.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2));
     }
 
     #[test]
     fn not_breaking_node() {
         let n = BreakingNode {};
-        assert!(!n.visit(
-            TEST_VALUES3.0,
-            TEST_VALUES3.1,
-            TEST_VALUES3.2
-        ));
+        assert!(!n.visit(TEST_VALUES3.0, TEST_VALUES3.1, TEST_VALUES3.2));
     }
 
     #[test]
@@ -323,11 +303,7 @@ mod tests {
             value: "literal".to_string(),
         };
         assert_eq!(
-            n.visit(
-                TEST_VALUES1.0,
-                TEST_VALUES1.1,
-                TEST_VALUES1.2
-            ),
+            n.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2),
             "literal".to_string()
         );
     }
@@ -342,11 +318,7 @@ mod tests {
             ],
         };
         assert_eq!(
-            n.visit(
-                TEST_VALUES1.0,
-                TEST_VALUES1.1,
-                TEST_VALUES1.2
-            ),
+            n.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2),
             vec![
                 "test1".to_string(),
                 "test2".to_string(),
@@ -364,11 +336,7 @@ mod tests {
                 values: vec!["type".to_string()],
             },
         };
-        assert!(n.visit(
-            TEST_VALUES1.0,
-            TEST_VALUES1.1,
-            TEST_VALUES1.2
-        ));
+        assert!(n.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2));
     }
 
     #[test]
@@ -379,11 +347,7 @@ mod tests {
                 values: vec!["test".to_string()],
             },
         };
-        assert!(!n.visit(
-            TEST_VALUES1.0,
-            TEST_VALUES1.1,
-            TEST_VALUES1.2
-        ));
+        assert!(!n.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2));
     }
 
     #[test]
@@ -394,11 +358,7 @@ mod tests {
                 values: vec!["scope".to_string()],
             },
         };
-        assert!(n.visit(
-            TEST_VALUES1.0,
-            TEST_VALUES1.1,
-            TEST_VALUES1.2
-        ));
+        assert!(n.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2));
     }
 
     #[test]
@@ -409,11 +369,7 @@ mod tests {
                 values: vec!["test".to_string()],
             },
         };
-        assert!(!n.visit(
-            TEST_VALUES1.0,
-            TEST_VALUES1.1,
-            TEST_VALUES1.2
-        ));
+        assert!(!n.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2));
     }
 
     #[test]
@@ -424,11 +380,7 @@ mod tests {
                 values: vec!["test".to_string()],
             },
         };
-        assert!(!n.visit(
-            TEST_VALUES2.0,
-            TEST_VALUES2.1,
-            TEST_VALUES2.2
-        ));
+        assert!(!n.visit(TEST_VALUES2.0, TEST_VALUES2.1, TEST_VALUES2.2));
     }
 
     // BasicStatement
@@ -440,79 +392,36 @@ mod tests {
                 values: vec!["test".to_string()],
             },
         };
-        let s = BasicStatement::In(InNode {
-            object: ObjectNode::Scope(ScopeNode {}),
-            array: ArrayNode {
-                values: vec!["test".to_string()],
-            },
-        });
+        let s = BasicStatement::In(n.clone());
         assert_eq!(
-            n.visit(
-                TEST_VALUES1.0,
-                TEST_VALUES1.1,
-                TEST_VALUES1.2
-            ),
-            s.visit(
-                TEST_VALUES1.0,
-                TEST_VALUES1.1,
-                TEST_VALUES1.2
-            )
+            n.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2),
+            s.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2)
         );
     }
 
     #[test]
     fn basic_statement_breaking_node() {
         let n = BreakingNode {};
-        let s = BasicStatement::Breaking(BreakingNode {});
+        let s = BasicStatement::Breaking(n.clone());
         assert_eq!(
-            n.visit(
-                TEST_VALUES1.0,
-                TEST_VALUES1.1,
-                TEST_VALUES1.2
-            ),
-            s.visit(
-                TEST_VALUES1.0,
-                TEST_VALUES1.1,
-                TEST_VALUES1.2
-            )
+            n.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2),
+            s.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2)
         );
     }
 
     // FirstAndValue
     #[test]
     fn first_and_value_basic() {
-        let n = FirstAndValue::Basic(BasicStatement::Breaking(BreakingNode {}));
         let s = BasicStatement::Breaking(BreakingNode {});
+        let n = FirstAndValue::Basic(s.clone());
         assert_eq!(
-            n.visit(
-                TEST_VALUES1.0,
-                TEST_VALUES1.1,
-                TEST_VALUES1.2
-            ),
-            s.visit(
-                TEST_VALUES1.0,
-                TEST_VALUES1.1,
-                TEST_VALUES1.2
-            )
+            n.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2),
+            s.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2)
         );
     }
 
     #[test]
     fn first_and_value_priority() {
-        let n = FirstAndValue::Priority(Box::new(PriorityStatement {
-            internal_node: OrStatement {
-                left: FirstOrValue::And(AndStatement {
-                    left: FirstAndValue::Basic(BasicStatement::Breaking(BreakingNode {})),
-                    right: SecondAndValue::Basic(BasicStatement::In(InNode {
-                        object: ObjectNode::Type(TypeNode {}),
-                        array: ArrayNode {
-                            values: vec!["test".to_string()],
-                        },
-                    })),
-                }),
-                right: SecondOrValue::Basic(BasicStatement::Breaking(BreakingNode {})),
-            },
-        }));
         let s = PriorityStatement {
             internal_node: OrStatement {
                 left: FirstOrValue::And(AndStatement {
@@ -527,54 +436,25 @@ mod tests {
                 right: SecondOrValue::Basic(BasicStatement::Breaking(BreakingNode {})),
             },
         };
+        let n = FirstAndValue::Priority(Box::new(s.clone()));
         assert_eq!(
-            n.visit(
-                TEST_VALUES1.0,
-                TEST_VALUES1.1,
-                TEST_VALUES1.2
-            ),
-            s.visit(
-                TEST_VALUES1.0,
-                TEST_VALUES1.1,
-                TEST_VALUES1.2
-            )
+            n.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2),
+            s.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2)
         );
     }
     // SecondAndValue
     #[test]
     fn second_and_value_basic() {
-        let n = SecondAndValue::Basic(BasicStatement::Breaking(BreakingNode {}));
         let s = BasicStatement::Breaking(BreakingNode {});
+        let n = SecondAndValue::Basic(s.clone());
         assert_eq!(
-            n.visit(
-                TEST_VALUES1.0,
-                TEST_VALUES1.1,
-                TEST_VALUES1.2
-            ),
-            s.visit(
-                TEST_VALUES1.0,
-                TEST_VALUES1.1,
-                TEST_VALUES1.2
-            )
+            n.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2),
+            s.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2)
         );
     }
 
     #[test]
     fn second_and_value_priority() {
-        let n = SecondAndValue::Priority(Box::new(PriorityStatement {
-            internal_node: OrStatement {
-                left: FirstOrValue::And(AndStatement {
-                    left: FirstAndValue::Basic(BasicStatement::Breaking(BreakingNode {})),
-                    right: SecondAndValue::Basic(BasicStatement::In(InNode {
-                        object: ObjectNode::Type(TypeNode {}),
-                        array: ArrayNode {
-                            values: vec!["test".to_string()],
-                        },
-                    })),
-                }),
-                right: SecondOrValue::Basic(BasicStatement::Breaking(BreakingNode {})),
-            },
-        }));
         let s = PriorityStatement {
             internal_node: OrStatement {
                 left: FirstOrValue::And(AndStatement {
@@ -589,31 +469,15 @@ mod tests {
                 right: SecondOrValue::Basic(BasicStatement::Breaking(BreakingNode {})),
             },
         };
+        let n = SecondAndValue::Priority(Box::new(s.clone()));
         assert_eq!(
-            n.visit(
-                TEST_VALUES1.0,
-                TEST_VALUES1.1,
-                TEST_VALUES1.2
-            ),
-            s.visit(
-                TEST_VALUES1.0,
-                TEST_VALUES1.1,
-                TEST_VALUES1.2
-            )
+            n.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2),
+            s.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2)
         );
     }
 
     #[test]
     fn second_and_value_and() {
-        let v = SecondAndValue::And(Box::new(AndStatement {
-            left: FirstAndValue::Basic(BasicStatement::Breaking(BreakingNode {})),
-            right: SecondAndValue::Basic(BasicStatement::In(InNode {
-                object: ObjectNode::Type(TypeNode {}),
-                array: ArrayNode {
-                    values: vec!["test".to_string()],
-                },
-            })),
-        }));
         let s = AndStatement {
             left: FirstAndValue::Basic(BasicStatement::Breaking(BreakingNode {})),
             right: SecondAndValue::Basic(BasicStatement::In(InNode {
@@ -623,31 +487,15 @@ mod tests {
                 },
             })),
         };
+        let v = SecondAndValue::And(Box::new(s.clone()));
         assert_eq!(
-            v.visit(
-                TEST_VALUES1.0,
-                TEST_VALUES1.1,
-                TEST_VALUES1.2
-            ),
-            s.visit(
-                TEST_VALUES1.0,
-                TEST_VALUES1.1,
-                TEST_VALUES1.2
-            )
+            v.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2),
+            s.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2)
         );
     }
     // AndStatement
     #[test]
     fn and_statement() {
-        let s = AndStatement {
-            left: FirstAndValue::Basic(BasicStatement::Breaking(BreakingNode {})),
-            right: SecondAndValue::Basic(BasicStatement::In(InNode {
-                object: ObjectNode::Type(TypeNode {}),
-                array: ArrayNode {
-                    values: vec!["test".to_string()],
-                },
-            })),
-        };
         let a1 = FirstAndValue::Basic(BasicStatement::Breaking(BreakingNode {}));
         let a2 = SecondAndValue::Basic(BasicStatement::In(InNode {
             object: ObjectNode::Type(TypeNode {}),
@@ -655,54 +503,30 @@ mod tests {
                 values: vec!["test".to_string()],
             },
         }));
+        let s = AndStatement {
+            left: a1.clone(),
+            right: a2.clone(),
+        };
 
         assert_eq!(
-            s.visit(
-                TEST_VALUES1.0,
-                TEST_VALUES1.1,
-                TEST_VALUES1.2
-            ),
-            a1.visit(
-                TEST_VALUES1.0,
-                TEST_VALUES1.1,
-                TEST_VALUES1.2
-            ) && a2.visit(
-                TEST_VALUES1.0,
-                TEST_VALUES1.1,
-                TEST_VALUES1.2
-            )
+            s.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2),
+            a1.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2)
+                && a2.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2)
         );
     }
     // FirstOrValue
     #[test]
     fn first_or_value_basic() {
-        let n = FirstOrValue::Basic(BasicStatement::Breaking(BreakingNode {}));
         let s = BasicStatement::Breaking(BreakingNode {});
+        let n = FirstOrValue::Basic(s.clone());
         assert_eq!(
-            n.visit(
-                TEST_VALUES1.0,
-                TEST_VALUES1.1,
-                TEST_VALUES1.2
-            ),
-            s.visit(
-                TEST_VALUES1.0,
-                TEST_VALUES1.1,
-                TEST_VALUES1.2
-            )
+            n.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2),
+            s.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2)
         );
     }
 
     #[test]
     fn first_or_value_and() {
-        let v = FirstOrValue::And(AndStatement {
-            left: FirstAndValue::Basic(BasicStatement::Breaking(BreakingNode {})),
-            right: SecondAndValue::Basic(BasicStatement::In(InNode {
-                object: ObjectNode::Type(TypeNode {}),
-                array: ArrayNode {
-                    values: vec!["test".to_string()],
-                },
-            })),
-        });
         let s = AndStatement {
             left: FirstAndValue::Basic(BasicStatement::Breaking(BreakingNode {})),
             right: SecondAndValue::Basic(BasicStatement::In(InNode {
@@ -712,48 +536,24 @@ mod tests {
                 },
             })),
         };
+        let v = FirstOrValue::And(s.clone());
         assert_eq!(
-            v.visit(
-                TEST_VALUES1.0,
-                TEST_VALUES1.1,
-                TEST_VALUES1.2
-            ),
-            s.visit(
-                TEST_VALUES1.0,
-                TEST_VALUES1.1,
-                TEST_VALUES1.2
-            )
+            v.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2),
+            s.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2)
         );
     }
     // SecondOrValue
     #[test]
     fn second_or_value_basic() {
-        let n = SecondOrValue::Basic(BasicStatement::Breaking(BreakingNode {}));
         let s = BasicStatement::Breaking(BreakingNode {});
+        let n = SecondOrValue::Basic(s.clone());
         assert_eq!(
-            n.visit(
-                TEST_VALUES1.0,
-                TEST_VALUES1.1,
-                TEST_VALUES1.2
-            ),
-            s.visit(
-                TEST_VALUES1.0,
-                TEST_VALUES1.1,
-                TEST_VALUES1.2
-            )
+            n.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2),
+            s.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2)
         );
     }
     #[test]
     fn second_or_value_and() {
-        let v = SecondOrValue::And(AndStatement {
-            left: FirstAndValue::Basic(BasicStatement::Breaking(BreakingNode {})),
-            right: SecondAndValue::Basic(BasicStatement::In(InNode {
-                object: ObjectNode::Type(TypeNode {}),
-                array: ArrayNode {
-                    values: vec!["test".to_string()],
-                },
-            })),
-        });
         let s = AndStatement {
             left: FirstAndValue::Basic(BasicStatement::Breaking(BreakingNode {})),
             right: SecondAndValue::Basic(BasicStatement::In(InNode {
@@ -763,33 +563,14 @@ mod tests {
                 },
             })),
         };
+        let v = SecondOrValue::And(s.clone());
         assert_eq!(
-            v.visit(
-                TEST_VALUES1.0,
-                TEST_VALUES1.1,
-                TEST_VALUES1.2
-            ),
-            s.visit(
-                TEST_VALUES1.0,
-                TEST_VALUES1.1,
-                TEST_VALUES1.2
-            )
+            v.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2),
+            s.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2)
         );
     }
     #[test]
     fn second_or_value_or() {
-        let v = SecondOrValue::Or(Box::new(OrStatement {
-            left: FirstOrValue::And(AndStatement {
-                left: FirstAndValue::Basic(BasicStatement::Breaking(BreakingNode {})),
-                right: SecondAndValue::Basic(BasicStatement::In(InNode {
-                    object: ObjectNode::Type(TypeNode {}),
-                    array: ArrayNode {
-                        values: vec!["test".to_string()],
-                    },
-                })),
-            }),
-            right: SecondOrValue::Basic(BasicStatement::Breaking(BreakingNode {})),
-        }));
         let s = OrStatement {
             left: FirstOrValue::And(AndStatement {
                 left: FirstAndValue::Basic(BasicStatement::Breaking(BreakingNode {})),
@@ -802,35 +583,15 @@ mod tests {
             }),
             right: SecondOrValue::Basic(BasicStatement::Breaking(BreakingNode {})),
         };
+        let v = SecondOrValue::Or(Box::new(s.clone()));
         assert_eq!(
-            v.visit(
-                TEST_VALUES1.0,
-                TEST_VALUES1.1,
-                TEST_VALUES1.2
-            ),
-            s.visit(
-                TEST_VALUES1.0,
-                TEST_VALUES1.1,
-                TEST_VALUES1.2
-            )
+            v.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2),
+            s.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2)
         );
     }
     // OrStatement
     #[test]
     fn or_statement() {
-        let s = OrStatement {
-            left: FirstOrValue::And(AndStatement {
-                left: FirstAndValue::Basic(BasicStatement::Breaking(BreakingNode {})),
-                right: SecondAndValue::Basic(BasicStatement::In(InNode {
-                    object: ObjectNode::Type(TypeNode {}),
-                    array: ArrayNode {
-                        values: vec!["test".to_string()],
-                    },
-                })),
-            }),
-            right: SecondOrValue::Basic(BasicStatement::Breaking(BreakingNode {})),
-        };
-
         let o1 = FirstOrValue::And(AndStatement {
             left: FirstAndValue::Basic(BasicStatement::Breaking(BreakingNode {})),
             right: SecondAndValue::Basic(BasicStatement::In(InNode {
@@ -842,41 +603,20 @@ mod tests {
         });
 
         let o2 = SecondOrValue::Basic(BasicStatement::Breaking(BreakingNode {}));
+        let s = OrStatement {
+            left: o1.clone(),
+            right: o2.clone(),
+        };
         assert_eq!(
-            s.visit(
-                TEST_VALUES1.0,
-                TEST_VALUES1.1,
-                TEST_VALUES1.2
-            ),
-            o1.visit(
-                TEST_VALUES1.0,
-                TEST_VALUES1.1,
-                TEST_VALUES1.2
-            ) || o2.visit(
-                TEST_VALUES1.0,
-                TEST_VALUES1.1,
-                TEST_VALUES1.2
-            )
+            s.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2),
+            o1.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2)
+                || o2.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2)
         );
     }
 
     // PriorityStatement
     #[test]
     fn priority_statement() {
-        let p = PriorityStatement {
-            internal_node: OrStatement {
-                left: FirstOrValue::And(AndStatement {
-                    left: FirstAndValue::Basic(BasicStatement::Breaking(BreakingNode {})),
-                    right: SecondAndValue::Basic(BasicStatement::In(InNode {
-                        object: ObjectNode::Type(TypeNode {}),
-                        array: ArrayNode {
-                            values: vec!["test".to_string()],
-                        },
-                    })),
-                }),
-                right: SecondOrValue::Basic(BasicStatement::Breaking(BreakingNode {})),
-            },
-        };
         let s = OrStatement {
             left: FirstOrValue::And(AndStatement {
                 left: FirstAndValue::Basic(BasicStatement::Breaking(BreakingNode {})),
@@ -889,32 +629,18 @@ mod tests {
             }),
             right: SecondOrValue::Basic(BasicStatement::Breaking(BreakingNode {})),
         };
+        let p = PriorityStatement {
+            internal_node: s.clone(),
+        };
 
         assert_eq!(
-            s.visit(
-                TEST_VALUES1.0,
-                TEST_VALUES1.1,
-                TEST_VALUES1.2
-            ),
-            p.visit(
-                TEST_VALUES1.0,
-                TEST_VALUES1.1,
-                TEST_VALUES1.2
-            )
+            s.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2),
+            p.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2)
         );
     }
     // Start
     #[test]
     fn start_and() {
-        let s = Start::And(AndStatement {
-            left: FirstAndValue::Basic(BasicStatement::Breaking(BreakingNode {})),
-            right: SecondAndValue::Basic(BasicStatement::In(InNode {
-                object: ObjectNode::Type(TypeNode {}),
-                array: ArrayNode {
-                    values: vec!["test".to_string()],
-                },
-            })),
-        });
         let a = AndStatement {
             left: FirstAndValue::Basic(BasicStatement::Breaking(BreakingNode {})),
             right: SecondAndValue::Basic(BasicStatement::In(InNode {
@@ -924,34 +650,15 @@ mod tests {
                 },
             })),
         };
+        let s = Start::And(a.clone());
         assert_eq!(
-            s.visit(
-                TEST_VALUES1.0,
-                TEST_VALUES1.1,
-                TEST_VALUES1.2
-            ),
-            a.visit(
-                TEST_VALUES1.0,
-                TEST_VALUES1.1,
-                TEST_VALUES1.2
-            )
+            s.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2),
+            a.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2)
         );
     }
 
     #[test]
     fn start_or() {
-        let s = Start::Or(OrStatement {
-            left: FirstOrValue::And(AndStatement {
-                left: FirstAndValue::Basic(BasicStatement::Breaking(BreakingNode {})),
-                right: SecondAndValue::Basic(BasicStatement::In(InNode {
-                    object: ObjectNode::Type(TypeNode {}),
-                    array: ArrayNode {
-                        values: vec!["test".to_string()],
-                    },
-                })),
-            }),
-            right: SecondOrValue::Basic(BasicStatement::Breaking(BreakingNode {})),
-        });
         let a = OrStatement {
             left: FirstOrValue::And(AndStatement {
                 left: FirstAndValue::Basic(BasicStatement::Breaking(BreakingNode {})),
@@ -964,35 +671,20 @@ mod tests {
             }),
             right: SecondOrValue::Basic(BasicStatement::Breaking(BreakingNode {})),
         };
+        let s = Start::Or(a.clone());
         assert_eq!(
-            s.visit(
-                TEST_VALUES1.0,
-                TEST_VALUES1.1,
-                TEST_VALUES1.2
-            ),
-            a.visit(
-                TEST_VALUES1.0,
-                TEST_VALUES1.1,
-                TEST_VALUES1.2
-            )
+            s.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2),
+            a.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2)
         );
     }
 
     #[test]
     fn start_basic() {
-        let s = Start::Basic(BasicStatement::Breaking(BreakingNode {}));
         let b = BasicStatement::Breaking(BreakingNode {});
+        let s = Start::Basic(b.clone());
         assert_eq!(
-            s.visit(
-                TEST_VALUES1.0,
-                TEST_VALUES1.1,
-                TEST_VALUES1.2
-            ),
-            b.visit(
-                TEST_VALUES1.0,
-                TEST_VALUES1.1,
-                TEST_VALUES1.2
-            )
+            s.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2),
+            b.visit(TEST_VALUES1.0, TEST_VALUES1.1, TEST_VALUES1.2)
         );
     }
 }
