@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{rc::Rc, str::FromStr};
 
 use crate::{
     application::manager::version_ingress_manager::VersionIngressManager,
@@ -22,20 +22,20 @@ impl<'a, 'b: 'a> SemanticVersionIngressRepositoryImpl<'a> {
 }
 
 impl SemanticVersionIngressRepository for SemanticVersionIngressRepositoryImpl<'_> {
-    fn last_version(&self) -> Result<Option<SemanticVersion>, AnyError> {
+    fn last_version(&self) -> Result<Rc<Option<SemanticVersion>>, AnyError> {
         let version = self.version_ingress_manager.last_version()?;
         Ok(match version {
             Some(s) => Some(SemanticVersion::from_str(&s)?),
             None => None,
-        })
+        }.into())
     }
 
-    fn last_stable_version(&self) -> Result<Option<SemanticVersion>, AnyError> {
+    fn last_stable_version(&self) -> Result<Rc<Option<SemanticVersion>>, AnyError> {
         let version = self.version_ingress_manager.last_stable_version()?;
         Ok(match version {
             Some(v) => Some(SemanticVersion::from_str(&v)?),
             None => None,
-        })
+        }.into())
     }
 }
 
@@ -95,7 +95,7 @@ mod tests {
         let expected = SemanticVersion::new(0, 1, 0, Some("dev1".to_string()), None);
         assert!(repository
             .last_version()
-            .is_ok_and(|it| it.is_some_and(|v| v == expected)));
+            .is_ok_and(|it| it.as_ref().clone().is_some_and(|v| v == expected)));
     }
 
     #[test]
@@ -116,7 +116,7 @@ mod tests {
         let expected = SemanticVersion::new(0, 1, 0, None, None);
         assert!(repository
             .last_stable_version()
-            .is_ok_and(|it| it.is_some_and(|v| v == expected)));
+            .is_ok_and(|it| it.as_ref().clone().is_some_and(|v| v == expected)));
     }
 
     #[test]

@@ -106,7 +106,7 @@ impl<'a, 'b: 'a, 'c: 'a, 'd: 'a> ChangelogController<'a> {
 
 #[cfg(test)]
 mod tests {
-    use std::{error::Error, fmt::Display};
+    use std::{error::Error, fmt::Display, rc::Rc};
 
     use crate::{
         application::{
@@ -128,7 +128,7 @@ mod tests {
     impl BoundedCommitSummaryIngressManager for MockCommitRetriever {
         fn get_commits_from(
             &self,
-            _version: Option<&SemanticVersion>,
+            _version: Rc<Option<SemanticVersion>>,
         ) -> Result<Box<dyn DoubleEndedIterator<Item = String>>, AnyError> {
             Ok(Box::new(
                 vec![

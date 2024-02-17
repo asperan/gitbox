@@ -1,4 +1,4 @@
-use std::{process::Command, str::FromStr};
+use std::{process::Command, rc::Rc, str::FromStr};
 
 use crate::{
     application::{
@@ -76,11 +76,11 @@ impl FullCommitSummaryHistoryIngressManager for GitCli {
 impl BoundedCommitSummaryIngressManager for GitCli {
     fn get_commits_from(
         &self,
-        version: Option<&SemanticVersion>,
+        version: Rc<Option<SemanticVersion>>,
     ) -> Result<Box<dyn DoubleEndedIterator<Item = String>>, AnyError> {
         let mut args = vec!["log", "--pretty=format:%s"];
         let mut _s = String::new();
-        if let Some(value) = version {
+        if let Some(value) = version.as_ref() {
             _s = format!("^{}", value);
             args.push(&_s);
             args.push("HEAD");

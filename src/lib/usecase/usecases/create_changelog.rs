@@ -43,17 +43,17 @@ impl UseCase<String> for CreateChangelogUseCase<'_> {
         } else {
             self.version_repository.last_stable_version()?
         };
-        let commit_list = self.commit_repository.get_commits_from(from_version.as_ref())?;
+        let commit_list = self.commit_repository.get_commits_from(from_version.clone())?;
 
         let type_map = categorize_commit_list(commit_list, self.configuration.exclude_trigger());
         let text = format_types(self.configuration.format(), &type_map);
-        let title = format_title(self.configuration.format(), &from_version);
+        let title = format_title(self.configuration.format(), from_version.as_ref().as_ref());
         Ok(format!("{}\n{}", title, text))
     }
 }
 
 #[inline(always)]
-fn format_title(format: &ChangelogFormat, version: &Option<SemanticVersion>) -> String {
+fn format_title(format: &ChangelogFormat, version: Option<&SemanticVersion>) -> String {
     let title = match version {
         Some(v) => format!("Changes from version {}", v),
         None => "Latest changes".to_string(),
@@ -214,6 +214,8 @@ fn scope_or_general(s: &Option<String>) -> String {
 
 #[cfg(test)]
 mod tests {
+
+    use std::rc::Rc;
 
     use ahash::AHashMap;
 
@@ -605,14 +607,14 @@ mod tests {
     #[test]
     fn format_title_basic() {
         let v = Some(SemanticVersion::new(0, 1, 0, None, None));
-        let s = format_title(&format(), &v);
+        let s = format_title(&format(), v.as_ref());
         assert_eq!(s, "# Changes from version 0.1.0");
     }
 
     #[test]
     fn format_title_empty_version() {
         let v = None;
-        let s = format_title(&format(), &v);
+        let s = format_title(&format(), v);
         assert_eq!(s, "# Latest changes");
     }
 
@@ -621,7 +623,7 @@ mod tests {
     impl BoundedCommitSummaryIngressRepository for MockCommitRepository {
         fn get_commits_from(
             &self,
-            _version: Option<&SemanticVersion>,
+            _version: Rc<Option<SemanticVersion>>,
         ) -> Result<Box<dyn DoubleEndedIterator<Item = CommitSummary>>, AnyError> {
             Ok(Box::new(
                 commit_list()
@@ -634,18 +636,18 @@ mod tests {
     struct MockVersionRepository {}
 
     impl SemanticVersionIngressRepository for MockVersionRepository {
-        fn last_version(&self) -> Result<Option<SemanticVersion>, AnyError> {
+        fn last_version(&self) -> Result<Rc<Option<SemanticVersion>>, AnyError> {
             Ok(Some(SemanticVersion::new(
                 0,
                 1,
                 0,
                 Some("dev1".to_string()),
                 None,
-            )))
+            )).into())
         }
 
-        fn last_stable_version(&self) -> Result<Option<SemanticVersion>, AnyError> {
-            Ok(Some(SemanticVersion::new(0, 1, 0, None, None)))
+        fn last_stable_version(&self) -> Result<Rc<Option<SemanticVersion>>, AnyError> {
+            Ok(Some(SemanticVersion::new(0, 1, 0, None, None)).into())
         }
     }
 

@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use crate::{
     domain::{commit_summary::CommitSummary, semantic_version::SemanticVersion},
     usecase::{
@@ -29,7 +31,7 @@ impl UseCase<(SemanticVersion, Option<SemanticVersion>)> for CalculateNewVersion
             self.version_repository.last_stable_version()
         }?;
         let new_version = {
-            let stable_version = self.next_stable(&base_version)?;
+            let stable_version = self.next_stable(base_version.clone())?;
             let prerelease = if self.configuration.prerelease().is_active() {
                 Some(self.update_prerelease(&stable_version)?)
             } else {
@@ -44,7 +46,7 @@ impl UseCase<(SemanticVersion, Option<SemanticVersion>)> for CalculateNewVersion
                 metadata,
             )
         };
-        Ok((new_version, base_version))
+        Ok((new_version, base_version.as_ref().clone()))
     }
 }
 
@@ -64,10 +66,10 @@ impl<'a, 'b: 'a, 'c: 'a, 'd: 'a> CalculateNewVersionUseCase<'a> {
     }
 
     #[inline]
-    fn greatest_change_from(&self, version: &Option<SemanticVersion>) -> Result<Change, AnyError> {
+    fn greatest_change_from(&self, version: Rc<Option<SemanticVersion>>) -> Result<Change, AnyError> {
         Ok(self
             .commit_summary_repository
-            .get_commits_from(version.as_ref())?
+            .get_commits_from(version)?
             .map(|it| self.commit_to_change(&it))
             .max()
             .unwrap_or(Change::None))
@@ -107,13 +109,13 @@ impl<'a, 'b: 'a, 'c: 'a, 'd: 'a> CalculateNewVersionUseCase<'a> {
     #[inline]
     fn next_stable(
         &self,
-        base_version: &Option<SemanticVersion>,
+        base_version: Rc<Option<SemanticVersion>>,
     ) -> Result<StableVersion, AnyError> {
         Ok(if base_version.is_none() {
             StableVersion::first_stable()
         } else {
-            let greatest_change = self.greatest_change_from(base_version)?;
-            let base_version = base_version
+            let greatest_change = self.greatest_change_from(base_version.clone())?;
+            let base_version = base_version.as_ref()
                 .as_ref()
                 .expect("base version must be present in this branch");
             match greatest_change {
@@ -144,7 +146,7 @@ impl<'a, 'b: 'a, 'c: 'a, 'd: 'a> CalculateNewVersionUseCase<'a> {
     #[inline]
     fn update_prerelease(&self, next_stable: &StableVersion) -> Result<String, AnyError> {
         let last_version = self.version_repository.last_version()?;
-        let is_stable_updated = match &last_version {
+        let is_stable_updated = match last_version.as_ref() {
             Some(old) => {
                 next_stable.major != old.major()
                     || next_stable.minor != old.minor()
@@ -153,8 +155,7 @@ impl<'a, 'b: 'a, 'c: 'a, 'd: 'a> CalculateNewVersionUseCase<'a> {
             None => true,
         };
         if !is_stable_updated
-            && last_version
-                .as_ref()
+            && last_version.as_ref().as_ref()
                 .is_some_and(|it| it.prerelease().is_none())
         {
             Err(Box::new(DescribeNoRelevantChangesError::new()))
@@ -165,7 +166,7 @@ impl<'a, 'b: 'a, 'c: 'a, 'd: 'a> CalculateNewVersionUseCase<'a> {
                 // Reset number
                 1
             } else {
-                let semantic_version = last_version.expect("stable is not updated, so last version is bound to exist");
+                let semantic_version = last_version.as_ref().as_ref().expect("stable is not updated, so last version is bound to exist");
                 let last_version_prerelease = semantic_version.prerelease().expect("prerelease is present, else this function would have returned an error already");
                 let old_prerelease_number =
                     self.configuration.prerelease().old_pattern()(last_version_prerelease);
@@ -221,6 +222,8 @@ impl StableVersion {
 
 #[cfg(test)]
 mod tests {
+
+    use std::rc::Rc;
 
     use crate::{
         domain::{
@@ -306,10 +309,10 @@ mod tests {
     impl BoundedCommitSummaryIngressRepository for MockCommitSummaryRepository {
         fn get_commits_from(
             &self,
-            version: Option<&SemanticVersion>,
+            version: Rc<Option<SemanticVersion>>,
         ) -> Result<Box<dyn DoubleEndedIterator<Item = CommitSummary>>, AnyError> {
             Ok(Box::new(
-                if version.as_ref().is_some_and(|it| it.prerelease().is_some()) {
+                if version.as_ref().clone().is_some_and(|it| it.prerelease().is_some()) {
                     let mut full = self.commit_list.clone();
                     full.append(self.from_prerelease.clone().as_mut());
                     full.into_iter()
@@ -332,16 +335,16 @@ mod tests {
     }
 
     struct MockVersionRepository {
-        stable_version: Option<SemanticVersion>,
-        last_version: Option<SemanticVersion>,
+        stable_version: Rc<Option<SemanticVersion>>,
+        last_version: Rc<Option<SemanticVersion>>,
     }
 
     impl SemanticVersionIngressRepository for MockVersionRepository {
-        fn last_version(&self) -> Result<Option<SemanticVersion>, AnyError> {
+        fn last_version(&self) -> Result<Rc<Option<SemanticVersion>>, AnyError> {
             Ok(self.last_version.clone())
         }
 
-        fn last_stable_version(&self) -> Result<Option<SemanticVersion>, AnyError> {
+        fn last_stable_version(&self) -> Result<Rc<Option<SemanticVersion>>, AnyError> {
             Ok(self.stable_version.clone())
         }
     }
@@ -375,8 +378,8 @@ mod tests {
         );
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
-            stable_version: None,
-            last_version: None,
+            stable_version: None.into(),
+            last_version: None.into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,
@@ -385,7 +388,7 @@ mod tests {
             &version_repository,
         );
         let result = usecase
-            .greatest_change_from(&Some(SemanticVersion::new(0, 1, 0, None, None)))
+            .greatest_change_from(Some(SemanticVersion::new(0, 1, 0, None, None)).into())
             .expect(
                 "greatest_change_from can only fail during commit list retrieval, which is mocked",
             );
@@ -398,8 +401,8 @@ mod tests {
         let commit_summary_repository = MockCommitSummaryRepository::new(vec![], vec![]);
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
-            stable_version: None,
-            last_version: None,
+            stable_version: None.into(),
+            last_version: None.into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,
@@ -408,7 +411,7 @@ mod tests {
             &version_repository,
         );
         let result = usecase
-            .greatest_change_from(&Some(SemanticVersion::new(0, 1, 0, None, None)))
+            .greatest_change_from(Some(SemanticVersion::new(0, 1, 0, None, None)).into())
             .expect(
                 "greatest_change_from can only fail during commit list retrieval, which is mocked",
             );
@@ -421,8 +424,8 @@ mod tests {
         let commit_summary_repository = MockCommitSummaryRepository::new(vec![], vec![]);
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
-            stable_version: None,
-            last_version: None,
+            stable_version: None.into(),
+            last_version: None.into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,
@@ -441,8 +444,8 @@ mod tests {
         let commit_summary_repository = MockCommitSummaryRepository::new(vec![], vec![]);
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
-            stable_version: None,
-            last_version: None,
+            stable_version: None.into(),
+            last_version: None.into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,
@@ -466,8 +469,8 @@ mod tests {
         let commit_summary_repository = MockCommitSummaryRepository::new(vec![], vec![]);
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
-            stable_version: None,
-            last_version: None,
+            stable_version: None.into(),
+            last_version: None.into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,
@@ -491,8 +494,8 @@ mod tests {
         let commit_summary_repository = MockCommitSummaryRepository::new(vec![], vec![]);
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
-            stable_version: None,
-            last_version: None,
+            stable_version: None.into(),
+            last_version: None.into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,
@@ -516,8 +519,8 @@ mod tests {
         let commit_summary_repository = MockCommitSummaryRepository::new(vec![], vec![]);
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
-            stable_version: None,
-            last_version: None,
+            stable_version: None.into(),
+            last_version: None.into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,
@@ -542,8 +545,8 @@ mod tests {
         let commit_summary_repository = MockCommitSummaryRepository::new(vec![], vec![]);
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
-            stable_version: None,
-            last_version: None,
+            stable_version: None.into(),
+            last_version: None.into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,
@@ -575,8 +578,8 @@ mod tests {
         let commit_summary_repository = MockCommitSummaryRepository::new(vec![], vec![]);
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
-            stable_version: None,
-            last_version: None,
+            stable_version: None.into(),
+            last_version: None.into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,
@@ -624,8 +627,8 @@ mod tests {
         );
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
-            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)),
-            last_version: None,
+            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)).into(),
+            last_version: None.into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,
@@ -670,8 +673,8 @@ mod tests {
         );
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
-            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)),
-            last_version: None,
+            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)).into(),
+            last_version: None.into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,
@@ -716,8 +719,8 @@ mod tests {
         );
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
-            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)),
-            last_version: None,
+            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)).into(),
+            last_version: None.into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,
@@ -762,8 +765,8 @@ mod tests {
         );
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
-            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)),
-            last_version: None,
+            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)).into(),
+            last_version: None.into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,
@@ -809,14 +812,14 @@ mod tests {
         );
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
-            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)),
+            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)).into(),
             last_version: Some(SemanticVersion::new(
                 0,
                 1,
                 1,
                 Some("alpha1".to_string()),
                 None,
-            )),
+            )).into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,
@@ -867,14 +870,14 @@ mod tests {
         );
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
-            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)),
+            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)).into(),
             last_version: Some(SemanticVersion::new(
                 0,
                 1,
                 1,
                 Some("dev1".to_string()),
                 None,
-            )),
+            )).into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,
@@ -920,8 +923,8 @@ mod tests {
         );
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
-            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)),
-            last_version: Some(SemanticVersion::new(0, 1, 0, None, None)),
+            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)).into(),
+            last_version: Some(SemanticVersion::new(0, 1, 0, None, None)).into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,
@@ -969,14 +972,14 @@ mod tests {
         );
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
-            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)),
+            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)).into(),
             last_version: Some(SemanticVersion::new(
                 0,
                 1,
                 1,
                 Some("dev1".to_string()),
                 None,
-            )),
+            )).into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,
@@ -1016,8 +1019,8 @@ mod tests {
         let commit_summary_repository = MockCommitSummaryRepository::new(vec![], vec![]);
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
-            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)),
-            last_version: None,
+            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)).into(),
+            last_version: None.into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,
@@ -1054,8 +1057,8 @@ mod tests {
         let commit_summary_repository = MockCommitSummaryRepository::new(vec![], vec![]);
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
-            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)),
-            last_version: None,
+            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)).into(),
+            last_version: None.into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,
@@ -1093,8 +1096,8 @@ mod tests {
         let commit_summary_repository = MockCommitSummaryRepository::new(vec![], vec![]);
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
-            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)),
-            last_version: None,
+            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)).into(),
+            last_version: None.into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,

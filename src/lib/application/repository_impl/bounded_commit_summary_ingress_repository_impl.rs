@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{rc::Rc, str::FromStr};
 
 use crate::{
     application::manager::bounded_commit_summary_ingress_manager::BoundedCommitSummaryIngressManager,
@@ -26,7 +26,7 @@ impl<'a, 'b: 'a> BoundedCommitSummaryIngressRepositoryImpl<'a> {
 impl BoundedCommitSummaryIngressRepository for BoundedCommitSummaryIngressRepositoryImpl<'_> {
     fn get_commits_from(
         &self,
-        version: Option<&SemanticVersion>,
+        version: Rc<Option<SemanticVersion>>,
     ) -> Result<Box<dyn DoubleEndedIterator<Item = CommitSummary>>, AnyError> {
         let commit_list = self
             .bounded_commit_summary_ingress_manager
@@ -39,6 +39,8 @@ impl BoundedCommitSummaryIngressRepository for BoundedCommitSummaryIngressReposi
 
 #[cfg(test)]
 mod tests {
+    use std::rc::Rc;
+
     use crate::{
         application::manager::bounded_commit_summary_ingress_manager::BoundedCommitSummaryIngressManager,
         domain::{commit_summary::CommitSummary, semantic_version::SemanticVersion},
@@ -55,7 +57,7 @@ mod tests {
     impl BoundedCommitSummaryIngressManager for MockCommitRetriever {
         fn get_commits_from(
             &self,
-            _version: Option<&SemanticVersion>,
+            _version: Rc<Option<SemanticVersion>>,
         ) -> Result<Box<dyn DoubleEndedIterator<Item = String>>, AnyError> {
             Ok(Box::new(
                 vec!["test freeform", "feat: im conventional"]
@@ -69,7 +71,7 @@ mod tests {
     fn get_commits_from_basic() {
         let mock_commit_retriever = MockCommitRetriever {};
         let repository = BoundedCommitSummaryIngressRepositoryImpl::new(&mock_commit_retriever);
-        let commit_list = repository.get_commits_from(None);
+        let commit_list = repository.get_commits_from(None.into());
         assert!(commit_list.is_ok());
         assert!(commit_list
             .expect("Just asserted its OK-ness")
