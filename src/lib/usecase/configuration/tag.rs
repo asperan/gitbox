@@ -18,7 +18,7 @@ impl TagConfiguration {
         message: Option<String>,
         sign: bool,
     ) -> Result<TagConfiguration, AnyError> {
-        Self::message_checks(&message)?;
+        Self::message_checks(message.as_deref())?;
         Ok(TagConfiguration {
             version,
             message,
@@ -36,7 +36,7 @@ impl TagConfiguration {
         self.sign
     }
 
-    fn message_checks(message: &Option<String>) -> Result<(), TagConfigurationInvariantError> {
+    fn message_checks(message: Option<&str>) -> Result<(), TagConfigurationInvariantError> {
         if message.as_ref().is_some_and(|it| it.is_empty()) {
             Err(TagConfigurationInvariantError::new(
                 "Message cannot be present but empty",
