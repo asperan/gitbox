@@ -33,8 +33,8 @@ impl ChangelogOptions {
         &self.format
     }
 
-    pub fn exclude_trigger(&self) -> &Option<String> {
-        &self.exclude_trigger
+    pub fn exclude_trigger(&self) -> Option<&str> {
+        self.exclude_trigger.as_deref()
     }
 }
 
