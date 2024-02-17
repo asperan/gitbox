@@ -87,18 +87,18 @@ impl<'a, 'b: 'a, 'c: 'a, 'd: 'a> CalculateNewVersionUseCase<'a> {
                     .configuration
                     .triggers()
                     .major()
-                    .accept(c.typ(), c.scope().as_deref(), c.breaking())
+                    .accept(c.typ(), c.scope(), c.breaking())
                 {
                     Change::Major
                 } else if self.configuration.triggers().minor().accept(
                     c.typ(),
-                    c.scope().as_deref(),
+                    c.scope(),
                     c.breaking(),
                 ) {
                     Change::Minor
                 } else if self.configuration.triggers().patch().accept(
                     c.typ(),
-                    c.scope().as_deref(),
+                    c.scope(),
                     c.breaking(),
                 ) {
                     Change::Patch

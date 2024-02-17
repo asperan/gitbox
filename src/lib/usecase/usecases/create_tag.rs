@@ -72,7 +72,7 @@ mod tests {
         ) -> Result<(), AnyError> {
             self.version.replace(version.clone());
             self.message
-                .replace(message.clone().map(|it| it.to_string()));
+                .replace(message.map(|it| it.to_string()));
             self.sign.replace(sign);
             Ok(())
         }

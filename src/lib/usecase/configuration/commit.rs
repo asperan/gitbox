@@ -96,61 +96,61 @@ mod tests {
 
     #[test]
     fn type_invariants_ok() {
-        let t = String::from("type");
-        let result = CommitConfiguration::type_checks(&t);
+        let t = "type";
+        let result = CommitConfiguration::type_checks(t);
         assert!(result.is_ok());
     }
 
     #[test]
     fn type_invariants_wrong() {
-        let t = String::new();
-        let result = CommitConfiguration::type_checks(&t);
+        let t = "";
+        let result = CommitConfiguration::type_checks(t);
         assert!(result.is_err());
     }
 
     #[test]
     fn scope_invariants_ok() {
-        let s1 = Some(String::from("api"));
+        let s1 = Some("api");
         let s2: Option<&str> = None;
-        let result1 = CommitConfiguration::scope_checks(s1.as_deref());
-        let result2 = CommitConfiguration::scope_checks(s2.as_deref());
+        let result1 = CommitConfiguration::scope_checks(s1);
+        let result2 = CommitConfiguration::scope_checks(s2);
         assert!(result1.is_ok() && result2.is_ok());
     }
 
     #[test]
     fn scope_invariants_wrong() {
-        let s = Some(String::new());
-        let result = CommitConfiguration::scope_checks(s.as_deref());
+        let s = Some("");
+        let result = CommitConfiguration::scope_checks(s);
         assert!(result.is_err());
     }
 
     #[test]
     fn summary_invariants_ok() {
-        let s = String::from("add test");
-        let result = CommitConfiguration::summary_checks(&s);
+        let s = "add test";
+        let result = CommitConfiguration::summary_checks(s);
         assert!(result.is_ok());
     }
 
     #[test]
     fn summary_invariants_wrong() {
-        let s = String::new();
-        let result = CommitConfiguration::summary_checks(&s);
+        let s = "";
+        let result = CommitConfiguration::summary_checks(s);
         assert!(result.is_err());
     }
 
     #[test]
     fn message_invariants_ok() {
-        let m1 = Some(String::from("Message body"));
+        let m1 = Some("Message body");
         let m2: Option<&str> = None;
-        let result1 = CommitConfiguration::message_checks(m1.as_deref());
-        let result2 = CommitConfiguration::message_checks(m2.as_deref());
+        let result1 = CommitConfiguration::message_checks(m1);
+        let result2 = CommitConfiguration::message_checks(m2);
         assert!(result1.is_ok() && result2.is_ok());
     }
 
     #[test]
     fn message_invariants_wrong() {
-        let m = Some(String::new());
-        let result = CommitConfiguration::message_checks(m.as_deref());
+        let m = Some("");
+        let result = CommitConfiguration::message_checks(m);
         assert!(result.is_err());
     }
 }
