@@ -34,7 +34,7 @@ impl UseCase<()> for CreateTagUseCase<'_> {
 
 #[cfg(test)]
 mod tests {
-    use std::{cell::RefCell};
+    use std::cell::RefCell;
 
     use crate::{
         domain::semantic_version::SemanticVersion,
@@ -67,11 +67,11 @@ mod tests {
         fn create_tag(
             &self,
             version: &SemanticVersion,
-            message: &Option<String>,
+            message: Option<&str>,
             sign: bool,
         ) -> Result<(), AnyError> {
             self.version.replace(version.clone());
-            self.message.replace(message.clone());
+            self.message.replace(message.clone().map(|it| it.to_string()));
             self.sign.replace(sign);
             Ok(())
         }

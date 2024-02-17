@@ -18,7 +18,7 @@ impl TagEgressRepository for TagEgressRepositoryImpl<'_> {
     fn create_tag(
         &self,
         version: &SemanticVersion,
-        message: &Option<String>,
+        message: Option<&str>,
         sign: bool,
     ) -> Result<(), AnyError> {
         self.tag_egress_manager
@@ -46,7 +46,7 @@ mod tests {
         fn create_tag(
             &self,
             label: &str,
-            _message: &Option<String>,
+            _message: Option<&str>,
             _sign: bool,
         ) -> Result<(), AnyError> {
             self.label.replace(label.into());
@@ -61,7 +61,7 @@ mod tests {
             label: RefCell::new("".into()),
         };
         let repository = TagEgressRepositoryImpl::new(&manager);
-        let result = repository.create_tag(&version, &None, false);
+        let result = repository.create_tag(&version, None, false);
         assert!(result.is_ok());
         assert_eq!(manager.label.borrow().as_ref(), version.to_string());
     }

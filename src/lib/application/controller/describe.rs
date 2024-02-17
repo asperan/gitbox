@@ -249,7 +249,7 @@ mod tests {
         fn create_tag(
             &self,
             label: &str,
-            _message: &Option<String>,
+            _message: Option<&str>,
             _sign: bool,
         ) -> Result<(), AnyError> {
             self.label.replace(label.into());

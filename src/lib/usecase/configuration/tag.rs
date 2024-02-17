@@ -29,8 +29,8 @@ impl TagConfiguration {
     pub fn version(&self) -> &SemanticVersion {
         &self.version
     }
-    pub fn message(&self) -> &Option<String> {
-        &self.message
+    pub fn message(&self) -> Option<&str> {
+        self.message.as_deref()
     }
     pub fn sign(&self) -> bool {
         self.sign

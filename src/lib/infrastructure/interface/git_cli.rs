@@ -148,7 +148,7 @@ impl TagEgressManager for GitCli {
     fn create_tag(
         &self,
         label: &str,
-        message: &Option<String>,
+        message: Option<&str>,
         sign: bool,
     ) -> Result<(), AnyError> {
         let mut args = vec![label];

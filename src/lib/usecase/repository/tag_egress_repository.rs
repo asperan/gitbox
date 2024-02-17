@@ -4,7 +4,7 @@ pub trait TagEgressRepository {
     fn create_tag(
         &self,
         version: &SemanticVersion,
-        message: &Option<String>,
+        message: Option<&str>,
         sign: bool,
     ) -> Result<(), AnyError>;
 }
