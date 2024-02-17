@@ -27,8 +27,8 @@ impl<'a> ChangelogConfiguration<'a> {
         &self.format
     }
 
-    pub fn exclude_trigger(&self) -> &Option<Trigger> {
-        &self.exclude_trigger
+    pub fn exclude_trigger(&self) -> Option<&Trigger> {
+        self.exclude_trigger.as_ref()
     }
 }
 

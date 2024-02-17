@@ -73,7 +73,7 @@ type TypeMap = AHashMap<String, ScopeMap>;
 #[inline(always)]
 fn categorize_commit_list(
     list: impl Iterator<Item = CommitSummary>,
-    exclude_trigger: &Option<Trigger>,
+    exclude_trigger: Option<&Trigger>,
 ) -> TypeMap {
     let mut types_map: TypeMap = AHashMap::with_hasher(HASH_RANDOM_STATE);
     list.for_each(|c| {
@@ -403,7 +403,7 @@ mod tests {
             commit_list()
                 .iter()
                 .map(|it| CommitSummary::Conventional(it.clone())),
-            &None,
+            None,
         );
         let expected = {
             let mut temp: TypeMap = AHashMap::with_hasher(HASH_RANDOM_STATE);
@@ -503,7 +503,7 @@ mod tests {
             commit_list()
                 .iter()
                 .map(|it| CommitSummary::Conventional(it.clone())),
-            &Some(Trigger::new(crate::domain::trigger::Start::Basic(
+            Some(Trigger::new(crate::domain::trigger::Start::Basic(
                 BasicStatement::In(crate::domain::trigger::InNode {
                     object: crate::domain::trigger::ObjectNode::Scope(
                         crate::domain::trigger::ScopeNode {},
@@ -512,7 +512,7 @@ mod tests {
                         values: vec!["exclude".to_string()],
                     },
                 }),
-            ))),
+            ))).as_ref(),
         );
         let expected = {
             let mut temp: TypeMap = AHashMap::with_hasher(HASH_RANDOM_STATE);
@@ -600,7 +600,7 @@ mod tests {
             &format(),
             &categorize_commit_list(
                 c.iter().map(|it| CommitSummary::Conventional(it.clone())),
-                &None,
+                None,
             ),
         );
         assert_eq!(s, "## feat\n### API\n:\n* test message #1\n### General\n:\n* test message #6\n\n## fix\n### API\n:\n* test message #2\n\n## docs\n### General\n:\n* test message #5\n\n## test\n### API\n:\n* test message #7\n### General\n:\n* test message #3\n\n## refactor\n### exclude\n:\n* test message #4\n");
