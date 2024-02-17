@@ -76,7 +76,7 @@ impl FullCommitSummaryHistoryIngressManager for GitCli {
 impl BoundedCommitSummaryIngressManager for GitCli {
     fn get_commits_from(
         &self,
-        version: &Option<SemanticVersion>,
+        version: Option<&SemanticVersion>,
     ) -> Result<Box<dyn DoubleEndedIterator<Item = String>>, AnyError> {
         let mut args = vec!["log", "--pretty=format:%s"];
         let mut _s = String::new();

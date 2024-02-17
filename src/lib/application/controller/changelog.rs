@@ -128,7 +128,7 @@ mod tests {
     impl BoundedCommitSummaryIngressManager for MockCommitRetriever {
         fn get_commits_from(
             &self,
-            _version: &Option<SemanticVersion>,
+            _version: Option<&SemanticVersion>,
         ) -> Result<Box<dyn DoubleEndedIterator<Item = String>>, AnyError> {
             Ok(Box::new(
                 vec![

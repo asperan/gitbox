@@ -67,7 +67,7 @@ impl<'a, 'b: 'a, 'c: 'a, 'd: 'a> CalculateNewVersionUseCase<'a> {
     fn greatest_change_from(&self, version: &Option<SemanticVersion>) -> Result<Change, AnyError> {
         Ok(self
             .commit_summary_repository
-            .get_commits_from(version)?
+            .get_commits_from(version.as_ref())?
             .map(|it| self.commit_to_change(&it))
             .max()
             .unwrap_or(Change::None))
@@ -306,7 +306,7 @@ mod tests {
     impl BoundedCommitSummaryIngressRepository for MockCommitSummaryRepository {
         fn get_commits_from(
             &self,
-            version: &Option<SemanticVersion>,
+            version: Option<&SemanticVersion>,
         ) -> Result<Box<dyn DoubleEndedIterator<Item = CommitSummary>>, AnyError> {
             Ok(Box::new(
                 if version.as_ref().is_some_and(|it| it.prerelease().is_some()) {

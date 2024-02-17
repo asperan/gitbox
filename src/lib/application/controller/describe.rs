@@ -177,7 +177,7 @@ impl<'a, 'b: 'a, 'c: 'a, 'd: 'a, 'e: 'a, 'f: 'a> DescribeController<'a> {
 
 #[cfg(test)]
 mod tests {
-    use std::{cell::RefCell};
+    use std::cell::RefCell;
 
     use crate::{
         application::{
@@ -201,7 +201,7 @@ mod tests {
     impl BoundedCommitSummaryIngressManager for MockCommitSummaryManager {
         fn get_commits_from(
             &self,
-            _version: &Option<SemanticVersion>,
+            _version: Option<&SemanticVersion>,
         ) -> Result<Box<dyn DoubleEndedIterator<Item = String>>, AnyError> {
             Ok(Box::new(
                 vec![

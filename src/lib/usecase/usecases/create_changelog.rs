@@ -43,7 +43,7 @@ impl UseCase<String> for CreateChangelogUseCase<'_> {
         } else {
             self.version_repository.last_stable_version()?
         };
-        let commit_list = self.commit_repository.get_commits_from(&from_version)?;
+        let commit_list = self.commit_repository.get_commits_from(from_version.as_ref())?;
 
         let type_map = categorize_commit_list(commit_list, self.configuration.exclude_trigger());
         let text = format_types(self.configuration.format(), &type_map);
@@ -214,7 +214,6 @@ fn scope_or_general(s: &Option<String>) -> String {
 
 #[cfg(test)]
 mod tests {
-    
 
     use ahash::AHashMap;
 
@@ -622,7 +621,7 @@ mod tests {
     impl BoundedCommitSummaryIngressRepository for MockCommitRepository {
         fn get_commits_from(
             &self,
-            _version: &Option<SemanticVersion>,
+            _version: Option<&SemanticVersion>,
         ) -> Result<Box<dyn DoubleEndedIterator<Item = CommitSummary>>, AnyError> {
             Ok(Box::new(
                 commit_list()

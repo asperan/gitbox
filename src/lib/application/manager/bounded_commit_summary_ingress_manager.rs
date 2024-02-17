@@ -3,6 +3,6 @@ use crate::{domain::semantic_version::SemanticVersion, usecase::type_aliases::An
 pub trait BoundedCommitSummaryIngressManager {
     fn get_commits_from(
         &self,
-        version: &Option<SemanticVersion>,
+        version: Option<&SemanticVersion>,
     ) -> Result<Box<dyn DoubleEndedIterator<Item = String>>, AnyError>;
 }
