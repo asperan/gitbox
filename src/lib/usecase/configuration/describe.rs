@@ -1,7 +1,7 @@
 use crate::{domain::trigger::Trigger, usecase::metadata_spec::MetadataSpec};
 
 pub type PrereleasePattern<'a> = Box<dyn Fn(u32) -> String + 'a>;
-pub type OldPrereleasePattern<'a> = Box<dyn Fn(&String) -> u32 + 'a>;
+pub type OldPrereleasePattern<'a> = Box<dyn Fn(&str) -> u32 + 'a>;
 
 pub struct DescribeConfiguration<'a> {
     prerelease: DescribePrereleaseConfiguration<'a>,

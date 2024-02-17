@@ -165,7 +165,8 @@ impl<'a, 'b: 'a, 'c: 'a, 'd: 'a> CalculateNewVersionUseCase<'a> {
                 // Reset number
                 1
             } else {
-                let last_version_prerelease = last_version.as_ref().expect("stable is not updated, so last version is bound to exist").prerelease().as_ref().expect("prerelease is present, else this function would have returned an error already");
+                let semantic_version = last_version.expect("stable is not updated, so last version is bound to exist");
+                let last_version_prerelease = semantic_version.prerelease().expect("prerelease is present, else this function would have returned an error already");
                 let old_prerelease_number =
                     self.configuration.prerelease().old_pattern()(last_version_prerelease);
                 old_prerelease_number + 1
@@ -220,7 +221,6 @@ impl StableVersion {
 
 #[cfg(test)]
 mod tests {
-    
 
     use crate::{
         domain::{

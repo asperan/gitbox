@@ -41,12 +41,12 @@ impl SemanticVersion {
         self.patch
     }
 
-    pub fn prerelease(&self) -> &Option<String> {
-        &self.prerelease
+    pub fn prerelease(&self) -> Option<&str> {
+        self.prerelease.as_deref()
     }
 
-    pub fn metadata(&self) -> &Option<String> {
-        &self.metadata
+    pub fn metadata(&self) -> Option<&str> {
+        self.metadata.as_deref()
     }
 }
 
