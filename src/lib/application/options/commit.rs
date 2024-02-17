@@ -23,8 +23,8 @@ impl CommitOptions {
     ) -> Result<CommitOptions, AnyError> {
         Self::check_non_empty(&commit_type, "commit type")?;
         Self::check_non_empty(&summary, "summary")?;
-        Self::check_non_empty_if_present(&scope, "scope")?;
-        Self::check_non_empty_if_present(&message, "message body")?;
+        Self::check_non_empty_if_present(scope.as_deref(), "scope")?;
+        Self::check_non_empty_if_present(message.as_deref(), "message body")?;
         Ok(CommitOptions {
             commit_type,
             scope,
@@ -38,8 +38,8 @@ impl CommitOptions {
     pub fn commit_type(&self) -> &str {
         &self.commit_type
     }
-    pub fn scope(&self) -> &Option<String> {
-        &self.scope
+    pub fn scope(&self) -> Option<&str> {
+        self.scope.as_deref()
     }
     pub fn is_breaking(&self) -> bool {
         self.is_breaking
@@ -47,8 +47,8 @@ impl CommitOptions {
     pub fn summary(&self) -> &str {
         &self.summary
     }
-    pub fn message(&self) -> &Option<String> {
-        &self.message
+    pub fn message(&self) -> Option<&str> {
+        self.message.as_deref()
     }
     pub fn quiet(&self) -> bool {
         self.quiet
@@ -63,7 +63,7 @@ impl CommitOptions {
     }
 
     fn check_non_empty_if_present(
-        o: &Option<String>,
+        o: Option<&str>,
         what: &str,
     ) -> Result<(), CommitOptionsInvariantError> {
         if o.as_ref().is_some_and(|it| it.is_empty()) {

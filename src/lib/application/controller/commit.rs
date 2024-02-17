@@ -37,10 +37,10 @@ impl<'a, 'b: 'a, 'c: 'a> CommitController<'a> {
     pub fn commit(&self) -> ControllerExitCode {
         match CommitConfiguration::new(
             self.options.commit_type().to_string(),
-            self.options.scope().clone(),
+            self.options.scope().map(|it| it.to_owned()),
             self.options.is_breaking(),
             self.options.summary().to_string(),
-            self.options.message().clone(),
+            self.options.message().map(|it| it.to_owned()),
         ) {
             Ok(configuration) => {
                 let commit_repository =
