@@ -89,7 +89,7 @@ fn categorize_commit_list(
         if !exclude_trigger.as_ref().is_some_and(|it| {
             it.accept(
                 surely_conventional.typ(),
-                surely_conventional.scope(),
+                surely_conventional.scope().as_deref(),
                 surely_conventional.breaking(),
             )
         }) {

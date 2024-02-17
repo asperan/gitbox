@@ -16,32 +16,32 @@ impl Trigger {
         Trigger { start_node }
     }
 
-    pub fn accept(&self, commit_type: &str, scope: &Option<String>, breaking: bool) -> bool {
+    pub fn accept(&self, commit_type: &str, scope: Option<&str>, breaking: bool) -> bool {
         self.start_node.visit(commit_type, scope, breaking)
     }
 }
 
 trait Visitable<'a, T> {
-    fn visit(&self, commit_type: &str, scope: &'a Option<String>, breaking: bool) -> T;
+    fn visit(&self, commit_type: &str, scope: Option<&'a str>, breaking: bool) -> T;
 }
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct TypeNode {}
 impl Visitable<'_, String> for TypeNode {
-    fn visit(&self, commit_type: &str, _scope: &Option<String>, _breaking: bool) -> String {
+    fn visit(&self, commit_type: &str, _scope: Option<&str>, _breaking: bool) -> String {
         commit_type.to_owned()
     }
 }
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct ScopeNode {}
-impl<'a> Visitable<'a, &'a Option<String>> for ScopeNode {
+impl<'a> Visitable<'a, Option<&'a str>> for ScopeNode {
     fn visit(
         &self,
         _commit_type: &str,
-        scope: &'a Option<String>,
+        scope: Option<&'a str>,
         _breaking: bool,
-    ) -> &'a Option<String> {
+    ) -> Option<&'a str> {
         scope
     }
 }
@@ -55,7 +55,7 @@ pub enum ObjectNode {
 #[derive(Debug, PartialEq, Eq)]
 pub struct BreakingNode {}
 impl Visitable<'_, bool> for BreakingNode {
-    fn visit(&self, _commit_type: &str, _scope: &Option<String>, breaking: bool) -> bool {
+    fn visit(&self, _commit_type: &str, _scope: Option<&str>, breaking: bool) -> bool {
         breaking
     }
 }
@@ -68,7 +68,7 @@ impl Visitable<'_, String> for LiteralNode {
     fn visit(
         &self,
         _commit_type: &str,
-        _scope: &Option<String>,
+        _scope: Option<&str>,
         _breaking: bool,
     ) -> std::string::String {
         self.value.clone()
@@ -80,7 +80,7 @@ pub struct ArrayNode {
     pub values: Vec<String>,
 }
 impl Visitable<'_, Vec<String>> for ArrayNode {
-    fn visit(&self, _commit_type: &str, _scope: &Option<String>, _breaking: bool) -> Vec<String> {
+    fn visit(&self, _commit_type: &str, _scope: Option<&str>, _breaking: bool) -> Vec<String> {
         self.values.clone()
     }
 }
@@ -91,7 +91,7 @@ pub struct InNode {
     pub array: ArrayNode,
 }
 impl Visitable<'_, bool> for InNode {
-    fn visit(&self, commit_type: &str, scope: &Option<String>, breaking: bool) -> bool {
+    fn visit(&self, commit_type: &str, scope: Option<&str>, breaking: bool) -> bool {
         match &self.object {
             ObjectNode::Type(type_node) => self
                 .array
@@ -101,7 +101,7 @@ impl Visitable<'_, bool> for InNode {
                 Some(this_scope) => self
                     .array
                     .visit(commit_type, scope, breaking)
-                    .contains(this_scope),
+                    .contains(&this_scope.to_owned()),
                 None => false,
             },
         }
@@ -115,7 +115,7 @@ pub enum BasicStatement {
 }
 
 impl Visitable<'_, bool> for BasicStatement {
-    fn visit(&self, commit_type: &str, scope: &Option<String>, breaking: bool) -> bool {
+    fn visit(&self, commit_type: &str, scope: Option<&str>, breaking: bool) -> bool {
         match self {
             BasicStatement::In(n) => n.visit(commit_type, scope, breaking),
             BasicStatement::Breaking(n) => n.visit(commit_type, scope, breaking),
@@ -130,7 +130,7 @@ pub enum FirstAndValue {
 }
 
 impl Visitable<'_, bool> for FirstAndValue {
-    fn visit(&self, commit_type: &str, scope: &Option<String>, breaking: bool) -> bool {
+    fn visit(&self, commit_type: &str, scope: Option<&str>, breaking: bool) -> bool {
         match self {
             FirstAndValue::Basic(node) => node.visit(commit_type, scope, breaking),
             FirstAndValue::Priority(node) => node.visit(commit_type, scope, breaking),
@@ -146,7 +146,7 @@ pub enum SecondAndValue {
 }
 
 impl Visitable<'_, bool> for SecondAndValue {
-    fn visit(&self, commit_type: &str, scope: &Option<String>, breaking: bool) -> bool {
+    fn visit(&self, commit_type: &str, scope: Option<&str>, breaking: bool) -> bool {
         match self {
             Self::Basic(n) => n.visit(commit_type, scope, breaking),
             Self::And(n) => n.visit(commit_type, scope, breaking),
@@ -162,7 +162,7 @@ pub struct AndStatement {
 }
 
 impl Visitable<'_, bool> for AndStatement {
-    fn visit(&self, commit_type: &str, scope: &Option<String>, breaking: bool) -> bool {
+    fn visit(&self, commit_type: &str, scope: Option<&str>, breaking: bool) -> bool {
         self.left.visit(commit_type, scope, breaking)
             && self.right.visit(commit_type, scope, breaking)
     }
@@ -175,7 +175,7 @@ pub enum FirstOrValue {
 }
 
 impl Visitable<'_, bool> for FirstOrValue {
-    fn visit(&self, commit_type: &str, scope: &Option<String>, breaking: bool) -> bool {
+    fn visit(&self, commit_type: &str, scope: Option<&str>, breaking: bool) -> bool {
         match self {
             Self::And(n) => n.visit(commit_type, scope, breaking),
             Self::Basic(n) => n.visit(commit_type, scope, breaking),
@@ -191,7 +191,7 @@ pub enum SecondOrValue {
 }
 
 impl Visitable<'_, bool> for SecondOrValue {
-    fn visit(&self, commit_type: &str, scope: &Option<String>, breaking: bool) -> bool {
+    fn visit(&self, commit_type: &str, scope: Option<&str>, breaking: bool) -> bool {
         match self {
             Self::And(n) => n.visit(commit_type, scope, breaking),
             Self::Basic(n) => n.visit(commit_type, scope, breaking),
@@ -207,7 +207,7 @@ pub struct OrStatement {
 }
 
 impl Visitable<'_, bool> for OrStatement {
-    fn visit(&self, commit_type: &str, scope: &Option<String>, breaking: bool) -> bool {
+    fn visit(&self, commit_type: &str, scope: Option<&str>, breaking: bool) -> bool {
         self.left.visit(commit_type, scope, breaking)
             || self.right.visit(commit_type, scope, breaking)
     }
@@ -219,7 +219,7 @@ pub struct PriorityStatement {
 }
 
 impl Visitable<'_, bool> for PriorityStatement {
-    fn visit(&self, commit_type: &str, scope: &Option<String>, breaking: bool) -> bool {
+    fn visit(&self, commit_type: &str, scope: Option<&str>, breaking: bool) -> bool {
         self.internal_node.visit(commit_type, scope, breaking)
     }
 }
@@ -232,7 +232,7 @@ pub enum Start {
 }
 
 impl Visitable<'_, bool> for Start {
-    fn visit(&self, commit_type: &str, scope: &Option<String>, breaking: bool) -> bool {
+    fn visit(&self, commit_type: &str, scope: Option<&str>, breaking: bool) -> bool {
         match self {
             Self::And(n) => n.visit(commit_type, scope, breaking),
             Self::Or(n) => n.visit(commit_type, scope, breaking),
@@ -264,7 +264,7 @@ mod tests {
         assert_eq!(
             n.visit(
                 TEST_VALUES1.0,
-                &TEST_VALUES1.1.map(|s| s.to_string()),
+                TEST_VALUES1.1,
                 TEST_VALUES1.2
             ),
             TEST_VALUES1.0
@@ -277,10 +277,10 @@ mod tests {
         assert_eq!(
             n.visit(
                 TEST_VALUES2.0,
-                &TEST_VALUES2.1.map(|s| s.to_string()),
+                TEST_VALUES2.1,
                 TEST_VALUES2.2
             ),
-            &None
+            None
         );
     }
 
@@ -290,10 +290,10 @@ mod tests {
         assert_eq!(
             n.visit(
                 TEST_VALUES1.0,
-                &TEST_VALUES1.1.map(|s| s.to_string()),
+                TEST_VALUES1.1,
                 TEST_VALUES1.2
             ),
-            &Some("scope".to_string())
+            Some("scope")
         );
     }
 
@@ -302,7 +302,7 @@ mod tests {
         let n = BreakingNode {};
         assert!(n.visit(
             TEST_VALUES1.0,
-            &TEST_VALUES1.1.map(|s| s.to_string()),
+            TEST_VALUES1.1,
             TEST_VALUES1.2
         ));
     }
@@ -312,7 +312,7 @@ mod tests {
         let n = BreakingNode {};
         assert!(!n.visit(
             TEST_VALUES3.0,
-            &TEST_VALUES3.1.map(|s| s.to_string()),
+            TEST_VALUES3.1,
             TEST_VALUES3.2
         ));
     }
@@ -325,7 +325,7 @@ mod tests {
         assert_eq!(
             n.visit(
                 TEST_VALUES1.0,
-                &TEST_VALUES1.1.map(|s| s.to_string()),
+                TEST_VALUES1.1,
                 TEST_VALUES1.2
             ),
             "literal".to_string()
@@ -344,7 +344,7 @@ mod tests {
         assert_eq!(
             n.visit(
                 TEST_VALUES1.0,
-                &TEST_VALUES1.1.map(|s| s.to_string()),
+                TEST_VALUES1.1,
                 TEST_VALUES1.2
             ),
             vec![
@@ -366,7 +366,7 @@ mod tests {
         };
         assert!(n.visit(
             TEST_VALUES1.0,
-            &TEST_VALUES1.1.as_ref().map(|s| s.to_string()),
+            TEST_VALUES1.1,
             TEST_VALUES1.2
         ));
     }
@@ -381,7 +381,7 @@ mod tests {
         };
         assert!(!n.visit(
             TEST_VALUES1.0,
-            &TEST_VALUES1.1.as_ref().map(|s| s.to_string()),
+            TEST_VALUES1.1,
             TEST_VALUES1.2
         ));
     }
@@ -396,7 +396,7 @@ mod tests {
         };
         assert!(n.visit(
             TEST_VALUES1.0,
-            &TEST_VALUES1.1.as_ref().map(|s| s.to_string()),
+            TEST_VALUES1.1,
             TEST_VALUES1.2
         ));
     }
@@ -411,7 +411,7 @@ mod tests {
         };
         assert!(!n.visit(
             TEST_VALUES1.0,
-            &TEST_VALUES1.1.as_ref().map(|s| s.to_string()),
+            TEST_VALUES1.1,
             TEST_VALUES1.2
         ));
     }
@@ -426,7 +426,7 @@ mod tests {
         };
         assert!(!n.visit(
             TEST_VALUES2.0,
-            &TEST_VALUES2.1.as_ref().map(|s| s.to_string()),
+            TEST_VALUES2.1,
             TEST_VALUES2.2
         ));
     }
@@ -449,12 +449,12 @@ mod tests {
         assert_eq!(
             n.visit(
                 TEST_VALUES1.0,
-                &TEST_VALUES1.1.as_ref().map(|s| s.to_string()),
+                TEST_VALUES1.1,
                 TEST_VALUES1.2
             ),
             s.visit(
                 TEST_VALUES1.0,
-                &TEST_VALUES1.1.as_ref().map(|s| s.to_string()),
+                TEST_VALUES1.1,
                 TEST_VALUES1.2
             )
         );
@@ -467,12 +467,12 @@ mod tests {
         assert_eq!(
             n.visit(
                 TEST_VALUES1.0,
-                &TEST_VALUES1.1.as_ref().map(|s| s.to_string()),
+                TEST_VALUES1.1,
                 TEST_VALUES1.2
             ),
             s.visit(
                 TEST_VALUES1.0,
-                &TEST_VALUES1.1.as_ref().map(|s| s.to_string()),
+                TEST_VALUES1.1,
                 TEST_VALUES1.2
             )
         );
@@ -486,12 +486,12 @@ mod tests {
         assert_eq!(
             n.visit(
                 TEST_VALUES1.0,
-                &TEST_VALUES1.1.as_ref().map(|s| s.to_string()),
+                TEST_VALUES1.1,
                 TEST_VALUES1.2
             ),
             s.visit(
                 TEST_VALUES1.0,
-                &TEST_VALUES1.1.as_ref().map(|s| s.to_string()),
+                TEST_VALUES1.1,
                 TEST_VALUES1.2
             )
         );
@@ -530,12 +530,12 @@ mod tests {
         assert_eq!(
             n.visit(
                 TEST_VALUES1.0,
-                &TEST_VALUES1.1.as_ref().map(|s| s.to_string()),
+                TEST_VALUES1.1,
                 TEST_VALUES1.2
             ),
             s.visit(
                 TEST_VALUES1.0,
-                &TEST_VALUES1.1.as_ref().map(|s| s.to_string()),
+                TEST_VALUES1.1,
                 TEST_VALUES1.2
             )
         );
@@ -548,12 +548,12 @@ mod tests {
         assert_eq!(
             n.visit(
                 TEST_VALUES1.0,
-                &TEST_VALUES1.1.as_ref().map(|s| s.to_string()),
+                TEST_VALUES1.1,
                 TEST_VALUES1.2
             ),
             s.visit(
                 TEST_VALUES1.0,
-                &TEST_VALUES1.1.as_ref().map(|s| s.to_string()),
+                TEST_VALUES1.1,
                 TEST_VALUES1.2
             )
         );
@@ -592,12 +592,12 @@ mod tests {
         assert_eq!(
             n.visit(
                 TEST_VALUES1.0,
-                &TEST_VALUES1.1.as_ref().map(|s| s.to_string()),
+                TEST_VALUES1.1,
                 TEST_VALUES1.2
             ),
             s.visit(
                 TEST_VALUES1.0,
-                &TEST_VALUES1.1.as_ref().map(|s| s.to_string()),
+                TEST_VALUES1.1,
                 TEST_VALUES1.2
             )
         );
@@ -626,12 +626,12 @@ mod tests {
         assert_eq!(
             v.visit(
                 TEST_VALUES1.0,
-                &TEST_VALUES1.1.as_ref().map(|s| s.to_string()),
+                TEST_VALUES1.1,
                 TEST_VALUES1.2
             ),
             s.visit(
                 TEST_VALUES1.0,
-                &TEST_VALUES1.1.as_ref().map(|s| s.to_string()),
+                TEST_VALUES1.1,
                 TEST_VALUES1.2
             )
         );
@@ -659,16 +659,16 @@ mod tests {
         assert_eq!(
             s.visit(
                 TEST_VALUES1.0,
-                &TEST_VALUES1.1.as_ref().map(|s| s.to_string()),
+                TEST_VALUES1.1,
                 TEST_VALUES1.2
             ),
             a1.visit(
                 TEST_VALUES1.0,
-                &TEST_VALUES1.1.as_ref().map(|s| s.to_string()),
+                TEST_VALUES1.1,
                 TEST_VALUES1.2
             ) && a2.visit(
                 TEST_VALUES1.0,
-                &TEST_VALUES1.1.as_ref().map(|s| s.to_string()),
+                TEST_VALUES1.1,
                 TEST_VALUES1.2
             )
         );
@@ -681,12 +681,12 @@ mod tests {
         assert_eq!(
             n.visit(
                 TEST_VALUES1.0,
-                &TEST_VALUES1.1.as_ref().map(|s| s.to_string()),
+                TEST_VALUES1.1,
                 TEST_VALUES1.2
             ),
             s.visit(
                 TEST_VALUES1.0,
-                &TEST_VALUES1.1.as_ref().map(|s| s.to_string()),
+                TEST_VALUES1.1,
                 TEST_VALUES1.2
             )
         );
@@ -715,12 +715,12 @@ mod tests {
         assert_eq!(
             v.visit(
                 TEST_VALUES1.0,
-                &TEST_VALUES1.1.as_ref().map(|s| s.to_string()),
+                TEST_VALUES1.1,
                 TEST_VALUES1.2
             ),
             s.visit(
                 TEST_VALUES1.0,
-                &TEST_VALUES1.1.as_ref().map(|s| s.to_string()),
+                TEST_VALUES1.1,
                 TEST_VALUES1.2
             )
         );
@@ -733,12 +733,12 @@ mod tests {
         assert_eq!(
             n.visit(
                 TEST_VALUES1.0,
-                &TEST_VALUES1.1.as_ref().map(|s| s.to_string()),
+                TEST_VALUES1.1,
                 TEST_VALUES1.2
             ),
             s.visit(
                 TEST_VALUES1.0,
-                &TEST_VALUES1.1.as_ref().map(|s| s.to_string()),
+                TEST_VALUES1.1,
                 TEST_VALUES1.2
             )
         );
@@ -766,12 +766,12 @@ mod tests {
         assert_eq!(
             v.visit(
                 TEST_VALUES1.0,
-                &TEST_VALUES1.1.as_ref().map(|s| s.to_string()),
+                TEST_VALUES1.1,
                 TEST_VALUES1.2
             ),
             s.visit(
                 TEST_VALUES1.0,
-                &TEST_VALUES1.1.as_ref().map(|s| s.to_string()),
+                TEST_VALUES1.1,
                 TEST_VALUES1.2
             )
         );
@@ -805,12 +805,12 @@ mod tests {
         assert_eq!(
             v.visit(
                 TEST_VALUES1.0,
-                &TEST_VALUES1.1.as_ref().map(|s| s.to_string()),
+                TEST_VALUES1.1,
                 TEST_VALUES1.2
             ),
             s.visit(
                 TEST_VALUES1.0,
-                &TEST_VALUES1.1.as_ref().map(|s| s.to_string()),
+                TEST_VALUES1.1,
                 TEST_VALUES1.2
             )
         );
@@ -845,16 +845,16 @@ mod tests {
         assert_eq!(
             s.visit(
                 TEST_VALUES1.0,
-                &TEST_VALUES1.1.as_ref().map(|s| s.to_string()),
+                TEST_VALUES1.1,
                 TEST_VALUES1.2
             ),
             o1.visit(
                 TEST_VALUES1.0,
-                &TEST_VALUES1.1.as_ref().map(|s| s.to_string()),
+                TEST_VALUES1.1,
                 TEST_VALUES1.2
             ) || o2.visit(
                 TEST_VALUES1.0,
-                &TEST_VALUES1.1.as_ref().map(|s| s.to_string()),
+                TEST_VALUES1.1,
                 TEST_VALUES1.2
             )
         );
@@ -893,12 +893,12 @@ mod tests {
         assert_eq!(
             s.visit(
                 TEST_VALUES1.0,
-                &TEST_VALUES1.1.as_ref().map(|s| s.to_string()),
+                TEST_VALUES1.1,
                 TEST_VALUES1.2
             ),
             p.visit(
                 TEST_VALUES1.0,
-                &TEST_VALUES1.1.as_ref().map(|s| s.to_string()),
+                TEST_VALUES1.1,
                 TEST_VALUES1.2
             )
         );
@@ -927,12 +927,12 @@ mod tests {
         assert_eq!(
             s.visit(
                 TEST_VALUES1.0,
-                &TEST_VALUES1.1.as_ref().map(|s| s.to_string()),
+                TEST_VALUES1.1,
                 TEST_VALUES1.2
             ),
             a.visit(
                 TEST_VALUES1.0,
-                &TEST_VALUES1.1.as_ref().map(|s| s.to_string()),
+                TEST_VALUES1.1,
                 TEST_VALUES1.2
             )
         );
@@ -967,12 +967,12 @@ mod tests {
         assert_eq!(
             s.visit(
                 TEST_VALUES1.0,
-                &TEST_VALUES1.1.as_ref().map(|s| s.to_string()),
+                TEST_VALUES1.1,
                 TEST_VALUES1.2
             ),
             a.visit(
                 TEST_VALUES1.0,
-                &TEST_VALUES1.1.as_ref().map(|s| s.to_string()),
+                TEST_VALUES1.1,
                 TEST_VALUES1.2
             )
         );
@@ -985,12 +985,12 @@ mod tests {
         assert_eq!(
             s.visit(
                 TEST_VALUES1.0,
-                &TEST_VALUES1.1.as_ref().map(|s| s.to_string()),
+                TEST_VALUES1.1,
                 TEST_VALUES1.2
             ),
             b.visit(
                 TEST_VALUES1.0,
-                &TEST_VALUES1.1.as_ref().map(|s| s.to_string()),
+                TEST_VALUES1.1,
                 TEST_VALUES1.2
             )
         );
