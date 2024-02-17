@@ -30,10 +30,10 @@ impl UseCase<ConventionalCommit> for CreateConventionalCommitUseCase<'_> {
     fn execute(&self) -> Result<ConventionalCommit, AnyError> {
         let commit = ConventionalCommit::new(
             self.configuration.typ().to_owned(),
-            self.configuration.scope().clone(),
+            self.configuration.scope().map(|it| it.to_owned()),
             self.configuration.is_breaking(),
             self.configuration.summary().to_owned(),
-            self.configuration.message().clone(),
+            self.configuration.message().map(|it| it.to_owned()),
         );
         self.commit_repository.create_commit(&commit)?;
         Ok(commit)

@@ -37,8 +37,8 @@ impl CommitConfiguration {
         &self.commit_type
     }
 
-    pub fn scope(&self) -> &Option<String> {
-        &self.scope
+    pub fn scope(&self) -> Option<&str> {
+        self.scope.as_deref()
     }
 
     pub fn is_breaking(&self) -> bool {
@@ -49,8 +49,8 @@ impl CommitConfiguration {
         &self.summary
     }
 
-    pub fn message(&self) -> &Option<String> {
-        &self.message
+    pub fn message(&self) -> Option<&str> {
+        self.message.as_deref()
     }
 
     fn type_checks(t: &str) -> Result<(), CommitConfigurationInvariantError> {
