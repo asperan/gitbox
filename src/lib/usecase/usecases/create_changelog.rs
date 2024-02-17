@@ -509,7 +509,8 @@ mod tests {
                         values: vec!["exclude".to_string()],
                     },
                 }),
-            ))).as_ref(),
+            )))
+            .as_ref(),
         );
         let expected = {
             let mut temp: TypeMap = AHashMap::with_hasher(HASH_RANDOM_STATE);
