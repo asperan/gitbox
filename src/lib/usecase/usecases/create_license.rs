@@ -46,7 +46,7 @@ impl UseCase<()> for CreateLicenseUseCase<'_> {
 
 #[cfg(test)]
 mod tests {
-    use std::{cell::RefCell};
+    use std::cell::RefCell;
 
     use crate::usecase::{
         license_metadata::LicenseMetadata,

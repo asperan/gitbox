@@ -27,7 +27,8 @@ impl SemanticVersionIngressRepository for SemanticVersionIngressRepositoryImpl<'
         Ok(match version {
             Some(s) => Some(SemanticVersion::from_str(&s)?),
             None => None,
-        }.into())
+        }
+        .into())
     }
 
     fn last_stable_version(&self) -> Result<Rc<Option<SemanticVersion>>, AnyError> {
@@ -35,7 +36,8 @@ impl SemanticVersionIngressRepository for SemanticVersionIngressRepositoryImpl<'
         Ok(match version {
             Some(v) => Some(SemanticVersion::from_str(&v)?),
             None => None,
-        }.into())
+        }
+        .into())
     }
 }
 

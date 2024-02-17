@@ -66,7 +66,10 @@ impl<'a, 'b: 'a, 'c: 'a, 'd: 'a> CalculateNewVersionUseCase<'a> {
     }
 
     #[inline]
-    fn greatest_change_from(&self, version: Rc<Option<SemanticVersion>>) -> Result<Change, AnyError> {
+    fn greatest_change_from(
+        &self,
+        version: Rc<Option<SemanticVersion>>,
+    ) -> Result<Change, AnyError> {
         Ok(self
             .commit_summary_repository
             .get_commits_from(version)?
@@ -115,7 +118,8 @@ impl<'a, 'b: 'a, 'c: 'a, 'd: 'a> CalculateNewVersionUseCase<'a> {
             StableVersion::first_stable()
         } else {
             let greatest_change = self.greatest_change_from(base_version.clone())?;
-            let base_version = base_version.as_ref()
+            let base_version = base_version
+                .as_ref()
                 .as_ref()
                 .expect("base version must be present in this branch");
             match greatest_change {
@@ -155,7 +159,9 @@ impl<'a, 'b: 'a, 'c: 'a, 'd: 'a> CalculateNewVersionUseCase<'a> {
             None => true,
         };
         if !is_stable_updated
-            && last_version.as_ref().as_ref()
+            && last_version
+                .as_ref()
+                .as_ref()
                 .is_some_and(|it| it.prerelease().is_none())
         {
             Err(Box::new(DescribeNoRelevantChangesError::new()))
@@ -166,7 +172,10 @@ impl<'a, 'b: 'a, 'c: 'a, 'd: 'a> CalculateNewVersionUseCase<'a> {
                 // Reset number
                 1
             } else {
-                let semantic_version = last_version.as_ref().as_ref().expect("stable is not updated, so last version is bound to exist");
+                let semantic_version = last_version
+                    .as_ref()
+                    .as_ref()
+                    .expect("stable is not updated, so last version is bound to exist");
                 let last_version_prerelease = semantic_version.prerelease().expect("prerelease is present, else this function would have returned an error already");
                 let old_prerelease_number =
                     self.configuration.prerelease().old_pattern()(last_version_prerelease);
@@ -312,7 +321,11 @@ mod tests {
             version: Rc<Option<SemanticVersion>>,
         ) -> Result<Box<dyn DoubleEndedIterator<Item = CommitSummary>>, AnyError> {
             Ok(Box::new(
-                if version.as_ref().clone().is_some_and(|it| it.prerelease().is_some()) {
+                if version
+                    .as_ref()
+                    .clone()
+                    .is_some_and(|it| it.prerelease().is_some())
+                {
                     let mut full = self.commit_list.clone();
                     full.append(self.from_prerelease.clone().as_mut());
                     full.into_iter()
@@ -819,7 +832,8 @@ mod tests {
                 1,
                 Some("alpha1".to_string()),
                 None,
-            )).into(),
+            ))
+            .into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,
@@ -877,7 +891,8 @@ mod tests {
                 1,
                 Some("dev1".to_string()),
                 None,
-            )).into(),
+            ))
+            .into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,
@@ -979,7 +994,8 @@ mod tests {
                 1,
                 Some("dev1".to_string()),
                 None,
-            )).into(),
+            ))
+            .into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,

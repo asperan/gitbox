@@ -126,7 +126,8 @@ mod tests {
         assert_eq!(
             output_manager
                 .output_buffer
-                .borrow().first()
+                .borrow()
+                .first()
                 .expect("The controller should have output"),
             expected_output
         );

@@ -43,7 +43,9 @@ impl UseCase<String> for CreateChangelogUseCase<'_> {
         } else {
             self.version_repository.last_stable_version()?
         };
-        let commit_list = self.commit_repository.get_commits_from(from_version.clone())?;
+        let commit_list = self
+            .commit_repository
+            .get_commits_from(from_version.clone())?;
 
         let type_map = categorize_commit_list(commit_list, self.configuration.exclude_trigger());
         let text = format_types(self.configuration.format(), &type_map);
@@ -643,7 +645,8 @@ mod tests {
                 0,
                 Some("dev1".to_string()),
                 None,
-            )).into())
+            ))
+            .into())
         }
 
         fn last_stable_version(&self) -> Result<Rc<Option<SemanticVersion>>, AnyError> {
