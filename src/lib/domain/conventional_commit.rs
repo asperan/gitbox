@@ -8,6 +8,7 @@ Other than a [ConventionalCommitSummary], it also contains the optional message.
 This message should contain all the lines but the first,
 so no duplicate information is present.
 */
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct ConventionalCommit {
     summary: ConventionalCommitSummary,
     message: Option<String>,
