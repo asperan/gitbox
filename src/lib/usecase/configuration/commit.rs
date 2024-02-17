@@ -21,9 +21,9 @@ impl CommitConfiguration {
         message: Option<String>,
     ) -> Result<CommitConfiguration, AnyError> {
         Self::type_checks(&commit_type)?;
-        Self::scope_checks(&scope)?;
+        Self::scope_checks(scope.as_deref())?;
         Self::summary_checks(&summary)?;
-        Self::message_checks(&message)?;
+        Self::message_checks(message.as_deref())?;
         Ok(CommitConfiguration {
             commit_type,
             scope,
@@ -62,7 +62,7 @@ impl CommitConfiguration {
         Ok(())
     }
 
-    fn scope_checks(s: &Option<String>) -> Result<(), CommitConfigurationInvariantError> {
+    fn scope_checks(s: Option<&str>) -> Result<(), CommitConfigurationInvariantError> {
         if s.as_ref().is_some_and(|it| it.is_empty()) {
             return Err(CommitConfigurationInvariantError::new(
                 "Scope length cannot be 0 if present",
@@ -80,7 +80,7 @@ impl CommitConfiguration {
         Ok(())
     }
 
-    fn message_checks(m: &Option<String>) -> Result<(), CommitConfigurationInvariantError> {
+    fn message_checks(m: Option<&str>) -> Result<(), CommitConfigurationInvariantError> {
         if m.as_ref().is_some_and(|it| it.is_empty()) {
             return Err(CommitConfigurationInvariantError::new(
                 "Message length cannot be 0 if present",
@@ -111,16 +111,16 @@ mod tests {
     #[test]
     fn scope_invariants_ok() {
         let s1 = Some(String::from("api"));
-        let s2 = None;
-        let result1 = CommitConfiguration::scope_checks(&s1);
-        let result2 = CommitConfiguration::scope_checks(&s2);
+        let s2: Option<&str> = None;
+        let result1 = CommitConfiguration::scope_checks(s1.as_deref());
+        let result2 = CommitConfiguration::scope_checks(s2.as_deref());
         assert!(result1.is_ok() && result2.is_ok());
     }
 
     #[test]
     fn scope_invariants_wrong() {
         let s = Some(String::new());
-        let result = CommitConfiguration::scope_checks(&s);
+        let result = CommitConfiguration::scope_checks(s.as_deref());
         assert!(result.is_err());
     }
 
@@ -141,16 +141,16 @@ mod tests {
     #[test]
     fn message_invariants_ok() {
         let m1 = Some(String::from("Message body"));
-        let m2 = None;
-        let result1 = CommitConfiguration::message_checks(&m1);
-        let result2 = CommitConfiguration::message_checks(&m2);
+        let m2: Option<&str> = None;
+        let result1 = CommitConfiguration::message_checks(m1.as_deref());
+        let result2 = CommitConfiguration::message_checks(m2.as_deref());
         assert!(result1.is_ok() && result2.is_ok());
     }
 
     #[test]
     fn message_invariants_wrong() {
         let m = Some(String::new());
-        let result = CommitConfiguration::message_checks(&m);
+        let result = CommitConfiguration::message_checks(m.as_deref());
         assert!(result.is_err());
     }
 }
