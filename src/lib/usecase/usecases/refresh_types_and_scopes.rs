@@ -43,7 +43,7 @@ impl UseCase<()> for RefreshTypesAndScopesUseCase<'_> {
                     types.push(c.typ().to_string());
                 }
                 if let Some(s) = c.scope() {
-                    if !scopes.contains(s) {
+                    if !scopes.contains(&s.to_owned()) {
                         scopes.push(s.to_string());
                     }
                 }

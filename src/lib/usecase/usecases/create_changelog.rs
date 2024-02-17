@@ -97,7 +97,7 @@ fn categorize_commit_list(
             let scopes_map = types_map
                 .get_mut(surely_conventional.typ())
                 .expect("The map is ensured to exist");
-            let scope = scope_or_general(surely_conventional.scope().as_deref());
+            let scope = scope_or_general(surely_conventional.scope());
             ensure_inner_vector_exists(scopes_map, &scope.to_owned());
             scopes_map
                 .get_mut(scope)
@@ -383,7 +383,7 @@ mod tests {
         let mut scope_map: ScopeMap = AHashMap::with_hasher(HASH_RANDOM_STATE);
         let l = commit_list();
         l.iter().for_each(|c| {
-            let scope = scope_or_general(c.scope().as_deref());
+            let scope = scope_or_general(c.scope());
             ensure_inner_vector_exists(&mut scope_map, &scope.to_owned());
             scope_map.get_mut(scope).unwrap().push(c.clone());
         });

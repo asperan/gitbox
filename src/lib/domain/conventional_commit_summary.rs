@@ -36,9 +36,8 @@ impl ConventionalCommitSummary {
         &self.typ
     }
 
-    // TODO: After changing everything else, see if this can return Option<&str>
-    pub fn scope(&self) -> &Option<String> {
-        &self.scope
+    pub fn scope(&self) -> Option<&str> {
+        self.scope.as_deref()
     }
 
     pub fn breaking(&self) -> bool {
