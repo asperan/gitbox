@@ -36,6 +36,7 @@ impl ConventionalCommitSummary {
         &self.typ
     }
 
+    // TODO: After changing everything else, see if this can return Option<&str>
     pub fn scope(&self) -> &Option<String> {
         &self.scope
     }
