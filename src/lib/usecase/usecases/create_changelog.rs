@@ -97,10 +97,10 @@ fn categorize_commit_list(
             let scopes_map = types_map
                 .get_mut(surely_conventional.typ())
                 .expect("The map is ensured to exist");
-            let scope = scope_or_general(surely_conventional.scope());
-            ensure_inner_vector_exists(scopes_map, &scope);
+            let scope = scope_or_general(surely_conventional.scope().as_deref());
+            ensure_inner_vector_exists(scopes_map, &scope.to_owned());
             scopes_map
-                .get_mut(&scope)
+                .get_mut(scope)
                 .expect("The vector is ensured to exist")
                 .push(surely_conventional);
         }
@@ -207,11 +207,8 @@ fn format_details(format: &ChangelogFormat, commit: &ConventionalCommitSummary) 
 }
 
 #[inline(always)]
-fn scope_or_general(s: &Option<String>) -> String {
-    match s {
-        Some(expr) => expr.to_string(),
-        None => String::from(NO_SCOPE_TITLE),
-    }
+fn scope_or_general(s: Option<&str>) -> &str {
+    s.unwrap_or(NO_SCOPE_TITLE)
 }
 
 #[cfg(test)]
@@ -371,13 +368,13 @@ mod tests {
 
     #[test]
     fn scope_or_general_some() {
-        let s = scope_or_general(&Some("test".to_string()));
+        let s = scope_or_general(Some("test"));
         assert_eq!(s, "test".to_string());
     }
 
     #[test]
     fn scope_or_general_empty() {
-        let s = scope_or_general(&None);
+        let s = scope_or_general(None);
         assert_eq!(s, NO_SCOPE_TITLE.to_owned());
     }
 
@@ -386,9 +383,9 @@ mod tests {
         let mut scope_map: ScopeMap = AHashMap::with_hasher(HASH_RANDOM_STATE);
         let l = commit_list();
         l.iter().for_each(|c| {
-            let scope = scope_or_general(c.scope());
-            ensure_inner_vector_exists(&mut scope_map, &scope);
-            scope_map.get_mut(&scope).unwrap().push(c.clone());
+            let scope = scope_or_general(c.scope().as_deref());
+            ensure_inner_vector_exists(&mut scope_map, &scope.to_owned());
+            scope_map.get_mut(scope).unwrap().push(c.clone());
         });
         let s = format_scopes(&format(), &scope_map);
         assert_eq!(
