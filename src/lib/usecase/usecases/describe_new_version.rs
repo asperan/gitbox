@@ -98,7 +98,7 @@ impl<'a, 'b: 'a, 'c: 'a, 'd: 'a> CalculateNewVersionUseCase<'a> {
                     Change::Minor
                 } else if self.configuration.triggers().patch().accept(
                     c.typ(),
-                    c.scope(),
+                    c.scope().as_deref(),
                     c.breaking(),
                 ) {
                     Change::Patch
