@@ -1,5 +1,7 @@
 use std::{error::Error, fmt::Display};
 
+/// This error may happen during construction of [TagConfiguration], when
+/// one of its invaiants is broken.
 #[derive(Debug)]
 pub struct TagConfigurationInvariantError {
     message: String,

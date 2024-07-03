@@ -1,5 +1,6 @@
 use std::{error::Error, fmt::Display};
 
+/// The error may occur when the Describe usecase does not find relevant changes.
 #[derive(Debug)]
 pub struct DescribeNoRelevantChangesError {}
 

@@ -1,5 +1,7 @@
 use std::{error::Error, fmt::Display};
 
+/// This error may happen during CommitConfiguration construction,
+/// if one of its invariants is broken by the arguments.
 #[derive(Debug)]
 pub struct CommitConfigurationInvariantError {
     message: String,
