@@ -1,7 +1,4 @@
-use crate::usecase::{
-    error::commit_configuration_invariant_error::CommitConfigurationInvariantError,
-    type_aliases::AnyError,
-};
+use crate::usecase::error::commit_configuration_invariant_error::CommitConfigurationInvariantError;
 
 #[derive(Debug)]
 pub struct CommitConfiguration {
@@ -19,7 +16,7 @@ impl CommitConfiguration {
         is_breaking: bool,
         summary: String,
         message: Option<String>,
-    ) -> Result<CommitConfiguration, AnyError> {
+    ) -> Result<CommitConfiguration, CommitConfigurationInvariantError> {
         Self::type_checks(&commit_type)?;
         Self::scope_checks(scope.as_deref())?;
         Self::summary_checks(&summary)?;
