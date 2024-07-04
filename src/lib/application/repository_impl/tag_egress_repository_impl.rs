@@ -56,7 +56,7 @@ mod tests {
 
     #[test]
     fn received_label_is_version_string() {
-        let version = SemanticVersion::new(0, 1, 0, None, None);
+        let version = SemanticVersion::new(0, 1, 0, None, None).expect("Hand-crafted version is always correct");
         let manager = MockTagEgressManager {
             label: RefCell::new("".into()),
         };
