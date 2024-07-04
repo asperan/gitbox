@@ -606,7 +606,7 @@ mod tests {
 
     #[test]
     fn format_title_basic() {
-        let v = Some(SemanticVersion::new(0, 1, 0, None, None));
+        let v = Some(SemanticVersion::new(0, 1, 0, None, None).expect("Hand-crafted version is always correct"));
         let s = format_title(&format(), v.as_ref());
         assert_eq!(s, "# Changes from version 0.1.0");
     }
@@ -643,12 +643,12 @@ mod tests {
                 0,
                 Some("dev1".to_string()),
                 None,
-            ))
+            ).expect("Hand-crafted version is always correct"))
             .into())
         }
 
         fn last_stable_version(&self) -> Result<Rc<Option<SemanticVersion>>, AnyError> {
-            Ok(Some(SemanticVersion::new(0, 1, 0, None, None)).into())
+            Ok(Some(SemanticVersion::new(0, 1, 0, None, None).expect("Hand-crafted version is always correct")).into())
         }
     }
 

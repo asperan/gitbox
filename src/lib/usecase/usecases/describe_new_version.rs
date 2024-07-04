@@ -44,7 +44,7 @@ impl UseCase<(SemanticVersion, Option<SemanticVersion>)> for CalculateNewVersion
                 stable_version.patch,
                 prerelease,
                 metadata,
-            )
+            )? // TODO: handle error
         };
         Ok((new_version, base_version.as_ref().clone()))
     }
@@ -401,7 +401,7 @@ mod tests {
             &version_repository,
         );
         let result = usecase
-            .greatest_change_from(Some(SemanticVersion::new(0, 1, 0, None, None)).into())
+            .greatest_change_from(Some(SemanticVersion::new(0, 1, 0, None, None).expect("Hand-crafted version must be correct")).into())
             .expect(
                 "greatest_change_from can only fail during commit list retrieval, which is mocked",
             );
@@ -424,7 +424,7 @@ mod tests {
             &version_repository,
         );
         let result = usecase
-            .greatest_change_from(Some(SemanticVersion::new(0, 1, 0, None, None)).into())
+            .greatest_change_from(Some(SemanticVersion::new(0, 1, 0, None, None).expect("Hand-crafted version must be correct")).into())
             .expect(
                 "greatest_change_from can only fail during commit list retrieval, which is mocked",
             );
@@ -570,7 +570,7 @@ mod tests {
         let result = usecase
             .execute()
             .expect("The first release should not have an error");
-        assert_eq!(result.0, SemanticVersion::new(0, 1, 0, None, None));
+        assert_eq!(result.0, SemanticVersion::new(0, 1, 0, None, None).expect("Hand-crafted version must be correct"));
     }
 
     #[test]
@@ -605,7 +605,7 @@ mod tests {
             .expect("The first release should not have an error");
         assert_eq!(
             result.0,
-            SemanticVersion::new(0, 1, 0, Some("dev1".to_string()), None)
+            SemanticVersion::new(0, 1, 0, Some("dev1".to_string()), None).expect("Hand-crafted version must be correct")
         );
     }
 
@@ -640,7 +640,7 @@ mod tests {
         );
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
-            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)).into(),
+            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None).expect("Hand-crafted version is always correct")).into(),
             last_version: None.into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
@@ -652,7 +652,7 @@ mod tests {
         let result = usecase
             .execute()
             .expect("The first release should not have an error");
-        assert_eq!(result.0, SemanticVersion::new(0, 1, 1, None, None));
+        assert_eq!(result.0, SemanticVersion::new(0, 1, 1, None, None).expect("Hand-crafted version must be correct"));
     }
 
     #[test]
@@ -686,7 +686,7 @@ mod tests {
         );
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
-            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)).into(),
+            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None).expect("Hand-crafted version must be correct")).into(),
             last_version: None.into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
@@ -698,7 +698,7 @@ mod tests {
         let result = usecase
             .execute()
             .expect("The first release should not have an error");
-        assert_eq!(result.0, SemanticVersion::new(0, 2, 0, None, None));
+        assert_eq!(result.0, SemanticVersion::new(0, 2, 0, None, None).expect("Hand-crafted version must be correct"));
     }
 
     #[test]
@@ -732,7 +732,7 @@ mod tests {
         );
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
-            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)).into(),
+            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None).expect("Hand-crafted version is always correct")).into(),
             last_version: None.into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
@@ -744,7 +744,7 @@ mod tests {
         let result = usecase
             .execute()
             .expect("The first release should not have an error");
-        assert_eq!(result.0, SemanticVersion::new(1, 0, 0, None, None));
+        assert_eq!(result.0, SemanticVersion::new(1, 0, 0, None, None).expect("Hand-crafted version must be correct"));
     }
 
     #[test]
@@ -778,7 +778,7 @@ mod tests {
         );
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
-            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)).into(),
+            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None).expect("Hand-crafted version must be correct")).into(),
             last_version: None.into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
@@ -825,14 +825,14 @@ mod tests {
         );
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
-            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)).into(),
+            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None).expect("Hand-crafted version is always correct")).into(),
             last_version: Some(SemanticVersion::new(
                 0,
                 1,
                 1,
                 Some("alpha1".to_string()),
                 None,
-            ))
+            ).expect("Hand-crafted version must be correct"))
             .into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
@@ -844,7 +844,7 @@ mod tests {
         let result = usecase.execute().expect("This calc should be correct");
         assert_eq!(
             result.0,
-            SemanticVersion::new(0, 1, 1, Some("dev1".to_string()), None)
+            SemanticVersion::new(0, 1, 1, Some("dev1".to_string()), None).expect("Hand-crafted version must be correct")
         );
     }
 
@@ -884,14 +884,14 @@ mod tests {
         );
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
-            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)).into(),
+            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None).expect("Hand-crafted version is always correct")).into(),
             last_version: Some(SemanticVersion::new(
                 0,
                 1,
                 1,
                 Some("dev1".to_string()),
                 None,
-            ))
+            ).expect("Hand-crafted version must be correct"))
             .into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
@@ -903,7 +903,7 @@ mod tests {
         let result = usecase.execute().expect("This calc should be correct");
         assert_eq!(
             result.0,
-            SemanticVersion::new(0, 2, 0, Some("dev1".to_string()), None)
+            SemanticVersion::new(0, 2, 0, Some("dev1".to_string()), None).expect("Hand-crafted version must be correct")
         );
     }
 
@@ -938,8 +938,8 @@ mod tests {
         );
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
-            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)).into(),
-            last_version: Some(SemanticVersion::new(0, 1, 0, None, None)).into(),
+            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None).expect("Hand-crafted version must be correct")).into(),
+            last_version: Some(SemanticVersion::new(0, 1, 0, None, None).expect("Hand-crafted version must be correct")).into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,
@@ -987,14 +987,14 @@ mod tests {
         );
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
-            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)).into(),
+            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None).expect("Hand-crafted version must be correct")).into(),
             last_version: Some(SemanticVersion::new(
                 0,
                 1,
                 1,
                 Some("dev1".to_string()),
                 None,
-            ))
+            ).expect("Hand-crafted version must be correct"))
             .into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
@@ -1006,7 +1006,7 @@ mod tests {
         let result = usecase.execute().expect("This calc should be correct");
         assert_eq!(
             result.0,
-            SemanticVersion::new(0, 1, 1, Some("dev2".to_string()), None)
+            SemanticVersion::new(0, 1, 1, Some("dev2".to_string()), None).expect("Hand-crafted version must be correct")
         );
     }
 
@@ -1035,7 +1035,7 @@ mod tests {
         let commit_summary_repository = MockCommitSummaryRepository::new(vec![], vec![]);
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
-            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)).into(),
+            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None).expect("Hand-crafted version must be correct")).into(),
             last_version: None.into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
@@ -1073,7 +1073,7 @@ mod tests {
         let commit_summary_repository = MockCommitSummaryRepository::new(vec![], vec![]);
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
-            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)).into(),
+            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None).expect("Hand-crafted version must be correct")).into(),
             last_version: None.into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
@@ -1112,7 +1112,7 @@ mod tests {
         let commit_summary_repository = MockCommitSummaryRepository::new(vec![], vec![]);
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
-            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None)).into(),
+            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None).expect("Hand-crafted version must be correct")).into(),
             last_version: None.into(),
         };
         let usecase = CalculateNewVersionUseCase::new(

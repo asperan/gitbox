@@ -56,7 +56,7 @@ mod tests {
     impl MockTagWriteRepository {
         pub fn new() -> MockTagWriteRepository {
             MockTagWriteRepository {
-                version: RefCell::new(SemanticVersion::new(0, 0, 0, None, None)),
+                version: RefCell::new(SemanticVersion::new(0, 0, 0, None, None).expect("Hand-crafted version is always correct")),
                 message: RefCell::new(None),
                 sign: RefCell::new(false),
             }
@@ -80,7 +80,7 @@ mod tests {
     #[test]
     fn usecase_propagate_configuration() {
         let tag_configuration = TagConfiguration::new(
-            SemanticVersion::new(1, 0, 0, None, None),
+            SemanticVersion::new(1, 0, 0, None, None).expect("Hand-crafted version is always correct"),
             Some("test".to_string()),
             true,
         )
@@ -90,7 +90,7 @@ mod tests {
         usecase.execute().expect("Mock does not return an error");
         assert_eq!(
             tag_write_repository.version.borrow().to_owned(),
-            SemanticVersion::new(1, 0, 0, None, None)
+            SemanticVersion::new(1, 0, 0, None, None).expect("Hand-crafted version is always correct")
         );
         assert_eq!(
             tag_write_repository.message.borrow().to_owned(),
