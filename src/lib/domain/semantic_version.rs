@@ -55,7 +55,7 @@ impl SemanticVersion {
 
     fn check_prerelease(
         prerelease: Option<String>,
-    ) -> Result<Option<String>, SemanticVersionInvariantError> {
+    ) -> Result<Option<String>, InvalidPrereleaseStringError> {
         match prerelease {
             Some(wrong)
                 if wrong.is_empty()
@@ -66,9 +66,7 @@ impl SemanticVersion {
                             || it == '-')
                     }) =>
             {
-                Err(SemanticVersionInvariantError::InvalidPrerelease(
-                    InvalidPrereleaseStringError::new(wrong),
-                ))
+                Err(InvalidPrereleaseStringError::new(wrong))
             }
             None => Ok(None),
             Some(s) => Ok(Some(s)),
@@ -77,7 +75,7 @@ impl SemanticVersion {
 
     fn check_metadata(
         metadata: Option<String>,
-    ) -> Result<Option<String>, SemanticVersionInvariantError> {
+    ) -> Result<Option<String>, InvalidMetadataStringError> {
         match metadata {
             Some(wrong)
                 if wrong.is_empty()
@@ -88,9 +86,7 @@ impl SemanticVersion {
                             || it == '-')
                     }) =>
             {
-                Err(SemanticVersionInvariantError::InvalidMetadata(
-                    InvalidMetadataStringError::new(wrong),
-                ))
+                Err(InvalidMetadataStringError::new(wrong))
             }
             None => Ok(None),
             Some(s) => Ok(Some(s)),

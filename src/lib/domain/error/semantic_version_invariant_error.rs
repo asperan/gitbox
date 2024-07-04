@@ -25,6 +25,18 @@ impl Error for SemanticVersionInvariantError {
     }
 }
 
+impl From<InvalidPrereleaseStringError> for SemanticVersionInvariantError {
+    fn from(value: InvalidPrereleaseStringError) -> Self {
+        Self::InvalidPrerelease(value)
+    }
+}
+
+impl From<InvalidMetadataStringError> for SemanticVersionInvariantError {
+    fn from(value: InvalidMetadataStringError) -> Self {
+        Self::InvalidMetadata(value)
+    }
+}
+
 #[derive(Debug)]
 pub struct InvalidPrereleaseStringError {
     wrong_string: String,
