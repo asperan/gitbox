@@ -1,4 +1,7 @@
-use super::conventional_commit_summary::ConventionalCommitSummary;
+use super::{
+    conventional_commit_summary::ConventionalCommitSummary,
+    error::conventional_commit_error::ConventionalCommitError,
+};
 
 /**
 A [conventional commit](https://www.conventionalcommits.org/en/v1.0.0/).
@@ -21,11 +24,11 @@ impl ConventionalCommit {
         breaking: bool,
         summary: String,
         message: Option<String>,
-    ) -> ConventionalCommit {
-        ConventionalCommit {
-            summary: ConventionalCommitSummary::new(typ, scope, breaking, summary),
+    ) -> Result<Self, ConventionalCommitError> {
+        Ok(ConventionalCommit {
+            summary: ConventionalCommitSummary::new(typ, scope, breaking, summary)?,
             message,
-        }
+        })
     }
 
     pub fn summary(&self) -> &ConventionalCommitSummary {
