@@ -3,19 +3,20 @@ use std::{fmt::Display, str::FromStr};
 use regex::Regex;
 
 use crate::{
-    application::error::commit_summary_parsing_error::CommitSummaryParsingError,
+    application::error::commit_summary_parsing_error::{
+        CommitSummaryParsingError, FreeFormCommitSummaryError,
+    },
     domain::{
         commit_summary::CommitSummary, conventional_commit::ConventionalCommit,
         conventional_commit_summary::ConventionalCommitSummary,
     },
-    usecase::type_aliases::AnyError,
 };
 
 // Groups: 1 = type, 2 = scope with (), 3 = scope, 4 = breaking change, 5 = summary
 const CONVENTIONAL_COMMIT_PATTERN: &str = r"^(\w+)(\(([\w/-]+)\))?(!)?: (.+)$";
 
 impl FromStr for CommitSummary {
-    type Err = AnyError;
+    type Err = CommitSummaryParsingError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let regex = Regex::new(CONVENTIONAL_COMMIT_PATTERN)
@@ -32,13 +33,14 @@ impl FromStr for CommitSummary {
                     scope.map(|it| it.to_owned()),
                     breaking,
                     summary.to_owned(),
-                )))
+                )?))
             }
             None => {
                 if s.is_empty() {
-                    Err(Box::new(CommitSummaryParsingError::new(
-                        "Free form commit message cannot be empty",
-                    )))
+                    Err(
+                        FreeFormCommitSummaryError::new("Free form commit message cannot be empty")
+                            .into(),
+                    )
                 } else {
                     Ok(CommitSummary::FreeForm(s.to_owned()))
                 }
@@ -105,7 +107,7 @@ mod tests {
         let basic_commit = "feat: test";
         let c = CommitSummary::from_str(basic_commit);
         let expected =
-            ConventionalCommitSummary::new("feat".to_string(), None, false, "test".to_string());
+            ConventionalCommitSummary::new("feat".to_string(), None, false, "test".to_string()).expect("Hand-crafted conventional commit summary is correct");
         assert!(c.is_ok());
         assert!(match c.expect("Just asserted its OK-ness") {
             CommitSummary::Conventional(conv) => conv == expected,
@@ -122,7 +124,7 @@ mod tests {
             Some("scope".to_string()),
             false,
             "test".to_string(),
-        );
+        ).expect("Hand-crafted conventional commit summary is correct");
         assert!(c.is_ok());
         assert!(match c.expect("Just asserted its OK-ness") {
             CommitSummary::Conventional(conv) => conv == expected,
@@ -135,7 +137,7 @@ mod tests {
         let breaking_commit = "feat!: test";
         let c = CommitSummary::from_str(breaking_commit);
         let expected =
-            ConventionalCommitSummary::new("feat".to_string(), None, true, "test".to_string());
+            ConventionalCommitSummary::new("feat".to_string(), None, true, "test".to_string()).expect("Hand-crafted conventional commit summary is correct");
         assert!(c.is_ok());
         assert!(match c.expect("Just asserted its OK-ness") {
             CommitSummary::Conventional(conv) => conv == expected,
@@ -152,7 +154,7 @@ mod tests {
             Some("scope".to_string()),
             true,
             "test".to_string(),
-        );
+        ).expect("Hand-crafted conventional commit summary is correct");
         assert!(c.is_ok());
         assert!(match c.expect("Just asserted its OK-ness") {
             CommitSummary::Conventional(conv) => conv == expected,
@@ -167,7 +169,7 @@ mod tests {
             None,
             false,
             "test format".to_string(),
-        );
+        ).expect("Hand-crafted conventional commit summary is correct");
         assert_eq!(&commit.to_string(), "feat: test format");
     }
 
@@ -178,7 +180,7 @@ mod tests {
             Some("domain".to_string()),
             false,
             "test format".to_string(),
-        );
+        ).expect("Hand-crafted conventional commit summary is correct");
         assert_eq!(&commit.to_string(), "feat(domain): test format");
     }
 
@@ -189,7 +191,7 @@ mod tests {
             None,
             true,
             "test format".to_string(),
-        );
+        ).expect("Hand-crafted conventional commit summary is correct");
         assert_eq!(&commit.to_string(), "feat!: test format");
     }
 
@@ -200,7 +202,7 @@ mod tests {
             Some("domain".to_string()),
             true,
             "test format".to_string(),
-        );
+        ).expect("Hand-crafted conventional commit summary is correct");
         assert_eq!(&commit.to_string(), "feat(domain)!: test format");
     }
 
