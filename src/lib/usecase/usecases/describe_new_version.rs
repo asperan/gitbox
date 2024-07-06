@@ -4,12 +4,9 @@ use crate::{
     domain::{commit_summary::CommitSummary, semantic_version::SemanticVersion},
     usecase::{
         configuration::describe::DescribeConfiguration,
-        error::{
-            describe_new_version_error::{
-                DescribeMetadataError, DescribeNewVersionError, DescribePrereleaseError,
-                DescribeStableReleaseError,
-            },
-            describe_no_relevant_changes_error::DescribeNoRelevantChangesError,
+        error::describe_new_version_error::{
+            DescribeMetadataError, DescribeNewVersionError, DescribeNoRelevantChangesError,
+            DescribePrereleaseError, DescribeStableReleaseError,
         },
         repository::{
             bounded_commit_summary_ingress_repository::BoundedCommitSummaryIngressRepository,
@@ -883,10 +880,7 @@ mod tests {
         let result = usecase
             .execute()
             .expect_err("This should return an error as there are no relevant changes");
-        assert!(matches!(
-            result,
-            DescribeNewVersionError::StableRelease(_)
-        ));
+        assert!(matches!(result, DescribeNewVersionError::StableRelease(_)));
     }
 
     // test prerelease generation

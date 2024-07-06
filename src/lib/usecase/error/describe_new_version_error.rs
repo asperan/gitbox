@@ -2,8 +2,6 @@ use std::{error::Error, fmt::Display};
 
 use crate::domain::error::semantic_version_invariant_error::SemanticVersionInvariantError;
 
-use super::describe_no_relevant_changes_error::DescribeNoRelevantChangesError;
-
 type RepositoryError = Box<dyn Error>;
 
 #[derive(Debug)]
@@ -157,3 +155,21 @@ impl From<Box<dyn Error>> for DescribeMetadataError {
         Self::RepositoryError(value)
     }
 }
+
+/// The error may occur when the Describe usecase does not find relevant changes.
+#[derive(Debug)]
+pub struct DescribeNoRelevantChangesError {}
+
+impl DescribeNoRelevantChangesError {
+    pub fn new() -> DescribeNoRelevantChangesError {
+        DescribeNoRelevantChangesError {}
+    }
+}
+
+impl Display for DescribeNoRelevantChangesError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "There are no relevant changes from the last release. Use triggers if you want to proc a new version.")
+    }
+}
+
+impl Error for DescribeNoRelevantChangesError {}
