@@ -108,7 +108,7 @@ impl<'a, 'b: 'a, 'c: 'a, 'd: 'a> CalculateNewVersionUseCase<'a> {
                     Change::Minor
                 } else if self.configuration.triggers().patch().accept(
                     c.typ(),
-                    c.scope().as_deref(),
+                    c.scope(),
                     c.breaking(),
                 ) {
                     Change::Patch
@@ -885,7 +885,7 @@ mod tests {
             .expect_err("This should return an error as there are no relevant changes");
         assert!(matches!(
             result,
-            DescribeNewVersionError::StableReleaseError(_)
+            DescribeNewVersionError::StableRelease(_)
         ));
     }
 
@@ -1070,7 +1070,7 @@ mod tests {
         let result = usecase.execute();
         assert!(matches!(
             result,
-            Err(DescribeNewVersionError::PrereleaseError(_))
+            Err(DescribeNewVersionError::Prerelease(_))
         ));
     }
 

@@ -2,9 +2,9 @@ use std::{error::Error, fmt::Display};
 
 #[derive(Debug)]
 pub enum ConventionalCommitSummaryInvariantError {
-    InvalidType(InvalidTypeError),
-    InvalidScope(InvalidScopeError),
-    InvalidSummary(InvalidSummaryError),
+    Type(InvalidTypeError),
+    Scope(InvalidScopeError),
+    Summary(InvalidSummaryError),
 }
 
 impl Display for ConventionalCommitSummaryInvariantError {
@@ -16,28 +16,28 @@ impl Display for ConventionalCommitSummaryInvariantError {
 impl Error for ConventionalCommitSummaryInvariantError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         match self {
-            Self::InvalidType(e) => Some(e),
-            Self::InvalidScope(e) => Some(e),
-            Self::InvalidSummary(e) => Some(e),
+            Self::Type(e) => Some(e),
+            Self::Scope(e) => Some(e),
+            Self::Summary(e) => Some(e),
         }
     }
 }
 
 impl From<InvalidTypeError> for ConventionalCommitSummaryInvariantError {
     fn from(value: InvalidTypeError) -> Self {
-        Self::InvalidType(value)
+        Self::Type(value)
     }
 }
 
 impl From<InvalidScopeError> for ConventionalCommitSummaryInvariantError {
     fn from(value: InvalidScopeError) -> Self {
-        Self::InvalidScope(value)
+        Self::Scope(value)
     }
 }
 
 impl From<InvalidSummaryError> for ConventionalCommitSummaryInvariantError {
     fn from(value: InvalidSummaryError) -> Self {
-        Self::InvalidSummary(value)
+        Self::Summary(value)
     }
 }
 

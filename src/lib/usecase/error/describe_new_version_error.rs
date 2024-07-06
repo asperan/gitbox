@@ -8,11 +8,11 @@ type RepositoryError = Box<dyn Error>;
 
 #[derive(Debug)]
 pub enum DescribeNewVersionError {
-    StableReleaseError(DescribeStableReleaseError),
-    PrereleaseError(DescribePrereleaseError),
-    MetadataError(DescribeMetadataError),
-    SemanticVersionCreationError(SemanticVersionInvariantError),
-    RepositoryError(RepositoryError),
+    StableRelease(DescribeStableReleaseError),
+    Prerelease(DescribePrereleaseError),
+    Metadata(DescribeMetadataError),
+    SemanticVersionCreation(SemanticVersionInvariantError),
+    Repository(RepositoryError),
 }
 
 impl Display for DescribeNewVersionError {
@@ -28,42 +28,42 @@ impl Display for DescribeNewVersionError {
 impl Error for DescribeNewVersionError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         match self {
-            Self::SemanticVersionCreationError(err) => Some(err),
-            Self::StableReleaseError(err) => Some(err),
-            Self::PrereleaseError(err) => Some(err),
-            Self::MetadataError(err) => Some(err),
-            Self::RepositoryError(err) => Some(err.as_ref()),
+            Self::SemanticVersionCreation(err) => Some(err),
+            Self::StableRelease(err) => Some(err),
+            Self::Prerelease(err) => Some(err),
+            Self::Metadata(err) => Some(err),
+            Self::Repository(err) => Some(err.as_ref()),
         }
     }
 }
 
 impl From<DescribeStableReleaseError> for DescribeNewVersionError {
     fn from(value: DescribeStableReleaseError) -> Self {
-        Self::StableReleaseError(value)
+        Self::StableRelease(value)
     }
 }
 
 impl From<DescribePrereleaseError> for DescribeNewVersionError {
     fn from(value: DescribePrereleaseError) -> Self {
-        Self::PrereleaseError(value)
+        Self::Prerelease(value)
     }
 }
 
 impl From<DescribeMetadataError> for DescribeNewVersionError {
     fn from(value: DescribeMetadataError) -> Self {
-        Self::MetadataError(value)
+        Self::Metadata(value)
     }
 }
 
 impl From<SemanticVersionInvariantError> for DescribeNewVersionError {
     fn from(value: SemanticVersionInvariantError) -> Self {
-        Self::SemanticVersionCreationError(value)
+        Self::SemanticVersionCreation(value)
     }
 }
 
 impl From<RepositoryError> for DescribeNewVersionError {
     fn from(value: RepositoryError) -> Self {
-        Self::RepositoryError(value)
+        Self::Repository(value)
     }
 }
 
