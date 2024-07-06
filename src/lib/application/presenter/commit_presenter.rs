@@ -214,7 +214,7 @@ mod tests {
             true,
             "test format".to_string(),
             None,
-        );
+        ).expect("Hand-crafted conventional commit summary is correct");
         assert_eq!(&commit.to_string(), "feat(domain)!: test format");
     }
 
@@ -226,7 +226,7 @@ mod tests {
             true,
             "test format".to_string(),
             Some("Message body".to_string()),
-        );
+        ).expect("Hand-crafted conventional commit summary is correct");
         assert_eq!(
             &commit.to_string(),
             "feat(domain)!: test format\n\nMessage body"
