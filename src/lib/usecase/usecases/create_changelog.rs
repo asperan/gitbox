@@ -84,7 +84,8 @@ fn categorize_commit_list(
                 None,
                 false,
                 free_form,
-            ),
+            )
+            .expect("Hand-crafted conventional commit (from free-form) is expected to be correct"),
         };
         if !exclude_trigger.as_ref().is_some_and(|it| {
             it.accept(
@@ -250,7 +251,7 @@ mod tests {
             Some("API".to_string()),
             false,
             "test message #1".to_string(),
-        )
+        ).expect("Hand-crafted conventional commit summary is always correct")
     }
 
     fn breaking_commit() -> ConventionalCommitSummary {
@@ -259,7 +260,7 @@ mod tests {
             Some("API".to_string()),
             true,
             "test message #1".to_string(),
-        )
+        ).expect("Hand-crafted conventional commit summary is always correct")
     }
 
     fn commit_list() -> Vec<ConventionalCommitSummary> {
@@ -269,43 +270,43 @@ mod tests {
                 Some("API".to_string()),
                 false,
                 "test message #1".to_string(),
-            ),
+            ).expect("Hand-crafted conventional commit summary is always correct"),
             ConventionalCommitSummary::new(
                 "fix".to_string(),
                 Some("API".to_string()),
                 false,
                 "test message #2".to_string(),
-            ),
+            ).expect("Hand-crafted conventional commit summary is always correct"),
             ConventionalCommitSummary::new(
                 "test".to_string(),
                 None,
                 false,
                 "test message #3".to_string(),
-            ),
+            ).expect("Hand-crafted conventional commit summary is always correct"),
             ConventionalCommitSummary::new(
                 "refactor".to_string(),
                 Some("exclude".to_string()),
                 false,
                 "test message #4".to_string(),
-            ),
+            ).expect("Hand-crafted conventional commit summary is always correct"),
             ConventionalCommitSummary::new(
                 "docs".to_string(),
                 None,
                 false,
                 "test message #5".to_string(),
-            ),
+            ).expect("Hand-crafted conventional commit summary is always correct"),
             ConventionalCommitSummary::new(
                 "feat".to_string(),
                 None,
                 false,
                 "test message #6".to_string(),
-            ),
+            ).expect("Hand-crafted conventional commit summary is always correct"),
             ConventionalCommitSummary::new(
                 "test".to_string(),
                 Some("API".to_string()),
                 false,
                 "test message #7".to_string(),
-            ),
+            ).expect("Hand-crafted conventional commit summary is always correct"),
         ]
     }
 
@@ -416,7 +417,7 @@ mod tests {
                     Some("API".to_string()),
                     false,
                     "test message #1".to_string(),
-                ));
+                ).expect("Hand-crafted conventional commit summary is always correct"));
             ensure_inner_vector_exists(feat_commits, &NO_SCOPE_TITLE.to_string());
             feat_commits
                 .get_mut(NO_SCOPE_TITLE)
@@ -426,7 +427,7 @@ mod tests {
                     None,
                     false,
                     "test message #6".to_string(),
-                ));
+                ).expect("Hand-crafted conventional commit summary is always correct"));
 
             ensure_inner_map_exists(&mut temp, "fix");
             let fix_commits = temp.get_mut("fix").expect("Map just created");
@@ -439,7 +440,7 @@ mod tests {
                     Some("API".to_string()),
                     false,
                     "test message #2".to_string(),
-                ));
+                ).expect("Hand-crafted conventional commit summary is always correct"));
 
             ensure_inner_map_exists(&mut temp, "test");
             let test_commits = temp.get_mut("test").expect("Map just created");
@@ -452,7 +453,7 @@ mod tests {
                     Some("API".to_string()),
                     false,
                     "test message #7".to_string(),
-                ));
+                ).expect("Hand-crafted conventional commit summary is always correct"));
             ensure_inner_vector_exists(test_commits, &NO_SCOPE_TITLE.to_string());
             test_commits
                 .get_mut(NO_SCOPE_TITLE)
@@ -462,7 +463,7 @@ mod tests {
                     None,
                     false,
                     "test message #3".to_string(),
-                ));
+                ).expect("Hand-crafted conventional commit summary is always correct"));
 
             ensure_inner_map_exists(&mut temp, "refactor");
             let refactor_commits = temp.get_mut("refactor").expect("Map just created");
@@ -475,7 +476,7 @@ mod tests {
                     Some("exclude".to_string()),
                     false,
                     "test message #4".to_string(),
-                ));
+                ).expect("Hand-crafted conventional commit summary is always correct"));
 
             ensure_inner_map_exists(&mut temp, "docs");
             let docs_commits = temp.get_mut("docs").expect("Map just created");
@@ -488,7 +489,7 @@ mod tests {
                     None,
                     false,
                     "test message #5".to_string(),
-                ));
+                ).expect("Hand-crafted conventional commit summary is always correct"));
             temp
         };
         assert_eq!(m, expected);
@@ -526,7 +527,7 @@ mod tests {
                     Some("API".to_string()),
                     false,
                     "test message #1".to_string(),
-                ));
+                ).expect("Hand-crafted conventional commit summary is always correct"));
             ensure_inner_vector_exists(feat_commits, &NO_SCOPE_TITLE.to_string());
             feat_commits
                 .get_mut(NO_SCOPE_TITLE)
@@ -536,7 +537,7 @@ mod tests {
                     None,
                     false,
                     "test message #6".to_string(),
-                ));
+                ).expect("Hand-crafted conventional commit summary is always correct"));
 
             ensure_inner_map_exists(&mut temp, "fix");
             let fix_commits = temp.get_mut("fix").expect("Map just created");
@@ -549,7 +550,7 @@ mod tests {
                     Some("API".to_string()),
                     false,
                     "test message #2".to_string(),
-                ));
+                ).expect("Hand-crafted conventional commit summary is always correct"));
 
             ensure_inner_map_exists(&mut temp, "test");
             let test_commits = temp.get_mut("test").expect("Map just created");
@@ -562,7 +563,7 @@ mod tests {
                     Some("API".to_string()),
                     false,
                     "test message #7".to_string(),
-                ));
+                ).expect("Hand-crafted conventional commit summary is always correct"));
             ensure_inner_vector_exists(test_commits, &NO_SCOPE_TITLE.to_string());
             test_commits
                 .get_mut(NO_SCOPE_TITLE)
@@ -572,7 +573,7 @@ mod tests {
                     None,
                     false,
                     "test message #3".to_string(),
-                ));
+                ).expect("Hand-crafted conventional commit summary is always correct"));
 
             ensure_inner_map_exists(&mut temp, "docs");
             let docs_commits = temp.get_mut("docs").expect("Map just created");
@@ -585,7 +586,7 @@ mod tests {
                     None,
                     false,
                     "test message #5".to_string(),
-                ));
+                ).expect("Hand-crafted conventional commit summary is always correct"));
             temp
         };
         assert_eq!(m, expected);
@@ -606,7 +607,10 @@ mod tests {
 
     #[test]
     fn format_title_basic() {
-        let v = Some(SemanticVersion::new(0, 1, 0, None, None).expect("Hand-crafted version is always correct"));
+        let v = Some(
+            SemanticVersion::new(0, 1, 0, None, None)
+                .expect("Hand-crafted version is always correct"),
+        );
         let s = format_title(&format(), v.as_ref());
         assert_eq!(s, "# Changes from version 0.1.0");
     }
@@ -637,18 +641,19 @@ mod tests {
 
     impl SemanticVersionIngressRepository for MockVersionRepository {
         fn last_version(&self) -> Result<Rc<Option<SemanticVersion>>, AnyError> {
-            Ok(Some(SemanticVersion::new(
-                0,
-                1,
-                0,
-                Some("dev1".to_string()),
-                None,
-            ).expect("Hand-crafted version is always correct"))
+            Ok(Some(
+                SemanticVersion::new(0, 1, 0, Some("dev1".to_string()), None)
+                    .expect("Hand-crafted version is always correct"),
+            )
             .into())
         }
 
         fn last_stable_version(&self) -> Result<Rc<Option<SemanticVersion>>, AnyError> {
-            Ok(Some(SemanticVersion::new(0, 1, 0, None, None).expect("Hand-crafted version is always correct")).into())
+            Ok(Some(
+                SemanticVersion::new(0, 1, 0, None, None)
+                    .expect("Hand-crafted version is always correct"),
+            )
+            .into())
         }
     }
 
