@@ -2,16 +2,20 @@ use ahash::{AHashMap, RandomState};
 
 use crate::{
     domain::{
-        commit_summary::CommitSummary, conventional_commit_summary::{ConventionalCommitSummary, ConventionalCommitSummaryBreakingFlag},
-        semantic_version::SemanticVersion, trigger::Trigger,
+        commit_summary::CommitSummary,
+        conventional_commit_summary::{
+            ConventionalCommitSummary, ConventionalCommitSummaryBreakingFlag,
+        },
+        semantic_version::SemanticVersion,
+        trigger::Trigger,
     },
     usecase::{
         configuration::changelog::{ChangelogConfiguration, ChangelogFormat},
+        error::changelog_creation_error::ChangelogCreationError,
         repository::{
             bounded_commit_summary_ingress_repository::BoundedCommitSummaryIngressRepository,
             semantic_version_ingress_repository::SemanticVersionIngressRepository,
         },
-        type_aliases::AnyError,
         usecases::usecase::UseCase,
     },
 };
@@ -36,8 +40,8 @@ impl<'a, 'b: 'a, 'c: 'a> CreateChangelogUseCase<'a> {
     }
 }
 
-impl UseCase<String, AnyError> for CreateChangelogUseCase<'_> {
-    fn execute(&self) -> Result<String, AnyError> {
+impl UseCase<String, ChangelogCreationError> for CreateChangelogUseCase<'_> {
+    fn execute(&self) -> Result<String, ChangelogCreationError> {
         let from_version = if self.configuration.generate_from_latest_version() {
             self.version_repository.last_version()?
         } else {
@@ -222,7 +226,9 @@ mod tests {
     use crate::{
         domain::{
             commit_summary::CommitSummary,
-            conventional_commit_summary::{ConventionalCommitSummary, ConventionalCommitSummaryBreakingFlag},
+            conventional_commit_summary::{
+                ConventionalCommitSummary, ConventionalCommitSummaryBreakingFlag,
+            },
             semantic_version::SemanticVersion,
             trigger::{BasicStatement, Trigger},
         },
@@ -251,7 +257,8 @@ mod tests {
             Some("API".to_string()),
             ConventionalCommitSummaryBreakingFlag::Disabled,
             "test message #1".to_string(),
-        ).expect("Hand-crafted conventional commit summary is always correct")
+        )
+        .expect("Hand-crafted conventional commit summary is always correct")
     }
 
     fn breaking_commit() -> ConventionalCommitSummary {
@@ -260,7 +267,8 @@ mod tests {
             Some("API".to_string()),
             ConventionalCommitSummaryBreakingFlag::Enabled,
             "test message #1".to_string(),
-        ).expect("Hand-crafted conventional commit summary is always correct")
+        )
+        .expect("Hand-crafted conventional commit summary is always correct")
     }
 
     fn commit_list() -> Vec<ConventionalCommitSummary> {
@@ -270,43 +278,50 @@ mod tests {
                 Some("API".to_string()),
                 ConventionalCommitSummaryBreakingFlag::Disabled,
                 "test message #1".to_string(),
-            ).expect("Hand-crafted conventional commit summary is always correct"),
+            )
+            .expect("Hand-crafted conventional commit summary is always correct"),
             ConventionalCommitSummary::new(
                 "fix".to_string(),
                 Some("API".to_string()),
                 ConventionalCommitSummaryBreakingFlag::Disabled,
                 "test message #2".to_string(),
-            ).expect("Hand-crafted conventional commit summary is always correct"),
+            )
+            .expect("Hand-crafted conventional commit summary is always correct"),
             ConventionalCommitSummary::new(
                 "test".to_string(),
                 None,
                 ConventionalCommitSummaryBreakingFlag::Disabled,
                 "test message #3".to_string(),
-            ).expect("Hand-crafted conventional commit summary is always correct"),
+            )
+            .expect("Hand-crafted conventional commit summary is always correct"),
             ConventionalCommitSummary::new(
                 "refactor".to_string(),
                 Some("exclude".to_string()),
                 ConventionalCommitSummaryBreakingFlag::Disabled,
                 "test message #4".to_string(),
-            ).expect("Hand-crafted conventional commit summary is always correct"),
+            )
+            .expect("Hand-crafted conventional commit summary is always correct"),
             ConventionalCommitSummary::new(
                 "docs".to_string(),
                 None,
                 ConventionalCommitSummaryBreakingFlag::Disabled,
                 "test message #5".to_string(),
-            ).expect("Hand-crafted conventional commit summary is always correct"),
+            )
+            .expect("Hand-crafted conventional commit summary is always correct"),
             ConventionalCommitSummary::new(
                 "feat".to_string(),
                 None,
                 ConventionalCommitSummaryBreakingFlag::Disabled,
                 "test message #6".to_string(),
-            ).expect("Hand-crafted conventional commit summary is always correct"),
+            )
+            .expect("Hand-crafted conventional commit summary is always correct"),
             ConventionalCommitSummary::new(
                 "test".to_string(),
                 Some("API".to_string()),
                 ConventionalCommitSummaryBreakingFlag::Disabled,
                 "test message #7".to_string(),
-            ).expect("Hand-crafted conventional commit summary is always correct"),
+            )
+            .expect("Hand-crafted conventional commit summary is always correct"),
         ]
     }
 
@@ -412,22 +427,28 @@ mod tests {
             feat_commits
                 .get_mut("API")
                 .expect("Vector just created")
-                .push(ConventionalCommitSummary::new(
-                    "feat".to_string(),
-                    Some("API".to_string()),
-                    ConventionalCommitSummaryBreakingFlag::Disabled,
-                    "test message #1".to_string(),
-                ).expect("Hand-crafted conventional commit summary is always correct"));
+                .push(
+                    ConventionalCommitSummary::new(
+                        "feat".to_string(),
+                        Some("API".to_string()),
+                        ConventionalCommitSummaryBreakingFlag::Disabled,
+                        "test message #1".to_string(),
+                    )
+                    .expect("Hand-crafted conventional commit summary is always correct"),
+                );
             ensure_inner_vector_exists(feat_commits, &NO_SCOPE_TITLE.to_string());
             feat_commits
                 .get_mut(NO_SCOPE_TITLE)
                 .expect("Vector just created")
-                .push(ConventionalCommitSummary::new(
-                    "feat".to_string(),
-                    None,
-                    ConventionalCommitSummaryBreakingFlag::Disabled,
-                    "test message #6".to_string(),
-                ).expect("Hand-crafted conventional commit summary is always correct"));
+                .push(
+                    ConventionalCommitSummary::new(
+                        "feat".to_string(),
+                        None,
+                        ConventionalCommitSummaryBreakingFlag::Disabled,
+                        "test message #6".to_string(),
+                    )
+                    .expect("Hand-crafted conventional commit summary is always correct"),
+                );
 
             ensure_inner_map_exists(&mut temp, "fix");
             let fix_commits = temp.get_mut("fix").expect("Map just created");
@@ -435,12 +456,15 @@ mod tests {
             fix_commits
                 .get_mut("API")
                 .expect("Vector just created")
-                .push(ConventionalCommitSummary::new(
-                    "fix".to_string(),
-                    Some("API".to_string()),
-                    ConventionalCommitSummaryBreakingFlag::Disabled,
-                    "test message #2".to_string(),
-                ).expect("Hand-crafted conventional commit summary is always correct"));
+                .push(
+                    ConventionalCommitSummary::new(
+                        "fix".to_string(),
+                        Some("API".to_string()),
+                        ConventionalCommitSummaryBreakingFlag::Disabled,
+                        "test message #2".to_string(),
+                    )
+                    .expect("Hand-crafted conventional commit summary is always correct"),
+                );
 
             ensure_inner_map_exists(&mut temp, "test");
             let test_commits = temp.get_mut("test").expect("Map just created");
@@ -448,22 +472,28 @@ mod tests {
             test_commits
                 .get_mut("API")
                 .expect("Vector just created")
-                .push(ConventionalCommitSummary::new(
-                    "test".to_string(),
-                    Some("API".to_string()),
-                    ConventionalCommitSummaryBreakingFlag::Disabled,
-                    "test message #7".to_string(),
-                ).expect("Hand-crafted conventional commit summary is always correct"));
+                .push(
+                    ConventionalCommitSummary::new(
+                        "test".to_string(),
+                        Some("API".to_string()),
+                        ConventionalCommitSummaryBreakingFlag::Disabled,
+                        "test message #7".to_string(),
+                    )
+                    .expect("Hand-crafted conventional commit summary is always correct"),
+                );
             ensure_inner_vector_exists(test_commits, &NO_SCOPE_TITLE.to_string());
             test_commits
                 .get_mut(NO_SCOPE_TITLE)
                 .expect("Vector just created")
-                .push(ConventionalCommitSummary::new(
-                    "test".to_string(),
-                    None,
-                    ConventionalCommitSummaryBreakingFlag::Disabled,
-                    "test message #3".to_string(),
-                ).expect("Hand-crafted conventional commit summary is always correct"));
+                .push(
+                    ConventionalCommitSummary::new(
+                        "test".to_string(),
+                        None,
+                        ConventionalCommitSummaryBreakingFlag::Disabled,
+                        "test message #3".to_string(),
+                    )
+                    .expect("Hand-crafted conventional commit summary is always correct"),
+                );
 
             ensure_inner_map_exists(&mut temp, "refactor");
             let refactor_commits = temp.get_mut("refactor").expect("Map just created");
@@ -471,12 +501,15 @@ mod tests {
             refactor_commits
                 .get_mut("exclude")
                 .expect("Vector just created")
-                .push(ConventionalCommitSummary::new(
-                    "refactor".to_string(),
-                    Some("exclude".to_string()),
-                    ConventionalCommitSummaryBreakingFlag::Disabled,
-                    "test message #4".to_string(),
-                ).expect("Hand-crafted conventional commit summary is always correct"));
+                .push(
+                    ConventionalCommitSummary::new(
+                        "refactor".to_string(),
+                        Some("exclude".to_string()),
+                        ConventionalCommitSummaryBreakingFlag::Disabled,
+                        "test message #4".to_string(),
+                    )
+                    .expect("Hand-crafted conventional commit summary is always correct"),
+                );
 
             ensure_inner_map_exists(&mut temp, "docs");
             let docs_commits = temp.get_mut("docs").expect("Map just created");
@@ -484,12 +517,15 @@ mod tests {
             docs_commits
                 .get_mut(NO_SCOPE_TITLE)
                 .expect("Vector just created")
-                .push(ConventionalCommitSummary::new(
-                    "docs".to_string(),
-                    None,
-                    ConventionalCommitSummaryBreakingFlag::Disabled,
-                    "test message #5".to_string(),
-                ).expect("Hand-crafted conventional commit summary is always correct"));
+                .push(
+                    ConventionalCommitSummary::new(
+                        "docs".to_string(),
+                        None,
+                        ConventionalCommitSummaryBreakingFlag::Disabled,
+                        "test message #5".to_string(),
+                    )
+                    .expect("Hand-crafted conventional commit summary is always correct"),
+                );
             temp
         };
         assert_eq!(m, expected);
@@ -522,22 +558,28 @@ mod tests {
             feat_commits
                 .get_mut("API")
                 .expect("Vector just created")
-                .push(ConventionalCommitSummary::new(
-                    "feat".to_string(),
-                    Some("API".to_string()),
-                    ConventionalCommitSummaryBreakingFlag::Disabled,
-                    "test message #1".to_string(),
-                ).expect("Hand-crafted conventional commit summary is always correct"));
+                .push(
+                    ConventionalCommitSummary::new(
+                        "feat".to_string(),
+                        Some("API".to_string()),
+                        ConventionalCommitSummaryBreakingFlag::Disabled,
+                        "test message #1".to_string(),
+                    )
+                    .expect("Hand-crafted conventional commit summary is always correct"),
+                );
             ensure_inner_vector_exists(feat_commits, &NO_SCOPE_TITLE.to_string());
             feat_commits
                 .get_mut(NO_SCOPE_TITLE)
                 .expect("Vector just created")
-                .push(ConventionalCommitSummary::new(
-                    "feat".to_string(),
-                    None,
-                    ConventionalCommitSummaryBreakingFlag::Disabled,
-                    "test message #6".to_string(),
-                ).expect("Hand-crafted conventional commit summary is always correct"));
+                .push(
+                    ConventionalCommitSummary::new(
+                        "feat".to_string(),
+                        None,
+                        ConventionalCommitSummaryBreakingFlag::Disabled,
+                        "test message #6".to_string(),
+                    )
+                    .expect("Hand-crafted conventional commit summary is always correct"),
+                );
 
             ensure_inner_map_exists(&mut temp, "fix");
             let fix_commits = temp.get_mut("fix").expect("Map just created");
@@ -545,12 +587,15 @@ mod tests {
             fix_commits
                 .get_mut("API")
                 .expect("Vector just created")
-                .push(ConventionalCommitSummary::new(
-                    "fix".to_string(),
-                    Some("API".to_string()),
-                    ConventionalCommitSummaryBreakingFlag::Disabled,
-                    "test message #2".to_string(),
-                ).expect("Hand-crafted conventional commit summary is always correct"));
+                .push(
+                    ConventionalCommitSummary::new(
+                        "fix".to_string(),
+                        Some("API".to_string()),
+                        ConventionalCommitSummaryBreakingFlag::Disabled,
+                        "test message #2".to_string(),
+                    )
+                    .expect("Hand-crafted conventional commit summary is always correct"),
+                );
 
             ensure_inner_map_exists(&mut temp, "test");
             let test_commits = temp.get_mut("test").expect("Map just created");
@@ -558,22 +603,28 @@ mod tests {
             test_commits
                 .get_mut("API")
                 .expect("Vector just created")
-                .push(ConventionalCommitSummary::new(
-                    "test".to_string(),
-                    Some("API".to_string()),
-                    ConventionalCommitSummaryBreakingFlag::Disabled,
-                    "test message #7".to_string(),
-                ).expect("Hand-crafted conventional commit summary is always correct"));
+                .push(
+                    ConventionalCommitSummary::new(
+                        "test".to_string(),
+                        Some("API".to_string()),
+                        ConventionalCommitSummaryBreakingFlag::Disabled,
+                        "test message #7".to_string(),
+                    )
+                    .expect("Hand-crafted conventional commit summary is always correct"),
+                );
             ensure_inner_vector_exists(test_commits, &NO_SCOPE_TITLE.to_string());
             test_commits
                 .get_mut(NO_SCOPE_TITLE)
                 .expect("Vector just created")
-                .push(ConventionalCommitSummary::new(
-                    "test".to_string(),
-                    None,
-                    ConventionalCommitSummaryBreakingFlag::Disabled,
-                    "test message #3".to_string(),
-                ).expect("Hand-crafted conventional commit summary is always correct"));
+                .push(
+                    ConventionalCommitSummary::new(
+                        "test".to_string(),
+                        None,
+                        ConventionalCommitSummaryBreakingFlag::Disabled,
+                        "test message #3".to_string(),
+                    )
+                    .expect("Hand-crafted conventional commit summary is always correct"),
+                );
 
             ensure_inner_map_exists(&mut temp, "docs");
             let docs_commits = temp.get_mut("docs").expect("Map just created");
@@ -581,12 +632,15 @@ mod tests {
             docs_commits
                 .get_mut(NO_SCOPE_TITLE)
                 .expect("Vector just created")
-                .push(ConventionalCommitSummary::new(
-                    "docs".to_string(),
-                    None,
-                    ConventionalCommitSummaryBreakingFlag::Disabled,
-                    "test message #5".to_string(),
-                ).expect("Hand-crafted conventional commit summary is always correct"));
+                .push(
+                    ConventionalCommitSummary::new(
+                        "docs".to_string(),
+                        None,
+                        ConventionalCommitSummaryBreakingFlag::Disabled,
+                        "test message #5".to_string(),
+                    )
+                    .expect("Hand-crafted conventional commit summary is always correct"),
+                );
             temp
         };
         assert_eq!(m, expected);
