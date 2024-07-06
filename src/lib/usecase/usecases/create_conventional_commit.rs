@@ -2,8 +2,8 @@ use crate::{
     domain::conventional_commit::ConventionalCommit,
     usecase::{
         configuration::commit::CommitConfiguration,
+        error::create_conventional_commit_error::CreateConventionalCommitError,
         repository::conventional_commit_egress_repository::ConventionalCommitEgressRepository,
-        type_aliases::AnyError,
     },
 };
 
@@ -26,15 +26,17 @@ impl<'a, 'b: 'a> CreateConventionalCommitUseCase<'a> {
     }
 }
 
-impl UseCase<ConventionalCommit> for CreateConventionalCommitUseCase<'_> {
-    fn execute(&self) -> Result<ConventionalCommit, AnyError> {
+impl UseCase<ConventionalCommit, CreateConventionalCommitError>
+    for CreateConventionalCommitUseCase<'_>
+{
+    fn execute(&self) -> Result<ConventionalCommit, CreateConventionalCommitError> {
         let commit = ConventionalCommit::new(
             self.configuration.typ().to_owned(),
             self.configuration.scope().map(|it| it.to_owned()),
             self.configuration.is_breaking(),
             self.configuration.summary().to_owned(),
             self.configuration.message().map(|it| it.to_owned()),
-        );
+        )?;
         self.commit_repository.create_commit(&commit)?;
         Ok(commit)
     }

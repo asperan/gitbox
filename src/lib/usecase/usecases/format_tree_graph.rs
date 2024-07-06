@@ -34,7 +34,7 @@ impl<'a, 'b: 'a> FormatTreeGraphUseCase<'a> {
     }
 }
 
-impl UseCase<Box<str>> for FormatTreeGraphUseCase<'_> {
+impl UseCase<Box<str>, AnyError> for FormatTreeGraphUseCase<'_> {
     fn execute(&self) -> Result<Box<str>, AnyError> {
         let lines = self.treegraphline_ingress_repository.graph_lines()?;
         let time_color_length = {

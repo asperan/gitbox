@@ -28,7 +28,7 @@ impl<'a, 'b: 'a, 'c: 'a> RefreshTypesAndScopesUseCase<'a> {
     }
 }
 
-impl UseCase<()> for RefreshTypesAndScopesUseCase<'_> {
+impl UseCase<(), AnyError> for RefreshTypesAndScopesUseCase<'_> {
     fn execute(&self) -> Result<(), AnyError> {
         let commits = self.commit_history_repository.get_all_commits()?;
         let mut types: Vec<String> = Vec::from(DEFAULT_COMMIT_TYPES.map(|it| it.to_string()));

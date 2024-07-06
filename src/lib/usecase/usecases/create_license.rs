@@ -33,7 +33,7 @@ impl<'a, 'b: 'a, 'c: 'a, 'd: 'a, 'e: 'a> CreateLicenseUseCase<'a> {
     }
 }
 
-impl UseCase<()> for CreateLicenseUseCase<'_> {
+impl UseCase<(), AnyError> for CreateLicenseUseCase<'_> {
     fn execute(&self) -> Result<(), AnyError> {
         let license_list = self.license_list_ingress_repository.license_list()?;
         let chosen_license = self

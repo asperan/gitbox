@@ -36,7 +36,7 @@ impl<'a, 'b: 'a, 'c: 'a> CreateChangelogUseCase<'a> {
     }
 }
 
-impl UseCase<String> for CreateChangelogUseCase<'_> {
+impl UseCase<String, AnyError> for CreateChangelogUseCase<'_> {
     fn execute(&self) -> Result<String, AnyError> {
         let from_version = if self.configuration.generate_from_latest_version() {
             self.version_repository.last_version()?

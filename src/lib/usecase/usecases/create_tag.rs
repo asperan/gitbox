@@ -22,7 +22,7 @@ impl<'a, 'b: 'a> CreateTagUseCase<'a> {
     }
 }
 
-impl UseCase<()> for CreateTagUseCase<'_> {
+impl UseCase<(), AnyError> for CreateTagUseCase<'_> {
     fn execute(&self) -> Result<(), AnyError> {
         self.tag_write_repository.create_tag(
             self.configuration.version(),

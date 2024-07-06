@@ -23,7 +23,7 @@ pub struct CalculateNewVersionUseCase<'a> {
     version_repository: &'a dyn SemanticVersionIngressRepository,
 }
 
-impl UseCase<(SemanticVersion, Option<SemanticVersion>)> for CalculateNewVersionUseCase<'_> {
+impl UseCase<(SemanticVersion, Option<SemanticVersion>), AnyError> for CalculateNewVersionUseCase<'_> {
     fn execute(&self) -> Result<(SemanticVersion, Option<SemanticVersion>), AnyError> {
         let base_version = if self.configuration.prerelease().is_active() {
             self.version_repository.last_version()
