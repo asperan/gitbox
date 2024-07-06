@@ -29,7 +29,7 @@ pub struct DescribeSubCommand {
         long,
         help = "Set the pattern for the new prerelease. A number can be used with the placeholder '%d'",
         requires("prerelease"),
-        default_value = "dev%d"
+        default_value = "%d"
     )]
     prerelease_pattern: String,
     #[arg(
