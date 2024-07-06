@@ -1,11 +1,11 @@
 use crate::usecase::{
+    error::create_license_error::CreateLicenseError,
     repository::{
         license_choice_ingress_repository::LicenseChoiceIngressRepository,
         license_list_ingress_repository::LicenseListIngressRepository,
         license_text_egress_repository::LicenseTextEgressRepository,
         license_text_ingress_repository::LicenseTextIngressRepository,
     },
-    type_aliases::AnyError,
 };
 
 use super::usecase::UseCase;
@@ -33,14 +33,14 @@ impl<'a, 'b: 'a, 'c: 'a, 'd: 'a, 'e: 'a> CreateLicenseUseCase<'a> {
     }
 }
 
-impl UseCase<(), AnyError> for CreateLicenseUseCase<'_> {
-    fn execute(&self) -> Result<(), AnyError> {
+impl UseCase<(), CreateLicenseError> for CreateLicenseUseCase<'_> {
+    fn execute(&self) -> Result<(), CreateLicenseError> {
         let license_list = self.license_list_ingress_repository.license_list()?;
         let chosen_license = self
             .license_choice_ingress_repository
             .ask_license(&license_list)?;
         let license_text = self.license_text_ingress_repository.text(chosen_license)?;
-        self.license_text_egress_repository.consume(&license_text)
+        Ok(self.license_text_egress_repository.consume(&license_text)?)
     }
 }
 
