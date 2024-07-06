@@ -19,6 +19,8 @@ use crate::{
 
 use super::usecase::UseCase;
 
+const FIRST_PRERELEASE_NUMBER: u32 = 1;
+
 pub struct CalculateNewVersionUseCase<'a> {
     configuration: DescribeConfiguration<'a>,
     commit_summary_repository: &'a dyn BoundedCommitSummaryIngressRepository,
@@ -179,8 +181,7 @@ impl<'a, 'b: 'a, 'c: 'a, 'd: 'a> CalculateNewVersionUseCase<'a> {
             let next_prerelease_number = if self.configuration.prerelease().pattern_changed()
                 || is_stable_updated
             {
-                // Reset number
-                1
+                FIRST_PRERELEASE_NUMBER
             } else {
                 let semantic_version = last_version
                     .as_ref()
