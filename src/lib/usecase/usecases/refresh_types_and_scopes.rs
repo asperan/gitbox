@@ -1,11 +1,11 @@
 use crate::{
     domain::{commit_summary::CommitSummary, constant::DEFAULT_COMMIT_TYPES},
     usecase::{
+        error::refresh_types_and_scopes_error::RefreshTypesAndScopesError,
         repository::{
             full_commit_summary_history_ingress_repository::FullCommitSummaryHistoryIngressRepository,
             git_extra_egress_repository::GitExtraEgressRepository,
         },
-        type_aliases::AnyError,
     },
 };
 
@@ -28,8 +28,8 @@ impl<'a, 'b: 'a, 'c: 'a> RefreshTypesAndScopesUseCase<'a> {
     }
 }
 
-impl UseCase<(), AnyError> for RefreshTypesAndScopesUseCase<'_> {
-    fn execute(&self) -> Result<(), AnyError> {
+impl UseCase<(), RefreshTypesAndScopesError> for RefreshTypesAndScopesUseCase<'_> {
+    fn execute(&self) -> Result<(), RefreshTypesAndScopesError> {
         let commits = self.commit_history_repository.get_all_commits()?;
         let mut types: Vec<String> = Vec::from(DEFAULT_COMMIT_TYPES.map(|it| it.to_string()));
         let mut scopes: Vec<String> = Vec::new();
@@ -62,8 +62,11 @@ mod tests {
 
     use crate::{
         domain::{
-            commit_summary::CommitSummary, constant::DEFAULT_COMMIT_TYPES,
-            conventional_commit_summary::{ConventionalCommitSummary, ConventionalCommitSummaryBreakingFlag},
+            commit_summary::CommitSummary,
+            constant::DEFAULT_COMMIT_TYPES,
+            conventional_commit_summary::{
+                ConventionalCommitSummary, ConventionalCommitSummaryBreakingFlag,
+            },
         },
         usecase::{
             repository::{
@@ -96,24 +99,33 @@ mod tests {
         ) -> Result<Box<dyn DoubleEndedIterator<Item = CommitSummary>>, AnyError> {
             Ok(Box::new(
                 vec![
-                    CommitSummary::Conventional(ConventionalCommitSummary::new(
-                        "feat".to_string(),
-                        Some("api".to_string()),
-                        ConventionalCommitSummaryBreakingFlag::Disabled,
-                        "test".to_string(),
-                    ).expect("Hand-crafted commits are always correct")),
-                    CommitSummary::Conventional(ConventionalCommitSummary::new(
-                        "feat".to_string(),
-                        Some("core-deps".to_string()),
-                        ConventionalCommitSummaryBreakingFlag::Disabled,
-                        "test".to_string(),
-                    ).expect("Hand-crafted commits are always correct")),
-                    CommitSummary::Conventional(ConventionalCommitSummary::new(
-                        "fix".to_string(),
-                        Some("core-deps".to_string()),
-                        ConventionalCommitSummaryBreakingFlag::Disabled,
-                        "test".to_string(),
-                    ).expect("Hand-crafted commits are always correct")),
+                    CommitSummary::Conventional(
+                        ConventionalCommitSummary::new(
+                            "feat".to_string(),
+                            Some("api".to_string()),
+                            ConventionalCommitSummaryBreakingFlag::Disabled,
+                            "test".to_string(),
+                        )
+                        .expect("Hand-crafted commits are always correct"),
+                    ),
+                    CommitSummary::Conventional(
+                        ConventionalCommitSummary::new(
+                            "feat".to_string(),
+                            Some("core-deps".to_string()),
+                            ConventionalCommitSummaryBreakingFlag::Disabled,
+                            "test".to_string(),
+                        )
+                        .expect("Hand-crafted commits are always correct"),
+                    ),
+                    CommitSummary::Conventional(
+                        ConventionalCommitSummary::new(
+                            "fix".to_string(),
+                            Some("core-deps".to_string()),
+                            ConventionalCommitSummaryBreakingFlag::Disabled,
+                            "test".to_string(),
+                        )
+                        .expect("Hand-crafted commits are always correct"),
+                    ),
                 ]
                 .into_iter(),
             ))
