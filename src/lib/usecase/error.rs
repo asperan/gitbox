@@ -1,3 +1,4 @@
+pub mod changelog_creation_error;
 pub mod commit_configuration_invariant_error;
 pub mod create_conventional_commit_error;
 pub mod describe_no_relevant_changes_error;
