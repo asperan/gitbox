@@ -237,7 +237,7 @@ mod tests {
     use crate::{
         domain::{
             commit_summary::CommitSummary,
-            conventional_commit_summary::ConventionalCommitSummary,
+            conventional_commit_summary::{ConventionalCommitSummary, ConventionalCommitSummaryBreakingFlag},
             semantic_version::SemanticVersion,
             trigger::{
                 ArrayNode, BasicStatement, BreakingNode, InNode, ObjectNode, Start, Trigger,
@@ -371,19 +371,19 @@ mod tests {
                 CommitSummary::Conventional(ConventionalCommitSummary::new(
                     "feat".to_string(),
                     None,
-                    false,
+                    ConventionalCommitSummaryBreakingFlag::Disabled,
                     "test".to_string(),
                 ).expect("Hand-crafted commits are always correct")),
                 CommitSummary::Conventional(ConventionalCommitSummary::new(
                     "fix".to_string(),
                     None,
-                    false,
+                    ConventionalCommitSummaryBreakingFlag::Disabled,
                     "test".to_string(),
                 ).expect("Hand-crafted commits are always correct")),
                 CommitSummary::Conventional(ConventionalCommitSummary::new(
                     "chore".to_string(),
                     None,
-                    false,
+                    ConventionalCommitSummaryBreakingFlag::Disabled,
                     "test".to_string(),
                 ).expect("Hand-crafted commits are always correct")),
             ],
@@ -469,7 +469,7 @@ mod tests {
         let commit = CommitSummary::Conventional(ConventionalCommitSummary::new(
             "chore".to_string(),
             None,
-            true,
+            ConventionalCommitSummaryBreakingFlag::Enabled,
             "test".to_string(),
         ).expect("Hand-crafted commits are always correct"));
         let result = usecase.commit_to_change(&commit);
@@ -494,7 +494,7 @@ mod tests {
         let commit = CommitSummary::Conventional(ConventionalCommitSummary::new(
             "feat".to_string(),
             None,
-            false,
+            ConventionalCommitSummaryBreakingFlag::Disabled,
             "test".to_string(),
         ).expect("Hand-crafted commits are always correct"));
         let result = usecase.commit_to_change(&commit);
@@ -519,7 +519,7 @@ mod tests {
         let commit = CommitSummary::Conventional(ConventionalCommitSummary::new(
             "fix".to_string(),
             None,
-            false,
+            ConventionalCommitSummaryBreakingFlag::Disabled,
             "test".to_string(),
         ).expect("Hand-crafted commits are always correct"));
         let result = usecase.commit_to_change(&commit);
@@ -544,7 +544,7 @@ mod tests {
         let commit = CommitSummary::Conventional(ConventionalCommitSummary::new(
             "chore".to_string(),
             None,
-            false,
+            ConventionalCommitSummaryBreakingFlag::Disabled,
             "test".to_string(),
         ).expect("Hand-crafted commits are always correct"));
         let result = usecase.commit_to_change(&commit);
@@ -633,7 +633,7 @@ mod tests {
             vec![CommitSummary::Conventional(ConventionalCommitSummary::new(
                 "fix".to_owned(),
                 None,
-                false,
+                ConventionalCommitSummaryBreakingFlag::Disabled,
                 "test".to_string(),
             ).expect("Hand-crafted commits are always correct"))],
             vec![],
@@ -679,7 +679,7 @@ mod tests {
             vec![CommitSummary::Conventional(ConventionalCommitSummary::new(
                 "feat".to_owned(),
                 None,
-                false,
+                ConventionalCommitSummaryBreakingFlag::Disabled,
                 "test".to_string(),
             ).expect("Hand-crafted commits are always correct"))],
             vec![],
@@ -725,7 +725,7 @@ mod tests {
             vec![CommitSummary::Conventional(ConventionalCommitSummary::new(
                 "refactor".to_owned(),
                 None,
-                true,
+                ConventionalCommitSummaryBreakingFlag::Enabled,
                 "test".to_string(),
             ).expect("Hand-crafted commits are always correct"))],
             vec![],
@@ -771,7 +771,7 @@ mod tests {
             vec![CommitSummary::Conventional(ConventionalCommitSummary::new(
                 "refactor".to_owned(),
                 None,
-                false,
+                ConventionalCommitSummaryBreakingFlag::Disabled,
                 "test".to_string(),
             ).expect("Hand-crafted commits are always correct"))],
             vec![],
@@ -818,7 +818,7 @@ mod tests {
             vec![CommitSummary::Conventional(ConventionalCommitSummary::new(
                 "refactor".to_owned(),
                 None,
-                false,
+                ConventionalCommitSummaryBreakingFlag::Disabled,
                 "test".to_string(),
             ).expect("Hand-crafted commits are always correct"))],
             vec![],
@@ -872,13 +872,13 @@ mod tests {
             vec![CommitSummary::Conventional(ConventionalCommitSummary::new(
                 "fix".to_owned(),
                 None,
-                false,
+                ConventionalCommitSummaryBreakingFlag::Disabled,
                 "test".to_string(),
             ).expect("Hand-crafted commits are always correct"))],
             vec![CommitSummary::Conventional(ConventionalCommitSummary::new(
                 "feat".to_owned(),
                 None,
-                false,
+                ConventionalCommitSummaryBreakingFlag::Disabled,
                 "test".to_string(),
             ).expect("Hand-crafted commits are always correct"))],
         );
@@ -931,7 +931,7 @@ mod tests {
             vec![CommitSummary::Conventional(ConventionalCommitSummary::new(
                 "chore".to_owned(),
                 None,
-                false,
+                ConventionalCommitSummaryBreakingFlag::Disabled,
                 "test".to_string(),
             ).expect("Hand-crafted commits are always correct"))],
             vec![],
@@ -975,13 +975,13 @@ mod tests {
             vec![CommitSummary::Conventional(ConventionalCommitSummary::new(
                 "chore".to_owned(),
                 None,
-                false,
+                ConventionalCommitSummaryBreakingFlag::Disabled,
                 "test".to_string(),
             ).expect("Hand-crafted commits are always correct"))],
             vec![CommitSummary::Conventional(ConventionalCommitSummary::new(
                 "chore".to_string(),
                 None,
-                false,
+                ConventionalCommitSummaryBreakingFlag::Disabled,
                 "test".to_string(),
             ).expect("Hand-crafted commits are always correct"))],
         );
