@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 use super::error::conventional_commit_summary_invariant_error::{
     ConventionalCommitSummaryInvariantError, InvalidScopeError, InvalidSummaryError,
     InvalidTypeError,
@@ -18,7 +20,7 @@ If the complete message is needed, see [ConventionalCommit].
 pub struct ConventionalCommitSummary {
     typ: String,
     scope: Option<String>,
-    breaking: bool,
+    breaking: ConventionalCommitSummaryBreakingFlag,
     summary: String,
 }
 
@@ -26,7 +28,7 @@ impl ConventionalCommitSummary {
     pub fn new(
         typ: String,
         scope: Option<String>,
-        breaking: bool,
+        breaking: ConventionalCommitSummaryBreakingFlag,
         summary: String,
     ) -> Result<Self, ConventionalCommitSummaryInvariantError> {
         Ok(ConventionalCommitSummary {
@@ -46,7 +48,7 @@ impl ConventionalCommitSummary {
     }
 
     pub fn breaking(&self) -> bool {
-        self.breaking
+        *self.breaking
     }
 
     pub fn summary(&self) -> &str {
@@ -82,6 +84,28 @@ impl ConventionalCommitSummary {
         } else {
             Ok(summary)
         }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ConventionalCommitSummaryBreakingFlag {
+    Enabled,
+    Disabled,
+}
+
+impl Deref for ConventionalCommitSummaryBreakingFlag {
+    type Target = bool;
+    fn deref(&self) -> &Self::Target {
+        match self {
+            Self::Enabled => &true,
+            Self::Disabled => &false,
+        }
+    }
+}
+
+impl AsRef<bool> for ConventionalCommitSummaryBreakingFlag {
+    fn as_ref(&self) -> &bool {
+        self.deref()
     }
 }
 
@@ -143,5 +167,15 @@ mod tests {
     fn summary_correct_invariants() {
         let correct_summary1 = String::from("a test Summary with all the available characters - even symbols");
         assert!(matches!(ConventionalCommitSummary::check_summary(correct_summary1), Ok(_)));
+    }
+
+    #[test]
+    fn flag_enabled() {
+        assert!(ConventionalCommitSummaryBreakingFlag::Enabled.deref());
+    }
+
+    #[test]
+    fn flag_disabled() {
+        assert!(!ConventionalCommitSummaryBreakingFlag::Disabled.deref());
     }
 }

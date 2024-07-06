@@ -1,5 +1,7 @@
 use super::{
-    conventional_commit_summary::ConventionalCommitSummary,
+    conventional_commit_summary::{
+        ConventionalCommitSummary, ConventionalCommitSummaryBreakingFlag,
+    },
     error::conventional_commit_error::ConventionalCommitError,
 };
 
@@ -21,7 +23,7 @@ impl ConventionalCommit {
     pub fn new(
         typ: String,
         scope: Option<String>,
-        breaking: bool,
+        breaking: ConventionalCommitSummaryBreakingFlag,
         summary: String,
         message: Option<String>,
     ) -> Result<Self, ConventionalCommitError> {
