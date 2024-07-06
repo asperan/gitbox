@@ -373,19 +373,19 @@ mod tests {
                     None,
                     false,
                     "test".to_string(),
-                )),
+                ).expect("Hand-crafted commits are always correct")),
                 CommitSummary::Conventional(ConventionalCommitSummary::new(
                     "fix".to_string(),
                     None,
                     false,
                     "test".to_string(),
-                )),
+                ).expect("Hand-crafted commits are always correct")),
                 CommitSummary::Conventional(ConventionalCommitSummary::new(
                     "chore".to_string(),
                     None,
                     false,
                     "test".to_string(),
-                )),
+                ).expect("Hand-crafted commits are always correct")),
             ],
             vec![],
         );
@@ -471,7 +471,7 @@ mod tests {
             None,
             true,
             "test".to_string(),
-        ));
+        ).expect("Hand-crafted commits are always correct"));
         let result = usecase.commit_to_change(&commit);
         assert_eq!(result, Change::Major);
     }
@@ -496,7 +496,7 @@ mod tests {
             None,
             false,
             "test".to_string(),
-        ));
+        ).expect("Hand-crafted commits are always correct"));
         let result = usecase.commit_to_change(&commit);
         assert_eq!(result, Change::Minor);
     }
@@ -521,7 +521,7 @@ mod tests {
             None,
             false,
             "test".to_string(),
-        ));
+        ).expect("Hand-crafted commits are always correct"));
         let result = usecase.commit_to_change(&commit);
         assert_eq!(result, Change::Patch);
     }
@@ -546,7 +546,7 @@ mod tests {
             None,
             false,
             "test".to_string(),
-        ));
+        ).expect("Hand-crafted commits are always correct"));
         let result = usecase.commit_to_change(&commit);
         assert_eq!(result, Change::None);
     }
@@ -635,7 +635,7 @@ mod tests {
                 None,
                 false,
                 "test".to_string(),
-            ))],
+            ).expect("Hand-crafted commits are always correct"))],
             vec![],
         );
         let commit_metadata_repository = MockCommitMetadataRepository {};
@@ -681,7 +681,7 @@ mod tests {
                 None,
                 false,
                 "test".to_string(),
-            ))],
+            ).expect("Hand-crafted commits are always correct"))],
             vec![],
         );
         let commit_metadata_repository = MockCommitMetadataRepository {};
@@ -727,7 +727,7 @@ mod tests {
                 None,
                 true,
                 "test".to_string(),
-            ))],
+            ).expect("Hand-crafted commits are always correct"))],
             vec![],
         );
         let commit_metadata_repository = MockCommitMetadataRepository {};
@@ -773,7 +773,7 @@ mod tests {
                 None,
                 false,
                 "test".to_string(),
-            ))],
+            ).expect("Hand-crafted commits are always correct"))],
             vec![],
         );
         let commit_metadata_repository = MockCommitMetadataRepository {};
@@ -820,7 +820,7 @@ mod tests {
                 None,
                 false,
                 "test".to_string(),
-            ))],
+            ).expect("Hand-crafted commits are always correct"))],
             vec![],
         );
         let commit_metadata_repository = MockCommitMetadataRepository {};
@@ -874,13 +874,13 @@ mod tests {
                 None,
                 false,
                 "test".to_string(),
-            ))],
+            ).expect("Hand-crafted commits are always correct"))],
             vec![CommitSummary::Conventional(ConventionalCommitSummary::new(
                 "feat".to_owned(),
                 None,
                 false,
                 "test".to_string(),
-            ))],
+            ).expect("Hand-crafted commits are always correct"))],
         );
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
@@ -933,7 +933,7 @@ mod tests {
                 None,
                 false,
                 "test".to_string(),
-            ))],
+            ).expect("Hand-crafted commits are always correct"))],
             vec![],
         );
         let commit_metadata_repository = MockCommitMetadataRepository {};
@@ -977,13 +977,13 @@ mod tests {
                 None,
                 false,
                 "test".to_string(),
-            ))],
+            ).expect("Hand-crafted commits are always correct"))],
             vec![CommitSummary::Conventional(ConventionalCommitSummary::new(
                 "chore".to_string(),
                 None,
                 false,
                 "test".to_string(),
-            ))],
+            ).expect("Hand-crafted commits are always correct"))],
         );
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
