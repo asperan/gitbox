@@ -1,8 +1,7 @@
 use regex::Regex;
 
 use crate::usecase::{
-    repository::treegraphline_ingress_repository::TreeGraphLineIngressRepository,
-    tree_graph_line::TreeGraphLine, type_aliases::AnyError,
+    error::format_tree_error::FormatTreeError, repository::treegraphline_ingress_repository::TreeGraphLineIngressRepository, tree_graph_line::TreeGraphLine, type_aliases::AnyError
 };
 
 use super::usecase::UseCase;
@@ -34,8 +33,8 @@ impl<'a, 'b: 'a> FormatTreeGraphUseCase<'a> {
     }
 }
 
-impl UseCase<Box<str>, AnyError> for FormatTreeGraphUseCase<'_> {
-    fn execute(&self) -> Result<Box<str>, AnyError> {
+impl UseCase<Box<str>, FormatTreeError> for FormatTreeGraphUseCase<'_> {
+    fn execute(&self) -> Result<Box<str>, FormatTreeError> {
         let lines = self.treegraphline_ingress_repository.graph_lines()?;
         let time_color_length = {
             let time_regex = Regex::new("\\([a-z0-9 ,]+\\)").unwrap();
