@@ -42,7 +42,7 @@ mod tests {
             manager::conventional_commit_egress_manager::ConventionalCommitEgressManager,
             repository_impl::conventional_commit_egress_repository_impl::ConventionalCommitEgressRepositoryImpl,
         },
-        domain::conventional_commit::ConventionalCommit,
+        domain::{conventional_commit::ConventionalCommit, conventional_commit_summary::ConventionalCommitSummaryBreakingFlag},
         usecase::{
             repository::conventional_commit_egress_repository::ConventionalCommitEgressRepository,
             type_aliases::AnyError,
@@ -84,7 +84,7 @@ mod tests {
     #[test]
     fn create_commit_ok() {
         let commit =
-            ConventionalCommit::new("feat".to_string(), None, false, "test".to_string(), None).expect("Hand-crafted conventional commit summary is always correct");
+            ConventionalCommit::new("feat".to_string(), None, ConventionalCommitSummaryBreakingFlag::Disabled, "test".to_string(), None).expect("Hand-crafted conventional commit summary is always correct");
         let commit_manager = MockCommitManager { fail: false };
         let commit_repository = ConventionalCommitEgressRepositoryImpl::new(&commit_manager);
         let result = commit_repository.create_commit(&commit);
@@ -94,7 +94,7 @@ mod tests {
     #[test]
     fn create_commit_error() {
         let commit =
-            ConventionalCommit::new("feat".to_string(), None, false, "test".to_string(), None).expect("Hand-crafted conventional commit summary is always correct");
+            ConventionalCommit::new("feat".to_string(), None, ConventionalCommitSummaryBreakingFlag::Disabled, "test".to_string(), None).expect("Hand-crafted conventional commit summary is always correct");
         let commit_manager = MockCommitManager { fail: true };
         let commit_repository = ConventionalCommitEgressRepositoryImpl::new(&commit_manager);
         let result = commit_repository.create_commit(&commit);
@@ -104,7 +104,7 @@ mod tests {
     #[test]
     fn create_empty_commit_ok() {
         let commit =
-            ConventionalCommit::new("feat".to_string(), None, false, "test".to_string(), None).expect("Hand-crafted conventional commit summary is always correct");
+            ConventionalCommit::new("feat".to_string(), None, ConventionalCommitSummaryBreakingFlag::Disabled, "test".to_string(), None).expect("Hand-crafted conventional commit summary is always correct");
         let commit_manager = MockCommitManager { fail: false };
         let commit_repository = ConventionalCommitEgressRepositoryImpl::new(&commit_manager);
         let result = commit_repository.create_empty_commit(&commit);
@@ -114,7 +114,7 @@ mod tests {
     #[test]
     fn create_empty_commit_error() {
         let commit =
-            ConventionalCommit::new("feat".to_string(), None, false, "test".to_string(), None).expect("Hand-crafted conventional commit summary is always correct");
+            ConventionalCommit::new("feat".to_string(), None, ConventionalCommitSummaryBreakingFlag::Disabled, "test".to_string(), None).expect("Hand-crafted conventional commit summary is always correct");
         let commit_manager = MockCommitManager { fail: true };
         let commit_repository = ConventionalCommitEgressRepositoryImpl::new(&commit_manager);
         let result = commit_repository.create_empty_commit(&commit);

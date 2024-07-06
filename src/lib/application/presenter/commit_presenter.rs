@@ -7,8 +7,11 @@ use crate::{
         CommitSummaryParsingError, FreeFormCommitSummaryError,
     },
     domain::{
-        commit_summary::CommitSummary, conventional_commit::ConventionalCommit,
-        conventional_commit_summary::ConventionalCommitSummary,
+        commit_summary::CommitSummary,
+        conventional_commit::ConventionalCommit,
+        conventional_commit_summary::{
+            ConventionalCommitSummary, ConventionalCommitSummaryBreakingFlag,
+        },
     },
 };
 
@@ -31,7 +34,11 @@ impl FromStr for CommitSummary {
                 Ok(CommitSummary::Conventional(ConventionalCommitSummary::new(
                     commit_type.to_owned(),
                     scope.map(|it| it.to_owned()),
-                    breaking,
+                    if breaking {
+                        ConventionalCommitSummaryBreakingFlag::Enabled
+                    } else {
+                        ConventionalCommitSummaryBreakingFlag::Disabled
+                    },
                     summary.to_owned(),
                 )?))
             }
@@ -82,8 +89,11 @@ mod tests {
     use std::str::FromStr;
 
     use crate::domain::{
-        commit_summary::CommitSummary, conventional_commit::ConventionalCommit,
-        conventional_commit_summary::ConventionalCommitSummary,
+        commit_summary::CommitSummary,
+        conventional_commit::ConventionalCommit,
+        conventional_commit_summary::{
+            ConventionalCommitSummary, ConventionalCommitSummaryBreakingFlag,
+        },
     };
 
     #[test]
@@ -106,8 +116,13 @@ mod tests {
     fn conventional_commit_basic() {
         let basic_commit = "feat: test";
         let c = CommitSummary::from_str(basic_commit);
-        let expected =
-            ConventionalCommitSummary::new("feat".to_string(), None, false, "test".to_string()).expect("Hand-crafted conventional commit summary is correct");
+        let expected = ConventionalCommitSummary::new(
+            "feat".to_string(),
+            None,
+            ConventionalCommitSummaryBreakingFlag::Disabled,
+            "test".to_string(),
+        )
+        .expect("Hand-crafted conventional commit summary is correct");
         assert!(c.is_ok());
         assert!(match c.expect("Just asserted its OK-ness") {
             CommitSummary::Conventional(conv) => conv == expected,
@@ -122,9 +137,10 @@ mod tests {
         let expected = ConventionalCommitSummary::new(
             "feat".to_string(),
             Some("scope".to_string()),
-            false,
+            ConventionalCommitSummaryBreakingFlag::Disabled,
             "test".to_string(),
-        ).expect("Hand-crafted conventional commit summary is correct");
+        )
+        .expect("Hand-crafted conventional commit summary is correct");
         assert!(c.is_ok());
         assert!(match c.expect("Just asserted its OK-ness") {
             CommitSummary::Conventional(conv) => conv == expected,
@@ -136,8 +152,13 @@ mod tests {
     fn conventional_commit_breaking() {
         let breaking_commit = "feat!: test";
         let c = CommitSummary::from_str(breaking_commit);
-        let expected =
-            ConventionalCommitSummary::new("feat".to_string(), None, true, "test".to_string()).expect("Hand-crafted conventional commit summary is correct");
+        let expected = ConventionalCommitSummary::new(
+            "feat".to_string(),
+            None,
+            ConventionalCommitSummaryBreakingFlag::Enabled,
+            "test".to_string(),
+        )
+        .expect("Hand-crafted conventional commit summary is correct");
         assert!(c.is_ok());
         assert!(match c.expect("Just asserted its OK-ness") {
             CommitSummary::Conventional(conv) => conv == expected,
@@ -152,9 +173,10 @@ mod tests {
         let expected = ConventionalCommitSummary::new(
             "feat".to_string(),
             Some("scope".to_string()),
-            true,
+            ConventionalCommitSummaryBreakingFlag::Enabled,
             "test".to_string(),
-        ).expect("Hand-crafted conventional commit summary is correct");
+        )
+        .expect("Hand-crafted conventional commit summary is correct");
         assert!(c.is_ok());
         assert!(match c.expect("Just asserted its OK-ness") {
             CommitSummary::Conventional(conv) => conv == expected,
@@ -167,9 +189,10 @@ mod tests {
         let commit = ConventionalCommitSummary::new(
             "feat".to_string(),
             None,
-            false,
+            ConventionalCommitSummaryBreakingFlag::Disabled,
             "test format".to_string(),
-        ).expect("Hand-crafted conventional commit summary is correct");
+        )
+        .expect("Hand-crafted conventional commit summary is correct");
         assert_eq!(&commit.to_string(), "feat: test format");
     }
 
@@ -178,9 +201,10 @@ mod tests {
         let commit = ConventionalCommitSummary::new(
             "feat".to_string(),
             Some("domain".to_string()),
-            false,
+            ConventionalCommitSummaryBreakingFlag::Disabled,
             "test format".to_string(),
-        ).expect("Hand-crafted conventional commit summary is correct");
+        )
+        .expect("Hand-crafted conventional commit summary is correct");
         assert_eq!(&commit.to_string(), "feat(domain): test format");
     }
 
@@ -189,9 +213,10 @@ mod tests {
         let commit = ConventionalCommitSummary::new(
             "feat".to_string(),
             None,
-            true,
+            ConventionalCommitSummaryBreakingFlag::Enabled,
             "test format".to_string(),
-        ).expect("Hand-crafted conventional commit summary is correct");
+        )
+        .expect("Hand-crafted conventional commit summary is correct");
         assert_eq!(&commit.to_string(), "feat!: test format");
     }
 
@@ -200,9 +225,10 @@ mod tests {
         let commit = ConventionalCommitSummary::new(
             "feat".to_string(),
             Some("domain".to_string()),
-            true,
+            ConventionalCommitSummaryBreakingFlag::Enabled,
             "test format".to_string(),
-        ).expect("Hand-crafted conventional commit summary is correct");
+        )
+        .expect("Hand-crafted conventional commit summary is correct");
         assert_eq!(&commit.to_string(), "feat(domain)!: test format");
     }
 
@@ -211,10 +237,11 @@ mod tests {
         let commit = ConventionalCommit::new(
             "feat".to_string(),
             Some("domain".to_string()),
-            true,
+            ConventionalCommitSummaryBreakingFlag::Enabled,
             "test format".to_string(),
             None,
-        ).expect("Hand-crafted conventional commit summary is correct");
+        )
+        .expect("Hand-crafted conventional commit summary is correct");
         assert_eq!(&commit.to_string(), "feat(domain)!: test format");
     }
 
@@ -223,10 +250,11 @@ mod tests {
         let commit = ConventionalCommit::new(
             "feat".to_string(),
             Some("domain".to_string()),
-            true,
+            ConventionalCommitSummaryBreakingFlag::Enabled,
             "test format".to_string(),
             Some("Message body".to_string()),
-        ).expect("Hand-crafted conventional commit summary is correct");
+        )
+        .expect("Hand-crafted conventional commit summary is correct");
         assert_eq!(
             &commit.to_string(),
             "feat(domain)!: test format\n\nMessage body"
