@@ -101,19 +101,19 @@ mod tests {
                         Some("api".to_string()),
                         false,
                         "test".to_string(),
-                    )),
+                    ).expect("Hand-crafted commits are always correct")),
                     CommitSummary::Conventional(ConventionalCommitSummary::new(
                         "feat".to_string(),
                         Some("core-deps".to_string()),
                         false,
                         "test".to_string(),
-                    )),
+                    ).expect("Hand-crafted commits are always correct")),
                     CommitSummary::Conventional(ConventionalCommitSummary::new(
                         "fix".to_string(),
                         Some("core-deps".to_string()),
                         false,
                         "test".to_string(),
-                    )),
+                    ).expect("Hand-crafted commits are always correct")),
                 ]
                 .into_iter(),
             ))
