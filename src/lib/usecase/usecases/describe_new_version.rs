@@ -1,10 +1,16 @@
-use std::rc::Rc;
+use std::{error::Error, rc::Rc};
 
 use crate::{
     domain::{commit_summary::CommitSummary, semantic_version::SemanticVersion},
     usecase::{
         configuration::describe::DescribeConfiguration,
-        error::describe_no_relevant_changes_error::DescribeNoRelevantChangesError,
+        error::{
+            describe_new_version_error::{
+                DescribeMetadataError, DescribeNewVersionError, DescribePrereleaseError,
+                DescribeStableReleaseError,
+            },
+            describe_no_relevant_changes_error::DescribeNoRelevantChangesError,
+        },
         repository::{
             bounded_commit_summary_ingress_repository::BoundedCommitSummaryIngressRepository,
             commit_metadata_ingress_repository::CommitMetadataIngressRepository,
@@ -23,8 +29,12 @@ pub struct CalculateNewVersionUseCase<'a> {
     version_repository: &'a dyn SemanticVersionIngressRepository,
 }
 
-impl UseCase<(SemanticVersion, Option<SemanticVersion>), AnyError> for CalculateNewVersionUseCase<'_> {
-    fn execute(&self) -> Result<(SemanticVersion, Option<SemanticVersion>), AnyError> {
+impl UseCase<(SemanticVersion, Option<SemanticVersion>), DescribeNewVersionError>
+    for CalculateNewVersionUseCase<'_>
+{
+    fn execute(
+        &self,
+    ) -> Result<(SemanticVersion, Option<SemanticVersion>), DescribeNewVersionError> {
         let base_version = if self.configuration.prerelease().is_active() {
             self.version_repository.last_version()
         } else {
@@ -44,7 +54,7 @@ impl UseCase<(SemanticVersion, Option<SemanticVersion>), AnyError> for Calculate
                 stable_version.patch,
                 prerelease,
                 metadata,
-            )? // TODO: handle error
+            )?
         };
         Ok((new_version, base_version.as_ref().clone()))
     }
@@ -69,7 +79,7 @@ impl<'a, 'b: 'a, 'c: 'a, 'd: 'a> CalculateNewVersionUseCase<'a> {
     fn greatest_change_from(
         &self,
         version: Rc<Option<SemanticVersion>>,
-    ) -> Result<Change, AnyError> {
+    ) -> Result<Change, Box<dyn Error>> {
         Ok(self
             .commit_summary_repository
             .get_commits_from(version)?
@@ -113,7 +123,7 @@ impl<'a, 'b: 'a, 'c: 'a, 'd: 'a> CalculateNewVersionUseCase<'a> {
     fn next_stable(
         &self,
         base_version: Rc<Option<SemanticVersion>>,
-    ) -> Result<StableVersion, AnyError> {
+    ) -> Result<StableVersion, DescribeStableReleaseError> {
         Ok(if base_version.is_none() {
             StableVersion::first_stable()
         } else {
@@ -140,7 +150,7 @@ impl<'a, 'b: 'a, 'c: 'a, 'd: 'a> CalculateNewVersionUseCase<'a> {
                             base_version.patch(),
                         )
                     } else {
-                        return Err(Box::new(DescribeNoRelevantChangesError {}));
+                        return Err(DescribeNoRelevantChangesError {}.into());
                     }
                 }
             }
@@ -148,7 +158,10 @@ impl<'a, 'b: 'a, 'c: 'a, 'd: 'a> CalculateNewVersionUseCase<'a> {
     }
 
     #[inline]
-    fn update_prerelease(&self, next_stable: &StableVersion) -> Result<String, AnyError> {
+    fn update_prerelease(
+        &self,
+        next_stable: &StableVersion,
+    ) -> Result<String, DescribePrereleaseError> {
         let last_version = self.version_repository.last_version()?;
         let is_stable_updated = match last_version.as_ref() {
             Some(old) => {
@@ -164,7 +177,7 @@ impl<'a, 'b: 'a, 'c: 'a, 'd: 'a> CalculateNewVersionUseCase<'a> {
                 .as_ref()
                 .is_some_and(|it| it.prerelease().is_none())
         {
-            Err(Box::new(DescribeNoRelevantChangesError::new()))
+            Err(DescribeNoRelevantChangesError::new().into())
         } else {
             let next_prerelease_number = if self.configuration.prerelease().pattern_changed()
                 || is_stable_updated
@@ -188,7 +201,7 @@ impl<'a, 'b: 'a, 'c: 'a, 'd: 'a> CalculateNewVersionUseCase<'a> {
     }
 
     #[inline]
-    fn generate_metadata(&self) -> Result<Option<String>, AnyError> {
+    fn generate_metadata(&self) -> Result<Option<String>, DescribeMetadataError> {
         Ok(self
             .configuration
             .metadata()
@@ -237,7 +250,9 @@ mod tests {
     use crate::{
         domain::{
             commit_summary::CommitSummary,
-            conventional_commit_summary::{ConventionalCommitSummary, ConventionalCommitSummaryBreakingFlag},
+            conventional_commit_summary::{
+                ConventionalCommitSummary, ConventionalCommitSummaryBreakingFlag,
+            },
             semantic_version::SemanticVersion,
             trigger::{
                 ArrayNode, BasicStatement, BreakingNode, InNode, ObjectNode, Start, Trigger,
@@ -249,7 +264,7 @@ mod tests {
                 DescribeConfiguration, DescribeMetadataConfiguration,
                 DescribePrereleaseConfiguration, DescribeTriggerConfiguration,
             },
-            error::describe_no_relevant_changes_error::DescribeNoRelevantChangesError,
+            error::describe_new_version_error::DescribeNewVersionError,
             metadata_spec::MetadataSpec,
             repository::{
                 bounded_commit_summary_ingress_repository::BoundedCommitSummaryIngressRepository,
@@ -368,24 +383,33 @@ mod tests {
         let configuration = basic_configuration();
         let commit_summary_repository = MockCommitSummaryRepository::new(
             vec![
-                CommitSummary::Conventional(ConventionalCommitSummary::new(
-                    "feat".to_string(),
-                    None,
-                    ConventionalCommitSummaryBreakingFlag::Disabled,
-                    "test".to_string(),
-                ).expect("Hand-crafted commits are always correct")),
-                CommitSummary::Conventional(ConventionalCommitSummary::new(
-                    "fix".to_string(),
-                    None,
-                    ConventionalCommitSummaryBreakingFlag::Disabled,
-                    "test".to_string(),
-                ).expect("Hand-crafted commits are always correct")),
-                CommitSummary::Conventional(ConventionalCommitSummary::new(
-                    "chore".to_string(),
-                    None,
-                    ConventionalCommitSummaryBreakingFlag::Disabled,
-                    "test".to_string(),
-                ).expect("Hand-crafted commits are always correct")),
+                CommitSummary::Conventional(
+                    ConventionalCommitSummary::new(
+                        "feat".to_string(),
+                        None,
+                        ConventionalCommitSummaryBreakingFlag::Disabled,
+                        "test".to_string(),
+                    )
+                    .expect("Hand-crafted commits are always correct"),
+                ),
+                CommitSummary::Conventional(
+                    ConventionalCommitSummary::new(
+                        "fix".to_string(),
+                        None,
+                        ConventionalCommitSummaryBreakingFlag::Disabled,
+                        "test".to_string(),
+                    )
+                    .expect("Hand-crafted commits are always correct"),
+                ),
+                CommitSummary::Conventional(
+                    ConventionalCommitSummary::new(
+                        "chore".to_string(),
+                        None,
+                        ConventionalCommitSummaryBreakingFlag::Disabled,
+                        "test".to_string(),
+                    )
+                    .expect("Hand-crafted commits are always correct"),
+                ),
             ],
             vec![],
         );
@@ -401,7 +425,13 @@ mod tests {
             &version_repository,
         );
         let result = usecase
-            .greatest_change_from(Some(SemanticVersion::new(0, 1, 0, None, None).expect("Hand-crafted version must be correct")).into())
+            .greatest_change_from(
+                Some(
+                    SemanticVersion::new(0, 1, 0, None, None)
+                        .expect("Hand-crafted version must be correct"),
+                )
+                .into(),
+            )
             .expect(
                 "greatest_change_from can only fail during commit list retrieval, which is mocked",
             );
@@ -424,7 +454,13 @@ mod tests {
             &version_repository,
         );
         let result = usecase
-            .greatest_change_from(Some(SemanticVersion::new(0, 1, 0, None, None).expect("Hand-crafted version must be correct")).into())
+            .greatest_change_from(
+                Some(
+                    SemanticVersion::new(0, 1, 0, None, None)
+                        .expect("Hand-crafted version must be correct"),
+                )
+                .into(),
+            )
             .expect(
                 "greatest_change_from can only fail during commit list retrieval, which is mocked",
             );
@@ -466,12 +502,15 @@ mod tests {
             &commit_metadata_repository,
             &version_repository,
         );
-        let commit = CommitSummary::Conventional(ConventionalCommitSummary::new(
-            "chore".to_string(),
-            None,
-            ConventionalCommitSummaryBreakingFlag::Enabled,
-            "test".to_string(),
-        ).expect("Hand-crafted commits are always correct"));
+        let commit = CommitSummary::Conventional(
+            ConventionalCommitSummary::new(
+                "chore".to_string(),
+                None,
+                ConventionalCommitSummaryBreakingFlag::Enabled,
+                "test".to_string(),
+            )
+            .expect("Hand-crafted commits are always correct"),
+        );
         let result = usecase.commit_to_change(&commit);
         assert_eq!(result, Change::Major);
     }
@@ -491,12 +530,15 @@ mod tests {
             &commit_metadata_repository,
             &version_repository,
         );
-        let commit = CommitSummary::Conventional(ConventionalCommitSummary::new(
-            "feat".to_string(),
-            None,
-            ConventionalCommitSummaryBreakingFlag::Disabled,
-            "test".to_string(),
-        ).expect("Hand-crafted commits are always correct"));
+        let commit = CommitSummary::Conventional(
+            ConventionalCommitSummary::new(
+                "feat".to_string(),
+                None,
+                ConventionalCommitSummaryBreakingFlag::Disabled,
+                "test".to_string(),
+            )
+            .expect("Hand-crafted commits are always correct"),
+        );
         let result = usecase.commit_to_change(&commit);
         assert_eq!(result, Change::Minor);
     }
@@ -516,12 +558,15 @@ mod tests {
             &commit_metadata_repository,
             &version_repository,
         );
-        let commit = CommitSummary::Conventional(ConventionalCommitSummary::new(
-            "fix".to_string(),
-            None,
-            ConventionalCommitSummaryBreakingFlag::Disabled,
-            "test".to_string(),
-        ).expect("Hand-crafted commits are always correct"));
+        let commit = CommitSummary::Conventional(
+            ConventionalCommitSummary::new(
+                "fix".to_string(),
+                None,
+                ConventionalCommitSummaryBreakingFlag::Disabled,
+                "test".to_string(),
+            )
+            .expect("Hand-crafted commits are always correct"),
+        );
         let result = usecase.commit_to_change(&commit);
         assert_eq!(result, Change::Patch);
     }
@@ -541,12 +586,15 @@ mod tests {
             &commit_metadata_repository,
             &version_repository,
         );
-        let commit = CommitSummary::Conventional(ConventionalCommitSummary::new(
-            "chore".to_string(),
-            None,
-            ConventionalCommitSummaryBreakingFlag::Disabled,
-            "test".to_string(),
-        ).expect("Hand-crafted commits are always correct"));
+        let commit = CommitSummary::Conventional(
+            ConventionalCommitSummary::new(
+                "chore".to_string(),
+                None,
+                ConventionalCommitSummaryBreakingFlag::Disabled,
+                "test".to_string(),
+            )
+            .expect("Hand-crafted commits are always correct"),
+        );
         let result = usecase.commit_to_change(&commit);
         assert_eq!(result, Change::None);
     }
@@ -570,7 +618,11 @@ mod tests {
         let result = usecase
             .execute()
             .expect("The first release should not have an error");
-        assert_eq!(result.0, SemanticVersion::new(0, 1, 0, None, None).expect("Hand-crafted version must be correct"));
+        assert_eq!(
+            result.0,
+            SemanticVersion::new(0, 1, 0, None, None)
+                .expect("Hand-crafted version must be correct")
+        );
     }
 
     #[test]
@@ -605,7 +657,8 @@ mod tests {
             .expect("The first release should not have an error");
         assert_eq!(
             result.0,
-            SemanticVersion::new(0, 1, 0, Some("dev1".to_string()), None).expect("Hand-crafted version must be correct")
+            SemanticVersion::new(0, 1, 0, Some("dev1".to_string()), None)
+                .expect("Hand-crafted version must be correct")
         );
     }
 
@@ -630,17 +683,24 @@ mod tests {
             trigger_configuration,
         );
         let commit_summary_repository = MockCommitSummaryRepository::new(
-            vec![CommitSummary::Conventional(ConventionalCommitSummary::new(
-                "fix".to_owned(),
-                None,
-                ConventionalCommitSummaryBreakingFlag::Disabled,
-                "test".to_string(),
-            ).expect("Hand-crafted commits are always correct"))],
+            vec![CommitSummary::Conventional(
+                ConventionalCommitSummary::new(
+                    "fix".to_owned(),
+                    None,
+                    ConventionalCommitSummaryBreakingFlag::Disabled,
+                    "test".to_string(),
+                )
+                .expect("Hand-crafted commits are always correct"),
+            )],
             vec![],
         );
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
-            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None).expect("Hand-crafted version is always correct")).into(),
+            stable_version: Some(
+                SemanticVersion::new(0, 1, 0, None, None)
+                    .expect("Hand-crafted version is always correct"),
+            )
+            .into(),
             last_version: None.into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
@@ -652,7 +712,11 @@ mod tests {
         let result = usecase
             .execute()
             .expect("The first release should not have an error");
-        assert_eq!(result.0, SemanticVersion::new(0, 1, 1, None, None).expect("Hand-crafted version must be correct"));
+        assert_eq!(
+            result.0,
+            SemanticVersion::new(0, 1, 1, None, None)
+                .expect("Hand-crafted version must be correct")
+        );
     }
 
     #[test]
@@ -676,17 +740,24 @@ mod tests {
             trigger_configuration,
         );
         let commit_summary_repository = MockCommitSummaryRepository::new(
-            vec![CommitSummary::Conventional(ConventionalCommitSummary::new(
-                "feat".to_owned(),
-                None,
-                ConventionalCommitSummaryBreakingFlag::Disabled,
-                "test".to_string(),
-            ).expect("Hand-crafted commits are always correct"))],
+            vec![CommitSummary::Conventional(
+                ConventionalCommitSummary::new(
+                    "feat".to_owned(),
+                    None,
+                    ConventionalCommitSummaryBreakingFlag::Disabled,
+                    "test".to_string(),
+                )
+                .expect("Hand-crafted commits are always correct"),
+            )],
             vec![],
         );
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
-            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None).expect("Hand-crafted version must be correct")).into(),
+            stable_version: Some(
+                SemanticVersion::new(0, 1, 0, None, None)
+                    .expect("Hand-crafted version must be correct"),
+            )
+            .into(),
             last_version: None.into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
@@ -698,7 +769,11 @@ mod tests {
         let result = usecase
             .execute()
             .expect("The first release should not have an error");
-        assert_eq!(result.0, SemanticVersion::new(0, 2, 0, None, None).expect("Hand-crafted version must be correct"));
+        assert_eq!(
+            result.0,
+            SemanticVersion::new(0, 2, 0, None, None)
+                .expect("Hand-crafted version must be correct")
+        );
     }
 
     #[test]
@@ -722,17 +797,24 @@ mod tests {
             trigger_configuration,
         );
         let commit_summary_repository = MockCommitSummaryRepository::new(
-            vec![CommitSummary::Conventional(ConventionalCommitSummary::new(
-                "refactor".to_owned(),
-                None,
-                ConventionalCommitSummaryBreakingFlag::Enabled,
-                "test".to_string(),
-            ).expect("Hand-crafted commits are always correct"))],
+            vec![CommitSummary::Conventional(
+                ConventionalCommitSummary::new(
+                    "refactor".to_owned(),
+                    None,
+                    ConventionalCommitSummaryBreakingFlag::Enabled,
+                    "test".to_string(),
+                )
+                .expect("Hand-crafted commits are always correct"),
+            )],
             vec![],
         );
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
-            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None).expect("Hand-crafted version is always correct")).into(),
+            stable_version: Some(
+                SemanticVersion::new(0, 1, 0, None, None)
+                    .expect("Hand-crafted version is always correct"),
+            )
+            .into(),
             last_version: None.into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
@@ -744,7 +826,11 @@ mod tests {
         let result = usecase
             .execute()
             .expect("The first release should not have an error");
-        assert_eq!(result.0, SemanticVersion::new(1, 0, 0, None, None).expect("Hand-crafted version must be correct"));
+        assert_eq!(
+            result.0,
+            SemanticVersion::new(1, 0, 0, None, None)
+                .expect("Hand-crafted version must be correct")
+        );
     }
 
     #[test]
@@ -768,17 +854,24 @@ mod tests {
             trigger_configuration,
         );
         let commit_summary_repository = MockCommitSummaryRepository::new(
-            vec![CommitSummary::Conventional(ConventionalCommitSummary::new(
-                "refactor".to_owned(),
-                None,
-                ConventionalCommitSummaryBreakingFlag::Disabled,
-                "test".to_string(),
-            ).expect("Hand-crafted commits are always correct"))],
+            vec![CommitSummary::Conventional(
+                ConventionalCommitSummary::new(
+                    "refactor".to_owned(),
+                    None,
+                    ConventionalCommitSummaryBreakingFlag::Disabled,
+                    "test".to_string(),
+                )
+                .expect("Hand-crafted commits are always correct"),
+            )],
             vec![],
         );
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
-            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None).expect("Hand-crafted version must be correct")).into(),
+            stable_version: Some(
+                SemanticVersion::new(0, 1, 0, None, None)
+                    .expect("Hand-crafted version must be correct"),
+            )
+            .into(),
             last_version: None.into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
@@ -790,7 +883,10 @@ mod tests {
         let result = usecase
             .execute()
             .expect_err("This should return an error as there are no relevant changes");
-        assert!(result.is::<DescribeNoRelevantChangesError>());
+        assert!(matches!(
+            result,
+            DescribeNewVersionError::StableReleaseError(_)
+        ));
     }
 
     // test prerelease generation
@@ -815,24 +911,28 @@ mod tests {
             trigger_configuration,
         );
         let commit_summary_repository = MockCommitSummaryRepository::new(
-            vec![CommitSummary::Conventional(ConventionalCommitSummary::new(
-                "refactor".to_owned(),
-                None,
-                ConventionalCommitSummaryBreakingFlag::Disabled,
-                "test".to_string(),
-            ).expect("Hand-crafted commits are always correct"))],
+            vec![CommitSummary::Conventional(
+                ConventionalCommitSummary::new(
+                    "refactor".to_owned(),
+                    None,
+                    ConventionalCommitSummaryBreakingFlag::Disabled,
+                    "test".to_string(),
+                )
+                .expect("Hand-crafted commits are always correct"),
+            )],
             vec![],
         );
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
-            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None).expect("Hand-crafted version is always correct")).into(),
-            last_version: Some(SemanticVersion::new(
-                0,
-                1,
-                1,
-                Some("alpha1".to_string()),
-                None,
-            ).expect("Hand-crafted version must be correct"))
+            stable_version: Some(
+                SemanticVersion::new(0, 1, 0, None, None)
+                    .expect("Hand-crafted version is always correct"),
+            )
+            .into(),
+            last_version: Some(
+                SemanticVersion::new(0, 1, 1, Some("alpha1".to_string()), None)
+                    .expect("Hand-crafted version must be correct"),
+            )
             .into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
@@ -844,7 +944,8 @@ mod tests {
         let result = usecase.execute().expect("This calc should be correct");
         assert_eq!(
             result.0,
-            SemanticVersion::new(0, 1, 1, Some("dev1".to_string()), None).expect("Hand-crafted version must be correct")
+            SemanticVersion::new(0, 1, 1, Some("dev1".to_string()), None)
+                .expect("Hand-crafted version must be correct")
         );
     }
 
@@ -869,29 +970,36 @@ mod tests {
             trigger_configuration,
         );
         let commit_summary_repository = MockCommitSummaryRepository::new(
-            vec![CommitSummary::Conventional(ConventionalCommitSummary::new(
-                "fix".to_owned(),
-                None,
-                ConventionalCommitSummaryBreakingFlag::Disabled,
-                "test".to_string(),
-            ).expect("Hand-crafted commits are always correct"))],
-            vec![CommitSummary::Conventional(ConventionalCommitSummary::new(
-                "feat".to_owned(),
-                None,
-                ConventionalCommitSummaryBreakingFlag::Disabled,
-                "test".to_string(),
-            ).expect("Hand-crafted commits are always correct"))],
+            vec![CommitSummary::Conventional(
+                ConventionalCommitSummary::new(
+                    "fix".to_owned(),
+                    None,
+                    ConventionalCommitSummaryBreakingFlag::Disabled,
+                    "test".to_string(),
+                )
+                .expect("Hand-crafted commits are always correct"),
+            )],
+            vec![CommitSummary::Conventional(
+                ConventionalCommitSummary::new(
+                    "feat".to_owned(),
+                    None,
+                    ConventionalCommitSummaryBreakingFlag::Disabled,
+                    "test".to_string(),
+                )
+                .expect("Hand-crafted commits are always correct"),
+            )],
         );
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
-            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None).expect("Hand-crafted version is always correct")).into(),
-            last_version: Some(SemanticVersion::new(
-                0,
-                1,
-                1,
-                Some("dev1".to_string()),
-                None,
-            ).expect("Hand-crafted version must be correct"))
+            stable_version: Some(
+                SemanticVersion::new(0, 1, 0, None, None)
+                    .expect("Hand-crafted version is always correct"),
+            )
+            .into(),
+            last_version: Some(
+                SemanticVersion::new(0, 1, 1, Some("dev1".to_string()), None)
+                    .expect("Hand-crafted version must be correct"),
+            )
             .into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
@@ -903,7 +1011,8 @@ mod tests {
         let result = usecase.execute().expect("This calc should be correct");
         assert_eq!(
             result.0,
-            SemanticVersion::new(0, 2, 0, Some("dev1".to_string()), None).expect("Hand-crafted version must be correct")
+            SemanticVersion::new(0, 2, 0, Some("dev1".to_string()), None)
+                .expect("Hand-crafted version must be correct")
         );
     }
 
@@ -928,18 +1037,29 @@ mod tests {
             trigger_configuration,
         );
         let commit_summary_repository = MockCommitSummaryRepository::new(
-            vec![CommitSummary::Conventional(ConventionalCommitSummary::new(
-                "chore".to_owned(),
-                None,
-                ConventionalCommitSummaryBreakingFlag::Disabled,
-                "test".to_string(),
-            ).expect("Hand-crafted commits are always correct"))],
+            vec![CommitSummary::Conventional(
+                ConventionalCommitSummary::new(
+                    "chore".to_owned(),
+                    None,
+                    ConventionalCommitSummaryBreakingFlag::Disabled,
+                    "test".to_string(),
+                )
+                .expect("Hand-crafted commits are always correct"),
+            )],
             vec![],
         );
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
-            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None).expect("Hand-crafted version must be correct")).into(),
-            last_version: Some(SemanticVersion::new(0, 1, 0, None, None).expect("Hand-crafted version must be correct")).into(),
+            stable_version: Some(
+                SemanticVersion::new(0, 1, 0, None, None)
+                    .expect("Hand-crafted version must be correct"),
+            )
+            .into(),
+            last_version: Some(
+                SemanticVersion::new(0, 1, 0, None, None)
+                    .expect("Hand-crafted version must be correct"),
+            )
+            .into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
             configuration,
@@ -948,7 +1068,10 @@ mod tests {
             &version_repository,
         );
         let result = usecase.execute();
-        assert!(result.is_err_and(|it| it.is::<DescribeNoRelevantChangesError>()));
+        assert!(matches!(
+            result,
+            Err(DescribeNewVersionError::PrereleaseError(_))
+        ));
     }
 
     #[test]
@@ -972,29 +1095,36 @@ mod tests {
             trigger_configuration,
         );
         let commit_summary_repository = MockCommitSummaryRepository::new(
-            vec![CommitSummary::Conventional(ConventionalCommitSummary::new(
-                "chore".to_owned(),
-                None,
-                ConventionalCommitSummaryBreakingFlag::Disabled,
-                "test".to_string(),
-            ).expect("Hand-crafted commits are always correct"))],
-            vec![CommitSummary::Conventional(ConventionalCommitSummary::new(
-                "chore".to_string(),
-                None,
-                ConventionalCommitSummaryBreakingFlag::Disabled,
-                "test".to_string(),
-            ).expect("Hand-crafted commits are always correct"))],
+            vec![CommitSummary::Conventional(
+                ConventionalCommitSummary::new(
+                    "chore".to_owned(),
+                    None,
+                    ConventionalCommitSummaryBreakingFlag::Disabled,
+                    "test".to_string(),
+                )
+                .expect("Hand-crafted commits are always correct"),
+            )],
+            vec![CommitSummary::Conventional(
+                ConventionalCommitSummary::new(
+                    "chore".to_string(),
+                    None,
+                    ConventionalCommitSummaryBreakingFlag::Disabled,
+                    "test".to_string(),
+                )
+                .expect("Hand-crafted commits are always correct"),
+            )],
         );
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
-            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None).expect("Hand-crafted version must be correct")).into(),
-            last_version: Some(SemanticVersion::new(
-                0,
-                1,
-                1,
-                Some("dev1".to_string()),
-                None,
-            ).expect("Hand-crafted version must be correct"))
+            stable_version: Some(
+                SemanticVersion::new(0, 1, 0, None, None)
+                    .expect("Hand-crafted version must be correct"),
+            )
+            .into(),
+            last_version: Some(
+                SemanticVersion::new(0, 1, 1, Some("dev1".to_string()), None)
+                    .expect("Hand-crafted version must be correct"),
+            )
             .into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
@@ -1006,7 +1136,8 @@ mod tests {
         let result = usecase.execute().expect("This calc should be correct");
         assert_eq!(
             result.0,
-            SemanticVersion::new(0, 1, 1, Some("dev2".to_string()), None).expect("Hand-crafted version must be correct")
+            SemanticVersion::new(0, 1, 1, Some("dev2".to_string()), None)
+                .expect("Hand-crafted version must be correct")
         );
     }
 
@@ -1035,7 +1166,11 @@ mod tests {
         let commit_summary_repository = MockCommitSummaryRepository::new(vec![], vec![]);
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
-            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None).expect("Hand-crafted version must be correct")).into(),
+            stable_version: Some(
+                SemanticVersion::new(0, 1, 0, None, None)
+                    .expect("Hand-crafted version must be correct"),
+            )
+            .into(),
             last_version: None.into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
@@ -1073,7 +1208,11 @@ mod tests {
         let commit_summary_repository = MockCommitSummaryRepository::new(vec![], vec![]);
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
-            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None).expect("Hand-crafted version must be correct")).into(),
+            stable_version: Some(
+                SemanticVersion::new(0, 1, 0, None, None)
+                    .expect("Hand-crafted version must be correct"),
+            )
+            .into(),
             last_version: None.into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
@@ -1112,7 +1251,11 @@ mod tests {
         let commit_summary_repository = MockCommitSummaryRepository::new(vec![], vec![]);
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
-            stable_version: Some(SemanticVersion::new(0, 1, 0, None, None).expect("Hand-crafted version must be correct")).into(),
+            stable_version: Some(
+                SemanticVersion::new(0, 1, 0, None, None)
+                    .expect("Hand-crafted version must be correct"),
+            )
+            .into(),
             last_version: None.into(),
         };
         let usecase = CalculateNewVersionUseCase::new(
