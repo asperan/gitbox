@@ -1,5 +1,5 @@
 use crate::{
-    domain::{conventional_commit::ConventionalCommit, conventional_commit_summary::ConventionalCommitSummaryBreakingFlag},
+    domain::conventional_commit::ConventionalCommit,
     usecase::{
         configuration::commit::CommitConfiguration,
         error::create_conventional_commit_error::CreateConventionalCommitError,
@@ -33,7 +33,7 @@ impl UseCase<ConventionalCommit, CreateConventionalCommitError>
         let commit = ConventionalCommit::new(
             self.configuration.typ().to_owned(),
             self.configuration.scope().map(|it| it.to_owned()),
-            if self.configuration.is_breaking() {ConventionalCommitSummaryBreakingFlag::Enabled} else {ConventionalCommitSummaryBreakingFlag::Disabled},
+            self.configuration.is_breaking().into(),
             self.configuration.summary().to_owned(),
             self.configuration.message().map(|it| it.to_owned()),
         )?;

@@ -109,6 +109,16 @@ impl AsRef<bool> for ConventionalCommitSummaryBreakingFlag {
     }
 }
 
+impl From<bool> for ConventionalCommitSummaryBreakingFlag {
+    fn from(value: bool) -> Self {
+        if value {
+            Self::Enabled
+        } else {
+            Self::Disabled
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::ops::Deref;

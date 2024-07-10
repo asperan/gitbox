@@ -7,11 +7,8 @@ use crate::{
         CommitSummaryParsingError, FreeFormCommitSummaryError,
     },
     domain::{
-        commit_summary::CommitSummary,
-        conventional_commit::ConventionalCommit,
-        conventional_commit_summary::{
-            ConventionalCommitSummary, ConventionalCommitSummaryBreakingFlag,
-        },
+        commit_summary::CommitSummary, conventional_commit::ConventionalCommit,
+        conventional_commit_summary::ConventionalCommitSummary,
     },
 };
 
@@ -34,11 +31,7 @@ impl FromStr for CommitSummary {
                 Ok(CommitSummary::Conventional(ConventionalCommitSummary::new(
                     commit_type.to_owned(),
                     scope.map(|it| it.to_owned()),
-                    if breaking {
-                        ConventionalCommitSummaryBreakingFlag::Enabled
-                    } else {
-                        ConventionalCommitSummaryBreakingFlag::Disabled
-                    },
+                    breaking.into(),
                     summary.to_owned(),
                 )?))
             }
