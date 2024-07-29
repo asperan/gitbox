@@ -57,7 +57,8 @@ mod tests {
                 message_egress_manager::MessageEgressManager,
             },
         },
-        usecase::{tree_graph_line::TreeGraphLine, type_aliases::AnyError},
+        domain::tree_graph_line::TreeGraphLine,
+        usecase::type_aliases::AnyError,
     };
 
     use super::TreeController;
@@ -67,19 +68,19 @@ mod tests {
         fn commit_tree(&self, _format: &str) -> Result<Box<[String]>, AnyError> {
             Ok([
                 format!(
-                    "* abcdef{separator}( some time ago ){separator}( HEAD -> main ){separator}",
+                    "* {separator}abcdef0{separator}( some time ago ){separator}( HEAD -> main ){separator}{separator}",
                     separator = TreeGraphLine::separator()
                 ),
                 format!(
-                    "| {separator}{separator}{separator}asperan: first test message",
+                    "| {separator}{separator}{separator}{separator}asperan: {separator}first test message",
                     separator = TreeGraphLine::separator()
                 ),
                 format!(
-                    "* fedcba{separator}( some more time ago ){separator}{separator}",
+                    "* {separator}0fedcba{separator}( some more time ago ){separator}{separator}{separator}",
                     separator = TreeGraphLine::separator()
                 ),
                 format!(
-                    "| {separator}{separator}{separator}asperan: stub test",
+                    "| {separator}{separator}{separator}{separator}asperan: {separator}stub test",
                     separator = TreeGraphLine::separator()
                 ),
             ]
@@ -118,10 +119,10 @@ mod tests {
         let result = controller.commit_tree();
         assert!(matches!(result, ControllerExitCode::Ok));
         let expected_output = concat!(
-            "       ( some time ago ) * abcdef ( HEAD -> main ) \n",
-            "                         |   asperan: first test message\n",
-            "  ( some more time ago ) * fedcba  \n",
-            "                         |   asperan: stub test"
+            "\u{1b}[2m       ( some time ago )\u{1b}[0m * \u{1b}[34mabcdef0\u{1b}[0m \u{1b}[33m( HEAD -> main )\u{1b}[0m\n",
+            "                         |     \u{1b}[1;37masperan:\u{1b}[0m first test message\n",
+            "\u{1b}[2m  ( some more time ago )\u{1b}[0m * \u{1b}[34m0fedcba\u{1b}[0m \u{1b}[33m\u{1b}[0m\n",
+            "                         |     \u{1b}[1;37masperan:\u{1b}[0m stub test"
         );
         assert_eq!(
             output_manager

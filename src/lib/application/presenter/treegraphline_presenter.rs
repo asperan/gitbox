@@ -1,29 +1,55 @@
 use std::str::FromStr;
 
 use crate::{
-    application::error::treegraphline_format_error::TreeGraphLineFormatError,
-    usecase::{tree_graph_line::TreeGraphLine, type_aliases::AnyError},
+    application::error::treegraphline_format_error::{
+        LineInvariantError, SeparatorNumberError, TreeGraphLineParseError
+    },
+    domain::tree_graph_line::{CommitData, CommitMetadata, TreeGraphLine, TreeGraphLineContent},
 };
 
 impl FromStr for TreeGraphLine {
-    type Err = AnyError;
+    type Err = TreeGraphLineParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        // if the separator are 3, the resulting array will have 4 values:
-        // "1sep2sep3sep4" => [1, 2, 3, 4]
-        if s.matches(TreeGraphLine::separator()).count() == 3 {
+        let correct_number_of_separators = TreeGraphLine::format()
+            .matches(TreeGraphLine::separator())
+            .count()
+            / 2;
+        let actual_number_of_separators = s.matches(TreeGraphLine::separator()).count();
+        if actual_number_of_separators == correct_number_of_separators {
             let raw_array: Box<[&str]> = s.split(TreeGraphLine::separator()).collect();
-            Ok(TreeGraphLine::new(
-                raw_array[1].to_owned(),
-                raw_array[0].to_owned(),
-                raw_array[2].to_owned(),
-                raw_array[3].to_owned(),
-            ))
+            if (!raw_array[TreeGraphLine::abbreviated_hash_position()].is_empty()
+                || !raw_array[TreeGraphLine::relative_date_position()].is_empty()
+                || !raw_array[TreeGraphLine::references_position()].is_empty())
+                && (!raw_array[TreeGraphLine::author_position()].is_empty()
+                    || !raw_array[TreeGraphLine::summary_position()].is_empty())
+            {
+                Err(LineInvariantError {}.into())
+            } else {
+                let line_content =
+                    if raw_array[TreeGraphLine::abbreviated_hash_position()].is_empty() {
+                        TreeGraphLineContent::Data(CommitData::new(
+                            raw_array[TreeGraphLine::author_position()],
+                            raw_array[TreeGraphLine::summary_position()],
+                        )?)
+                    } else {
+                        TreeGraphLineContent::Metadata(CommitMetadata::new(
+                            raw_array[TreeGraphLine::abbreviated_hash_position()],
+                            raw_array[TreeGraphLine::relative_date_position()],
+                            raw_array[TreeGraphLine::references_position()],
+                        )?)
+                    };
+                Ok(TreeGraphLine::new(
+                    raw_array[TreeGraphLine::tree_marks_position()],
+                    line_content,
+                ))
+            }
         } else {
-            Err(Box::new(TreeGraphLineFormatError::new(&format!(
-                "the line must contain TreeGraphLine separator '{}' 3 times",
-                TreeGraphLine::separator()
-            ))))
+            Err(SeparatorNumberError::new(
+                correct_number_of_separators,
+                actual_number_of_separators,
+            )
+            .into())
         }
     }
 }

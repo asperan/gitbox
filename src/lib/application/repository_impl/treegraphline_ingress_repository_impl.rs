@@ -1,10 +1,14 @@
 use std::str::FromStr;
 
 use crate::{
-    application::manager::git_tree_ingress_manager::GitTreeIngressManager,
+    application::{
+        error::treegraphline_format_error::TreeGraphLineParseError,
+        manager::git_tree_ingress_manager::GitTreeIngressManager,
+    },
+    domain::tree_graph_line::TreeGraphLine,
     usecase::{
         repository::treegraphline_ingress_repository::TreeGraphLineIngressRepository,
-        tree_graph_line::TreeGraphLine, type_aliases::AnyError,
+        type_aliases::AnyError,
     },
 };
 
@@ -25,10 +29,10 @@ impl TreeGraphLineIngressRepository for TreeGraphLineIngressRepositoryImpl<'_> {
         let lines = self
             .treegraphline_ingress_manager
             .commit_tree(TreeGraphLine::format())?;
-        lines
+        Ok(lines
             .iter()
             .map(|it| TreeGraphLine::from_str(it))
-            .collect::<Result<Box<[TreeGraphLine]>, AnyError>>()
+            .collect::<Result<Box<[TreeGraphLine]>, TreeGraphLineParseError>>()?)
     }
 }
 
@@ -39,9 +43,12 @@ mod tests {
             manager::git_tree_ingress_manager::GitTreeIngressManager,
             repository_impl::treegraphline_ingress_repository_impl::TreeGraphLineIngressRepositoryImpl,
         },
+        domain::tree_graph_line::{
+            CommitData, CommitMetadata, TreeGraphLine, TreeGraphLineContent,
+        },
         usecase::{
             repository::treegraphline_ingress_repository::TreeGraphLineIngressRepository,
-            tree_graph_line::TreeGraphLine, type_aliases::AnyError,
+            type_aliases::AnyError,
         },
     };
 
@@ -57,10 +64,10 @@ mod tests {
                 format!("* fedcba{separator}( sample date 2 ){separator}{separator}", separator = TreeGraphLine::separator()),
                 format!("| {separator}{separator}{separator}asperan: another test message", separator = TreeGraphLine::separator())].into())
             } else {
-                Ok([format!("* abcdef{separator}( sample date 1 ){separator}( HEAD -> main ){separator}", separator = TreeGraphLine::separator()),
-                format!("| {separator}{separator}{separator}asperan: test message", separator = TreeGraphLine::separator()),
-                format!("* fedcba{separator}( sample date 2 ){separator}{separator}", separator = TreeGraphLine::separator()),
-                format!("| {separator}{separator}{separator}asperan: another test message", separator = TreeGraphLine::separator())].into())
+                Ok([format!("* {separator}abcdef0{separator}( sample date 1 ){separator}( HEAD -> main ){separator}{separator}", separator = TreeGraphLine::separator()),
+                format!("| {separator}{separator}{separator}{separator}asperan: {separator}test message", separator = TreeGraphLine::separator()),
+                format!("* {separator}0fedcba{separator}( sample date 2 ){separator}{separator}{separator}", separator = TreeGraphLine::separator()),
+                format!("| {separator}{separator}{separator}{separator}asperan: {separator}another test message", separator = TreeGraphLine::separator())].into())
             }
         }
     }
@@ -72,31 +79,35 @@ mod tests {
         };
         let repository_impl = TreeGraphLineIngressRepositoryImpl::new(&git_tree_ingress_manager);
         let result = repository_impl.graph_lines();
-        assert!(result.is_ok());
+        assert!(matches!(result, Ok(_)));
         let expected = [
             TreeGraphLine::new(
-                "( sample date 1 )".to_owned(),
-                "* abcdef".to_owned(),
-                "( HEAD -> main )".to_owned(),
-                String::new(),
+                "* ",
+                TreeGraphLineContent::Metadata(
+                    CommitMetadata::new("abcdef0", "( sample date 1 )", "( HEAD -> main )")
+                        .expect("Hand-crafted lines are always correct"),
+                ),
             ),
             TreeGraphLine::new(
-                String::new(),
-                "| ".to_owned(),
-                String::new(),
-                "asperan: test message".to_owned(),
+                "| ",
+                TreeGraphLineContent::Data(
+                    CommitData::new("asperan:", "test message")
+                        .expect("Hand-crafted lines are always correct"),
+                ),
             ),
             TreeGraphLine::new(
-                "( sample date 2 )".to_owned(),
-                "* fedcba".to_owned(),
-                String::new(),
-                String::new(),
+                "*",
+                TreeGraphLineContent::Metadata(
+                    CommitMetadata::new("0fedcba", "( sample date 2 )", "")
+                        .expect("Hand-crafted lines are always correct"),
+                ),
             ),
             TreeGraphLine::new(
-                String::new(),
-                "| ".to_owned(),
-                String::new(),
-                "asperan: another test message".to_owned(),
+                "| ",
+                TreeGraphLineContent::Data(
+                    CommitData::new("asperan:", "another test message")
+                        .expect("Hand-crafted lines are always correct"),
+                ),
             ),
         ];
         assert_eq!(result.expect("Just asserted the Ok-ness"), expected.into())

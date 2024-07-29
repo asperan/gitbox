@@ -1,9 +1,11 @@
-use regex::Regex;
+use colored::Colorize;
 
-use crate::usecase::{
-    error::format_tree_error::FormatTreeError,
-    repository::treegraphline_ingress_repository::TreeGraphLineIngressRepository,
-    tree_graph_line::TreeGraphLine,
+use crate::{
+    domain::tree_graph_line::{TreeGraphLine, TreeGraphLineContent},
+    usecase::{
+        error::format_tree_error::FormatTreeError,
+        repository::treegraphline_ingress_repository::TreeGraphLineIngressRepository,
+    },
 };
 
 use super::usecase::UseCase;
@@ -23,14 +25,24 @@ impl<'a, 'b: 'a> FormatTreeGraphUseCase<'a> {
 
     #[inline(always)]
     fn format_line(&self, line: &TreeGraphLine, left_padding: usize) -> Box<str> {
-        format!(
-            "{date:>width$} {tree_mark} {pointers} {commit_text}",
-            date = line.date(),
-            width = left_padding,
-            tree_mark = line.tree_mark(),
-            pointers = line.pointers(),
-            commit_text = line.message(),
-        )
+        match line.line_content() {
+            TreeGraphLineContent::Metadata(metadata) => format!(
+                "{date:>width$} {tree_marks} {hash} {references}",
+                date = metadata.relative_date().dimmed(),
+                width = left_padding,
+                tree_marks = line.tree_marks(),
+                hash = metadata.abbreviated_hash().blue(),
+                references = metadata.references().yellow(),
+            ),
+            TreeGraphLineContent::Data(data) => format!(
+                "{:>width$} {tree_marks:>1}     {author} {summary}",
+                "",
+                width = left_padding,
+                tree_marks = line.tree_marks(),
+                author = data.author().white().bold(),
+                summary = data.summary()
+            ),
+        }
         .into()
     }
 }
@@ -38,38 +50,21 @@ impl<'a, 'b: 'a> FormatTreeGraphUseCase<'a> {
 impl UseCase<Box<str>, FormatTreeError> for FormatTreeGraphUseCase<'_> {
     fn execute(&self) -> Result<Box<str>, FormatTreeError> {
         let lines = self.treegraphline_ingress_repository.graph_lines()?;
-        let time_color_length = {
-            let time_regex = Regex::new("\\([a-z0-9 ,]+\\)").unwrap();
-            let first_line_time = &lines[0].date();
-            match time_regex.captures(first_line_time) {
-                Some(captures) => {
-                    first_line_time.len()
-                        - captures.get(0).expect("the groups should be there").len()
-                }
-                None => 0,
-            }
-        };
         let time_padding = lines
             .iter()
             .filter_map(|it| {
-                if !it.date().is_empty() {
-                    Some(it.date().len() - time_color_length)
-                } else {
-                    None
+                match it.line_content() {
+                    TreeGraphLineContent::Data(_) => None,
+                    TreeGraphLineContent::Metadata(metadata) => Some(metadata.relative_date()),
                 }
+                .map(|it| it.len())
             })
             .max()
             .unwrap_or(0usize);
         let result = lines
             .iter()
             .map(|line| {
-                let left_padding = TIME_MINIMUM_PADDING
-                    + time_padding
-                    + if !line.date().is_empty() {
-                        time_color_length
-                    } else {
-                        0
-                    };
+                let left_padding = TIME_MINIMUM_PADDING + time_padding;
                 self.format_line(line, left_padding)
             })
             .fold(String::new(), |acc, e| acc + "\n" + &e);
@@ -79,11 +74,15 @@ impl UseCase<Box<str>, FormatTreeError> for FormatTreeGraphUseCase<'_> {
 
 #[cfg(test)]
 mod tests {
-    use crate::usecase::{
-        repository::treegraphline_ingress_repository::TreeGraphLineIngressRepository,
-        tree_graph_line::TreeGraphLine,
-        type_aliases::AnyError,
-        usecases::{format_tree_graph::FormatTreeGraphUseCase, usecase::UseCase},
+    use crate::{
+        domain::tree_graph_line::{
+            CommitData, CommitMetadata, TreeGraphLine, TreeGraphLineContent,
+        },
+        usecase::{
+            repository::treegraphline_ingress_repository::TreeGraphLineIngressRepository,
+            type_aliases::AnyError,
+            usecases::{format_tree_graph::FormatTreeGraphUseCase, usecase::UseCase},
+        },
     };
 
     struct MockTreeGraphLineIngressRepository {}
@@ -92,28 +91,32 @@ mod tests {
         fn graph_lines(&self) -> Result<Box<[TreeGraphLine]>, AnyError> {
             Ok([
                 TreeGraphLine::new(
-                    "( sample date 1 )".to_owned(),
-                    "* abcdef".to_owned(),
-                    "( HEAD -> main )".to_owned(),
-                    String::new(),
+                    "*",
+                    TreeGraphLineContent::Metadata(
+                        CommitMetadata::new("abcdef0", "( sample date 1 )", "( HEAD -> main )")
+                            .expect("Hand-crafted lines are always correct"),
+                    ),
                 ),
                 TreeGraphLine::new(
-                    String::new(),
-                    "| ".to_owned(),
-                    String::new(),
-                    "asperan: test message".to_owned(),
+                    "| ",
+                    TreeGraphLineContent::Data(
+                        CommitData::new("asperan:", "test message")
+                            .expect("Hand-crafted lines are always correct"),
+                    ),
                 ),
                 TreeGraphLine::new(
-                    "( sample date 2 )".to_owned(),
-                    "* fedcba".to_owned(),
-                    String::new(),
-                    String::new(),
+                    "*",
+                    TreeGraphLineContent::Metadata(
+                        CommitMetadata::new("0fedcba", "( sample date 2 )", "")
+                            .expect("Hand-crafted lines are always correct"),
+                    ),
                 ),
                 TreeGraphLine::new(
-                    String::new(),
-                    "| ".to_owned(),
-                    String::new(),
-                    "asperan: another test message".to_owned(),
+                    "| ",
+                    TreeGraphLineContent::Data(
+                        CommitData::new("asperan:", "another test message")
+                            .expect("Hand-crafted lines are always correct"),
+                    ),
                 ),
             ]
             .into())
@@ -124,14 +127,15 @@ mod tests {
     fn format_header_line() {
         let padding = 16;
         let t = TreeGraphLine::new(
-            "( sample date )".to_owned(),
-            "* abcdef".to_owned(),
-            "( HEAD -> main )".to_owned(),
-            String::new(),
+            "*",
+            TreeGraphLineContent::Metadata(
+                CommitMetadata::new("abcdef0", "( sample date )", "( HEAD -> main )")
+                    .expect("Hand-crafted lines are always correct"),
+            ),
         );
         let usecase = FormatTreeGraphUseCase::new(&MockTreeGraphLineIngressRepository {});
         let result = usecase.format_line(&t, padding);
-        let expected = " ( sample date ) * abcdef ( HEAD -> main ) ";
+        let expected = "\u{1b}[2m ( sample date )\u{1b}[0m * \u{1b}[34mabcdef0\u{1b}[0m \u{1b}[33m( HEAD -> main )\u{1b}[0m";
         assert_eq!(result, expected.into());
     }
 
@@ -139,14 +143,15 @@ mod tests {
     fn format_message_line() {
         let padding = 16;
         let t = TreeGraphLine::new(
-            String::new(),
-            "| ".to_owned(),
-            "".to_owned(),
-            "asperan: test message".to_owned(),
+            "| ",
+            TreeGraphLineContent::Data(
+                CommitData::new("asperan:", "test message")
+                    .expect("Hand-crafted lines are always correct"),
+            ),
         );
         let usecase = FormatTreeGraphUseCase::new(&MockTreeGraphLineIngressRepository {});
         let result = usecase.format_line(&t, padding);
-        let expected = "                 |   asperan: test message";
+        let expected = "                 |     \u{1b}[1;37masperan:\u{1b}[0m test message";
         assert_eq!(result, expected.into());
     }
 
@@ -158,10 +163,10 @@ mod tests {
             .expect("The usecase should execute correctly");
         println!("{}", &result);
         let expected = concat!(
-            "  ( sample date 1 ) * abcdef ( HEAD -> main ) \n",
-            "                    |   asperan: test message\n",
-            "  ( sample date 2 ) * fedcba  \n",
-            "                    |   asperan: another test message",
+            "\u{1b}[2m  ( sample date 1 )\u{1b}[0m * \u{1b}[34mabcdef0\u{1b}[0m \u{1b}[33m( HEAD -> main )\u{1b}[0m\n",
+            "                    |     \u{1b}[1;37masperan:\u{1b}[0m test message\n",
+            "\u{1b}[2m  ( sample date 2 )\u{1b}[0m * \u{1b}[34m0fedcba\u{1b}[0m \u{1b}[33m\u{1b}[0m\n",
+            "                    |     \u{1b}[1;37masperan:\u{1b}[0m another test message",
         );
         assert_eq!(result, expected.into());
     }

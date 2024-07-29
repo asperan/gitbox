@@ -10,10 +10,22 @@ use crate::{
 
 #[derive(Args, Debug)]
 #[command(about = "Print a fancy view of the commit tree")]
-pub struct TreeSubCommand {}
+pub struct TreeSubCommand {
+    #[arg(
+        long,
+        default_value = "false",
+        help = "Set whether to use the default color behaviour with pipes and redirections"
+    )]
+    use_default_color_behaviour: bool,
+}
 
 impl Subcommand for TreeSubCommand {
     fn execute(&self) -> i32 {
+        if self.use_default_color_behaviour {
+            colored::control::unset_override();
+        } else {
+            colored::control::set_override(true);
+        }
         let git_cli = GitCli::new();
         let message_egress_manager = MessageEgressManagerImpl::new();
         let controller = TreeController::new(&git_cli, &message_egress_manager);
