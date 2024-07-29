@@ -58,7 +58,7 @@ impl UseCase<(), RefreshTypesAndScopesError> for RefreshTypesAndScopesUseCase<'_
 
 #[cfg(test)]
 mod tests {
-    use std::{cell::RefCell, error::Error, fmt::Display};
+    use std::cell::RefCell;
 
     use crate::{
         domain::{
@@ -79,17 +79,6 @@ mod tests {
     };
 
     use super::RefreshTypesAndScopesUseCase;
-
-    #[derive(Debug)]
-    struct MockError {}
-
-    impl Display for MockError {
-        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-            write!(f, "Mock error")
-        }
-    }
-
-    impl Error for MockError {}
 
     struct MockFullCommitSummaryHistoryIngressRepository {}
 
