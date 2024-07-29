@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 use crate::usecase::error::commit_configuration_invariant_error::CommitConfigurationInvariantError;
 
 #[derive(Debug)]
@@ -7,6 +9,7 @@ pub struct CommitConfiguration {
     is_breaking: bool,
     summary: String,
     message: Option<String>,
+    allow_empty: AllowEmptyFlag,
 }
 
 impl CommitConfiguration {
@@ -16,6 +19,7 @@ impl CommitConfiguration {
         is_breaking: bool,
         summary: String,
         message: Option<String>,
+        allow_empty: AllowEmptyFlag,
     ) -> Result<CommitConfiguration, CommitConfigurationInvariantError> {
         Self::type_checks(&commit_type)?;
         Self::scope_checks(scope.as_deref())?;
@@ -27,6 +31,7 @@ impl CommitConfiguration {
             is_breaking,
             summary,
             message,
+            allow_empty,
         })
     }
 
@@ -48,6 +53,10 @@ impl CommitConfiguration {
 
     pub fn message(&self) -> Option<&str> {
         self.message.as_deref()
+    }
+
+    pub fn allow_empty(&self) -> bool {
+        *self.allow_empty
     }
 
     fn type_checks(t: &str) -> Result<(), CommitConfigurationInvariantError> {
@@ -84,6 +93,29 @@ impl CommitConfiguration {
             ));
         }
         Ok(())
+    }
+}
+
+#[derive(Debug)]
+pub enum AllowEmptyFlag {
+    Enabled,
+    Disabled,
+}
+
+impl Deref for AllowEmptyFlag {
+    type Target = bool;
+
+    fn deref(&self) -> &Self::Target {
+        match self {
+            Self::Enabled => &true,
+            Self::Disabled => &false,
+        }
+    }
+}
+
+impl AsRef<bool> for AllowEmptyFlag {
+    fn as_ref(&self) -> &bool {
+        self.deref()
     }
 }
 

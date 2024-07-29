@@ -8,7 +8,7 @@ use crate::{
         repository_impl::conventional_commit_egress_repository_impl::ConventionalCommitEgressRepositoryImpl,
     },
     usecase::{
-        configuration::commit::CommitConfiguration,
+        configuration::commit::{AllowEmptyFlag, CommitConfiguration},
         usecases::{create_conventional_commit::CreateConventionalCommitUseCase, usecase::UseCase},
     },
 };
@@ -50,6 +50,7 @@ impl<'a, 'b: 'a, 'c: 'a, 'd: 'a> InitController<'a> {
                 false,
                 "initialize empty repository".to_string(),
                 None,
+                AllowEmptyFlag::Enabled,
             )
             .expect("Init commit configuration is hand-made");
             let commit_repository =

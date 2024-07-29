@@ -37,7 +37,11 @@ impl UseCase<ConventionalCommit, CreateConventionalCommitError>
             self.configuration.summary().to_owned(),
             self.configuration.message().map(|it| it.to_owned()),
         )?;
-        self.commit_repository.create_commit(&commit)?;
+        if self.configuration.allow_empty() {
+            self.commit_repository.create_empty_commit(&commit)?;
+        } else {
+            self.commit_repository.create_commit(&commit)?;
+        }
         Ok(commit)
     }
 }
@@ -49,7 +53,7 @@ mod tests {
     use crate::{
         domain::conventional_commit::ConventionalCommit,
         usecase::{
-            configuration::commit::CommitConfiguration,
+            configuration::commit::{AllowEmptyFlag, CommitConfiguration},
             repository::conventional_commit_egress_repository::ConventionalCommitEgressRepository,
             type_aliases::AnyError,
             usecases::{
@@ -86,8 +90,15 @@ mod tests {
     }
 
     fn simple_configuration() -> CommitConfiguration {
-        CommitConfiguration::new("feat".to_string(), None, false, "test".to_string(), None)
-            .expect("This configuration is well-formed")
+        CommitConfiguration::new(
+            "feat".to_string(),
+            None,
+            false,
+            "test".to_string(),
+            None,
+            AllowEmptyFlag::Disabled,
+        )
+        .expect("This configuration is well-formed")
     }
 
     fn full_configuration() -> CommitConfiguration {
@@ -97,6 +108,7 @@ mod tests {
             true,
             "test".to_string(),
             Some("Message body".to_string()),
+            AllowEmptyFlag::Disabled,
         )
         .expect("This configuration is well-formed")
     }

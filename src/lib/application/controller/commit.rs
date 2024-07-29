@@ -8,7 +8,7 @@ use crate::{
         repository_impl::conventional_commit_egress_repository_impl::ConventionalCommitEgressRepositoryImpl,
     },
     usecase::{
-        configuration::commit::CommitConfiguration,
+        configuration::commit::{AllowEmptyFlag, CommitConfiguration},
         usecases::{create_conventional_commit::CreateConventionalCommitUseCase, usecase::UseCase},
     },
 };
@@ -41,6 +41,7 @@ impl<'a, 'b: 'a, 'c: 'a> CommitController<'a> {
             self.options.is_breaking(),
             self.options.summary().to_string(),
             self.options.message().map(|it| it.to_owned()),
+            AllowEmptyFlag::Disabled,
         ) {
             Ok(configuration) => {
                 let commit_repository =
