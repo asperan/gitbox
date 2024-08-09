@@ -330,7 +330,7 @@ mod tests {
             Box::new(|t| format!("# {}", t)),
             Box::new(|t| format!("## {}", t)),
             Box::new(|s| format!("### {}", s)),
-            Box::new(|l| format!("{}", l)),
+            Box::new(|l| l.to_string()),
             Box::new(|i| format!("* {}", i)),
             Box::new(|b| format!("**{}**", b)),
         )

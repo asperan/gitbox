@@ -79,7 +79,7 @@ mod tests {
         };
         let repository_impl = TreeGraphLineIngressRepositoryImpl::new(&git_tree_ingress_manager);
         let result = repository_impl.graph_lines();
-        assert!(matches!(result, Ok(_)));
+        assert!(result.is_ok());
         let expected = [
             TreeGraphLine::new(
                 "* ",

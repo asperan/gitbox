@@ -131,16 +131,16 @@ mod tests {
         let test_string2_only_spaces = String::from("  ");
         let test_string3_uppercase = String::from("FEAT");
         let test_string4_hypen = String::from("test-4");
-        assert!(matches!(ConventionalCommitSummary::check_type(test_string1_empty), Err(_)));
-        assert!(matches!(ConventionalCommitSummary::check_type(test_string2_only_spaces), Err(_)));
-        assert!(matches!(ConventionalCommitSummary::check_type(test_string3_uppercase), Err(_)));
-        assert!(matches!(ConventionalCommitSummary::check_type(test_string4_hypen), Err(_)));
+        assert!(ConventionalCommitSummary::check_type(test_string1_empty).is_err());
+        assert!(ConventionalCommitSummary::check_type(test_string2_only_spaces).is_err());
+        assert!(ConventionalCommitSummary::check_type(test_string3_uppercase).is_err());
+        assert!(ConventionalCommitSummary::check_type(test_string4_hypen).is_err());
     }
 
     #[test]
     fn type_correct_invariants() {
         let correct_type = String::from("feat");
-        assert!(matches!(ConventionalCommitSummary::check_type(correct_type), Ok(_)));
+        assert!(ConventionalCommitSummary::check_type(correct_type).is_ok());
     }
 
     #[test]
@@ -148,9 +148,9 @@ mod tests {
         let test_scope1_empty = Some(String::from(""));
         let test_scope2_only_spaces = Some(String::from("  "));
         let test_scope3_symbols = Some(String::from("test/what"));
-        assert!(matches!(ConventionalCommitSummary::check_scope(test_scope1_empty), Err(_)));
-        assert!(matches!(ConventionalCommitSummary::check_scope(test_scope2_only_spaces), Err(_)));
-        assert!(matches!(ConventionalCommitSummary::check_scope(test_scope3_symbols), Err(_)));
+        assert!(ConventionalCommitSummary::check_scope(test_scope1_empty).is_err());
+        assert!(ConventionalCommitSummary::check_scope(test_scope2_only_spaces).is_err());
+        assert!(ConventionalCommitSummary::check_scope(test_scope3_symbols).is_err());
     }
 
     #[test]
@@ -159,24 +159,24 @@ mod tests {
         let correct_scope2_lowercase = Some(String::from("api"));
         let correct_scope3_uppercase = Some(String::from("API"));
         let correct_scope4_hypen = Some(String::from("test-api"));
-        assert!(matches!(ConventionalCommitSummary::check_scope(correct_scope1_none), Ok(_)));
-        assert!(matches!(ConventionalCommitSummary::check_scope(correct_scope2_lowercase), Ok(_)));
-        assert!(matches!(ConventionalCommitSummary::check_scope(correct_scope3_uppercase), Ok(_)));
-        assert!(matches!(ConventionalCommitSummary::check_scope(correct_scope4_hypen), Ok(_)));
+        assert!(ConventionalCommitSummary::check_scope(correct_scope1_none).is_ok());
+        assert!(ConventionalCommitSummary::check_scope(correct_scope2_lowercase).is_ok());
+        assert!(ConventionalCommitSummary::check_scope(correct_scope3_uppercase).is_ok());
+        assert!(ConventionalCommitSummary::check_scope(correct_scope4_hypen).is_ok());
     }
 
     #[test]
     fn summary_wrong_invariants() {
         let wrong_summary1_empty = String::from("");
         let wrong_summary2_onyl_spaces = String::from("  ");
-        assert!(matches!(ConventionalCommitSummary::check_summary(wrong_summary1_empty), Err(_)));
-        assert!(matches!(ConventionalCommitSummary::check_summary(wrong_summary2_onyl_spaces), Err(_)));
+        assert!(ConventionalCommitSummary::check_summary(wrong_summary1_empty).is_err());
+        assert!(ConventionalCommitSummary::check_summary(wrong_summary2_onyl_spaces).is_err());
     }
 
     #[test]
     fn summary_correct_invariants() {
         let correct_summary1 = String::from("a test Summary with all the available characters - even symbols");
-        assert!(matches!(ConventionalCommitSummary::check_summary(correct_summary1), Ok(_)));
+        assert!(ConventionalCommitSummary::check_summary(correct_summary1).is_ok());
     }
 
     #[test]

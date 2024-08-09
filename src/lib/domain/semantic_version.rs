@@ -246,7 +246,7 @@ mod tests {
     #[test]
     fn prerelease_invariant_correct() {
         let v = SemanticVersion::new(0, 1, 0, Some("dev1".to_string()), None);
-        assert!(matches!(v, Ok(_)));
+        assert!(v.is_ok());
     }
     #[test]
     fn metadata_invariant_if_empty() {
@@ -269,6 +269,6 @@ mod tests {
     #[test]
     fn metadata_invariant_correct() {
         let v = SemanticVersion::new(0, 1, 0, None, Some("sha-date".to_string()));
-        assert!(matches!(v, Ok(_)));
+        assert!(v.is_ok());
     }
 }
