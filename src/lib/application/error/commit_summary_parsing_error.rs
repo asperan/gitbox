@@ -10,7 +10,11 @@ pub enum CommitSummaryParsingError {
 
 impl Display for CommitSummaryParsingError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "failed to parse commit summary: {}", self.source().expect("source error is always present"))
+        write!(
+            f,
+            "failed to parse commit summary: {}",
+            self.source().expect("source error is always present")
+        )
     }
 }
 

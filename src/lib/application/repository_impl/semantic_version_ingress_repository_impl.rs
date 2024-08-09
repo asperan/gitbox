@@ -94,7 +94,8 @@ mod tests {
     #[test]
     fn last_version_present() {
         let repository = SemanticVersionIngressRepositoryImpl::new(&MockFullVersionRetriever {});
-        let expected = SemanticVersion::new(0, 1, 0, Some("dev1".to_string()), None).expect("Hand-crafted version is always correct");
+        let expected = SemanticVersion::new(0, 1, 0, Some("dev1".to_string()), None)
+            .expect("Hand-crafted version is always correct");
         assert!(repository
             .last_version()
             .is_ok_and(|it| it.as_ref().clone().is_some_and(|v| v == expected)));
@@ -115,7 +116,8 @@ mod tests {
     #[test]
     fn last_stable_version_present() {
         let repository = SemanticVersionIngressRepositoryImpl::new(&MockFullVersionRetriever {});
-        let expected = SemanticVersion::new(0, 1, 0, None, None).expect("Hand-crafted version is always correct");
+        let expected = SemanticVersion::new(0, 1, 0, None, None)
+            .expect("Hand-crafted version is always correct");
         assert!(repository
             .last_stable_version()
             .is_ok_and(|it| it.as_ref().clone().is_some_and(|v| v == expected)));

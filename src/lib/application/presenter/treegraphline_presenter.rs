@@ -2,7 +2,7 @@ use std::str::FromStr;
 
 use crate::{
     application::error::treegraphline_format_error::{
-        LineInvariantError, SeparatorNumberError, TreeGraphLineParseError
+        LineInvariantError, SeparatorNumberError, TreeGraphLineParseError,
     },
     domain::tree_graph_line::{CommitData, CommitMetadata, TreeGraphLine, TreeGraphLineContent},
 };

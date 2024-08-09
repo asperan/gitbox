@@ -73,7 +73,11 @@ pub enum DescribeStableReleaseError {
 
 impl Display for DescribeStableReleaseError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "failed to describe stable release: {}", self.source().expect("source error is always present"))
+        write!(
+            f,
+            "failed to describe stable release: {}",
+            self.source().expect("source error is always present")
+        )
     }
 }
 
@@ -106,7 +110,11 @@ pub enum DescribePrereleaseError {
 
 impl Display for DescribePrereleaseError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "failed to describe prerelease: {}", self.source().expect("source error is always present"))
+        write!(
+            f,
+            "failed to describe prerelease: {}",
+            self.source().expect("source error is always present")
+        )
     }
 }
 
@@ -138,7 +146,11 @@ pub enum DescribeMetadataError {
 
 impl Display for DescribeMetadataError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "failed to describe metadata: {}", self.source().expect("source error is always present"))
+        write!(
+            f,
+            "failed to describe metadata: {}",
+            self.source().expect("source error is always present")
+        )
     }
 }
 

@@ -123,7 +123,9 @@ impl From<bool> for ConventionalCommitSummaryBreakingFlag {
 mod tests {
     use std::ops::Deref;
 
-    use crate::domain::conventional_commit_summary::{ConventionalCommitSummary, ConventionalCommitSummaryBreakingFlag};
+    use crate::domain::conventional_commit_summary::{
+        ConventionalCommitSummary, ConventionalCommitSummaryBreakingFlag,
+    };
 
     #[test]
     fn type_wrong_invariants() {
@@ -175,7 +177,8 @@ mod tests {
 
     #[test]
     fn summary_correct_invariants() {
-        let correct_summary1 = String::from("a test Summary with all the available characters - even symbols");
+        let correct_summary1 =
+            String::from("a test Summary with all the available characters - even symbols");
         assert!(ConventionalCommitSummary::check_summary(correct_summary1).is_ok());
     }
 

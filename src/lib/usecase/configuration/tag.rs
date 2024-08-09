@@ -55,7 +55,8 @@ mod tests {
 
     #[test]
     fn invariant_correct() {
-        let version = SemanticVersion::new(0, 1, 0, None, None).expect("Hand-crafted version is always correct");
+        let version = SemanticVersion::new(0, 1, 0, None, None)
+            .expect("Hand-crafted version is always correct");
         let message = Some(String::from("test"));
         let sign = false;
         let result = TagConfiguration::new(version, message, sign);
@@ -64,7 +65,8 @@ mod tests {
 
     #[test]
     fn invariant_correct_with_no_message() {
-        let version = SemanticVersion::new(0, 1, 0, None, None).expect("Hand-crafted version is always correct");
+        let version = SemanticVersion::new(0, 1, 0, None, None)
+            .expect("Hand-crafted version is always correct");
         let message = None;
         let sign = false;
         let result = TagConfiguration::new(version, message, sign);
@@ -73,7 +75,8 @@ mod tests {
 
     #[test]
     fn invariant_wrong() {
-        let version = SemanticVersion::new(0, 1, 0, None, None).expect("Hand-crafted version is always correct");
+        let version = SemanticVersion::new(0, 1, 0, None, None)
+            .expect("Hand-crafted version is always correct");
         let message = Some(String::new());
         let sign = false;
         let result = TagConfiguration::new(version, message, sign);

@@ -9,7 +9,11 @@ pub enum ConventionalCommitSummaryInvariantError {
 
 impl Display for ConventionalCommitSummaryInvariantError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "invariant violated: {}", self.source().expect("The source is always present"))
+        write!(
+            f,
+            "invariant violated: {}",
+            self.source().expect("The source is always present")
+        )
     }
 }
 
