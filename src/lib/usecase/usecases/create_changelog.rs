@@ -364,7 +364,7 @@ mod tests {
         assert_eq!(
             s,
             format!(
-                ":\n{}\n{}\n{}\n{}\n{}\n{}\n{}",
+                "{}\n{}\n{}\n{}\n{}\n{}\n{}",
                 "* test message #1",
                 "* test message #2",
                 "* test message #3",
@@ -379,7 +379,7 @@ mod tests {
     #[test]
     fn format_list_empty() {
         let s = format_list(&format(), [].iter());
-        assert_eq!(s, ":\n".to_string());
+        assert_eq!(s, "".to_string());
     }
 
     #[test]
@@ -678,15 +678,15 @@ mod tests {
                 "### API\n",
                 "* test message #2\n",
                 "\n",
-                "## docs\n",
-                "### General\n",
-                "* test message #5\n",
-                "\n",
                 "## test\n",
                 "### API\n",
                 "* test message #7\n",
                 "### General\n",
                 "* test message #3\n",
+                "\n",
+                "## docs\n",
+                "### General\n",
+                "* test message #5\n",
                 "\n",
                 "## refactor\n",
                 "### exclude\n",
@@ -770,15 +770,15 @@ mod tests {
                 "### API\n",
                 "* test message #2\n",
                 "\n",
-                "## docs\n",
-                "### General\n",
-                "* test message #5\n",
-                "\n",
                 "## test\n",
                 "### API\n",
                 "* test message #7\n",
                 "### General\n",
                 "* test message #3\n",
+                "\n",
+                "## docs\n",
+                "### General\n",
+                "* test message #5\n",
                 "\n",
                 "## refactor\n",
                 "### exclude\n",
@@ -810,15 +810,15 @@ mod tests {
                 "### API\n",
                 "* test message #2\n",
                 "\n",
-                "## docs\n",
-                "### General\n",
-                "* test message #5\n",
-                "\n",
                 "## test\n",
                 "### API\n",
                 "* test message #7\n",
                 "### General\n",
                 "* test message #3\n",
+                "\n",
+                "## docs\n",
+                "### General\n",
+                "* test message #5\n",
                 "\n",
                 "## refactor\n",
                 "### exclude\n",
@@ -858,15 +858,15 @@ mod tests {
                 "### API\n",
                 "* test message #2\n",
                 "\n",
-                "## docs\n",
-                "### General\n",
-                "* test message #5\n",
-                "\n",
                 "## test\n",
                 "### API\n",
                 "* test message #7\n",
                 "### General\n",
                 "* test message #3\n",
+                "\n",
+                "## docs\n",
+                "### General\n",
+                "* test message #5\n",
             )
         );
     }
@@ -890,8 +890,8 @@ mod tests {
         assert!(changelog.is_ok());
         assert_eq!(
             changelog.expect("Just asserted its OK-ness"),
-            "# Changes from version 0.1.0-dev1\n",
             concat!(
+                "# Changes from version 0.1.0-dev1\n",
                 "## feat\n",
                 "### API\n",
                 "* test message #1\n",
@@ -902,15 +902,15 @@ mod tests {
                 "### API\n",
                 "* test message #2\n",
                 "\n",
-                "## docs\n",
-                "### General\n",
-                "* test message #5\n",
-                "\n",
                 "## test\n",
                 "### API\n",
                 "* test message #7\n",
                 "### General\n",
                 "* test message #3\n",
+                "\n",
+                "## docs\n",
+                "### General\n",
+                "* test message #5\n",
             )
         );
     }
