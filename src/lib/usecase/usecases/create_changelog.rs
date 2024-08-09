@@ -230,7 +230,7 @@ mod tests {
                 ConventionalCommitSummary, ConventionalCommitSummaryBreakingFlag,
             },
             semantic_version::SemanticVersion,
-            trigger::{BasicStatement, Trigger},
+            trigger::{self, BasicStatement, Trigger},
         },
         usecase::{
             configuration::changelog::{ChangelogConfiguration, ChangelogFormat},
@@ -330,7 +330,7 @@ mod tests {
             Box::new(|t| format!("# {}", t)),
             Box::new(|t| format!("## {}", t)),
             Box::new(|s| format!("### {}", s)),
-            Box::new(|l| format!(":\n{}", l)),
+            Box::new(|l| format!("{}", l)),
             Box::new(|i| format!("* {}", i)),
             Box::new(|b| format!("**{}**", b)),
         )
@@ -406,7 +406,18 @@ mod tests {
         let s = format_scopes(&format(), &scope_map);
         assert_eq!(
             s,
-            format!("### API\n:\n* test message #1\n* test message #2\n* test message #7\n### exclude\n:\n* test message #4\n### General\n:\n* test message #3\n* test message #5\n* test message #6")
+            concat!(
+                "### API\n",
+                "* test message #1\n",
+                "* test message #2\n",
+                "* test message #7\n",
+                "### exclude\n",
+                "* test message #4\n",
+                "### General\n",
+                "* test message #3\n",
+                "* test message #5\n",
+                "* test message #6"
+            )
         );
     }
 
@@ -537,16 +548,14 @@ mod tests {
             commit_list()
                 .iter()
                 .map(|it| CommitSummary::Conventional(it.clone())),
-            Some(Trigger::new(crate::domain::trigger::Start::Basic(
-                BasicStatement::In(crate::domain::trigger::InNode {
-                    object: crate::domain::trigger::ObjectNode::Scope(
-                        crate::domain::trigger::ScopeNode {},
-                    ),
-                    array: crate::domain::trigger::ArrayNode {
+            Some(Trigger::new(trigger::Start::Basic(BasicStatement::In(
+                trigger::InNode {
+                    object: trigger::ObjectNode::Scope(trigger::ScopeNode {}),
+                    array: trigger::ArrayNode {
                         values: vec!["exclude".to_string()],
                     },
-                }),
-            )))
+                },
+            ))))
             .as_ref(),
         );
         let expected = {
@@ -656,7 +665,34 @@ mod tests {
                 None,
             ),
         );
-        assert_eq!(s, "## feat\n### API\n:\n* test message #1\n### General\n:\n* test message #6\n\n## fix\n### API\n:\n* test message #2\n\n## docs\n### General\n:\n* test message #5\n\n## test\n### API\n:\n* test message #7\n### General\n:\n* test message #3\n\n## refactor\n### exclude\n:\n* test message #4\n");
+        assert_eq!(
+            s,
+            concat!(
+                "## feat\n",
+                "### API\n",
+                "* test message #1\n",
+                "### General\n",
+                "* test message #6\n",
+                "\n",
+                "## fix\n",
+                "### API\n",
+                "* test message #2\n",
+                "\n",
+                "## docs\n",
+                "### General\n",
+                "* test message #5\n",
+                "\n",
+                "## test\n",
+                "### API\n",
+                "* test message #7\n",
+                "### General\n",
+                "* test message #3\n",
+                "\n",
+                "## refactor\n",
+                "### exclude\n",
+                "* test message #4\n",
+            )
+        );
     }
 
     #[test]
@@ -720,7 +756,35 @@ mod tests {
             CreateChangelogUseCase::new(configuration, &commit_repository, &version_repository);
         let changelog = usecase.execute();
         assert!(changelog.is_ok());
-        assert_eq!(changelog.expect("Just asserted it OK-ness"), "# Changes from version 0.1.0\n## feat\n### API\n:\n* test message #1\n### General\n:\n* test message #6\n\n## fix\n### API\n:\n* test message #2\n\n## docs\n### General\n:\n* test message #5\n\n## test\n### API\n:\n* test message #7\n### General\n:\n* test message #3\n\n## refactor\n### exclude\n:\n* test message #4\n");
+        assert_eq!(
+            changelog.expect("Just asserted it OK-ness"),
+            concat!(
+                "# Changes from version 0.1.0\n",
+                "## feat\n",
+                "### API\n",
+                "* test message #1\n",
+                "### General\n",
+                "* test message #6\n",
+                "\n",
+                "## fix\n",
+                "### API\n",
+                "* test message #2\n",
+                "\n",
+                "## docs\n",
+                "### General\n",
+                "* test message #5\n",
+                "\n",
+                "## test\n",
+                "### API\n",
+                "* test message #7\n",
+                "### General\n",
+                "* test message #3\n",
+                "\n",
+                "## refactor\n",
+                "### exclude\n",
+                "* test message #4\n"
+            )
+        );
     }
 
     #[test]
@@ -732,21 +796,47 @@ mod tests {
             CreateChangelogUseCase::new(configuration, &commit_repository, &version_repository);
         let changelog = usecase.execute();
         assert!(changelog.is_ok());
-        assert_eq!(changelog.expect("Just asserted its OK-ness"), "# Changes from version 0.1.0-dev1\n## feat\n### API\n:\n* test message #1\n### General\n:\n* test message #6\n\n## fix\n### API\n:\n* test message #2\n\n## docs\n### General\n:\n* test message #5\n\n## test\n### API\n:\n* test message #7\n### General\n:\n* test message #3\n\n## refactor\n### exclude\n:\n* test message #4\n");
+        assert_eq!(
+            changelog.expect("Just asserted its OK-ness"),
+            concat!(
+                "# Changes from version 0.1.0-dev1\n",
+                "## feat\n",
+                "### API\n",
+                "* test message #1\n",
+                "### General\n",
+                "* test message #6\n",
+                "\n",
+                "## fix\n",
+                "### API\n",
+                "* test message #2\n",
+                "\n",
+                "## docs\n",
+                "### General\n",
+                "* test message #5\n",
+                "\n",
+                "## test\n",
+                "### API\n",
+                "* test message #7\n",
+                "### General\n",
+                "* test message #3\n",
+                "\n",
+                "## refactor\n",
+                "### exclude\n",
+                "* test message #4\n",
+            )
+        );
     }
 
     #[test]
     fn execute_with_trigger() {
-        let trigger = Some(Trigger::new(crate::domain::trigger::Start::Basic(
-            BasicStatement::In(crate::domain::trigger::InNode {
-                object: crate::domain::trigger::ObjectNode::Scope(
-                    crate::domain::trigger::ScopeNode {},
-                ),
-                array: crate::domain::trigger::ArrayNode {
+        let trigger = Some(Trigger::new(trigger::Start::Basic(BasicStatement::In(
+            trigger::InNode {
+                object: trigger::ObjectNode::Scope(trigger::ScopeNode {}),
+                array: trigger::ArrayNode {
                     values: vec!["exclude".to_string()],
                 },
-            }),
-        )));
+            },
+        ))));
         let configuration = ChangelogConfiguration::new(false, format(), trigger);
         let commit_repository = MockCommitRepository {};
         let version_repository = MockVersionRepository {};
@@ -754,21 +844,43 @@ mod tests {
             CreateChangelogUseCase::new(configuration, &commit_repository, &version_repository);
         let changelog = usecase.execute();
         assert!(changelog.is_ok());
-        assert_eq!(changelog.expect("Just asserted its OK-ness"), "# Changes from version 0.1.0\n## feat\n### API\n:\n* test message #1\n### General\n:\n* test message #6\n\n## fix\n### API\n:\n* test message #2\n\n## docs\n### General\n:\n* test message #5\n\n## test\n### API\n:\n* test message #7\n### General\n:\n* test message #3\n");
+        assert_eq!(
+            changelog.expect("Just asserted its OK-ness"),
+            concat!(
+                "# Changes from version 0.1.0\n",
+                "## feat\n",
+                "### API\n",
+                "* test message #1\n",
+                "### General\n",
+                "* test message #6\n",
+                "\n",
+                "## fix\n",
+                "### API\n",
+                "* test message #2\n",
+                "\n",
+                "## docs\n",
+                "### General\n",
+                "* test message #5\n",
+                "\n",
+                "## test\n",
+                "### API\n",
+                "* test message #7\n",
+                "### General\n",
+                "* test message #3\n",
+            )
+        );
     }
 
     #[test]
     fn execute_from_latest_version_with_trigger() {
-        let trigger = Some(Trigger::new(crate::domain::trigger::Start::Basic(
-            BasicStatement::In(crate::domain::trigger::InNode {
-                object: crate::domain::trigger::ObjectNode::Scope(
-                    crate::domain::trigger::ScopeNode {},
-                ),
-                array: crate::domain::trigger::ArrayNode {
+        let trigger = Some(Trigger::new(trigger::Start::Basic(BasicStatement::In(
+            trigger::InNode {
+                object: trigger::ObjectNode::Scope(trigger::ScopeNode {}),
+                array: trigger::ArrayNode {
                     values: vec!["exclude".to_string()],
                 },
-            }),
-        )));
+            },
+        ))));
         let configuration = ChangelogConfiguration::new(true, format(), trigger);
         let commit_repository = MockCommitRepository {};
         let version_repository = MockVersionRepository {};
@@ -776,6 +888,30 @@ mod tests {
             CreateChangelogUseCase::new(configuration, &commit_repository, &version_repository);
         let changelog = usecase.execute();
         assert!(changelog.is_ok());
-        assert_eq!(changelog.expect("Just asserted its OK-ness"), "# Changes from version 0.1.0-dev1\n## feat\n### API\n:\n* test message #1\n### General\n:\n* test message #6\n\n## fix\n### API\n:\n* test message #2\n\n## docs\n### General\n:\n* test message #5\n\n## test\n### API\n:\n* test message #7\n### General\n:\n* test message #3\n");
+        assert_eq!(
+            changelog.expect("Just asserted its OK-ness"),
+            "# Changes from version 0.1.0-dev1\n",
+            concat!(
+                "## feat\n",
+                "### API\n",
+                "* test message #1\n",
+                "### General\n",
+                "* test message #6\n",
+                "\n",
+                "## fix\n",
+                "### API\n",
+                "* test message #2\n",
+                "\n",
+                "## docs\n",
+                "### General\n",
+                "* test message #5\n",
+                "\n",
+                "## test\n",
+                "### API\n",
+                "* test message #7\n",
+                "### General\n",
+                "* test message #3\n",
+            )
+        );
     }
 }
