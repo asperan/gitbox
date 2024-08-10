@@ -10,5 +10,5 @@ fi
 sed -E -i "3,3 s/(version = \")(.*)(\")/\\1$1\\3/" Cargo.toml
 
 # Update version in src/lib/lib.rs
-sed -E -i "10,10 s/(\\#\\[command\\(version = \")(.*)(\"\\)\\])/\1$1\3/" src/lib/lib.rs
+sed -E -i "14,14 s/(\\#\\[command\\(version = \")(.*)(\"\\)\\])/\1$1\3/" src/lib/lib.rs
 
