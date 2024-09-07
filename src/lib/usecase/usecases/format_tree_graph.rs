@@ -3,7 +3,7 @@ use colored::Colorize;
 use crate::{
     domain::tree_graph_line::{TreeGraphLine, TreeGraphLineContent},
     usecase::{
-        error::format_tree_error::FormatTreeError,
+        error::format_tree_error::{FormatTreeError, NoCommitsError},
         repository::treegraphline_ingress_repository::TreeGraphLineIngressRepository,
     },
 };
@@ -50,6 +50,9 @@ impl<'a, 'b: 'a> FormatTreeGraphUseCase<'a> {
 impl UseCase<Box<str>, FormatTreeError> for FormatTreeGraphUseCase<'_> {
     fn execute(&self) -> Result<Box<str>, FormatTreeError> {
         let lines = self.treegraphline_ingress_repository.graph_lines()?;
+        if lines.is_empty() {
+            return Err(NoCommitsError::new().into());
+        }
         let time_padding = lines
             .iter()
             .filter_map(|it| {
