@@ -31,6 +31,7 @@ impl TreeGraphLineIngressRepository for TreeGraphLineIngressRepositoryImpl<'_> {
             .commit_tree(TreeGraphLine::format())?;
         Ok(lines
             .iter()
+            .filter(|it| !it.is_empty())
             .map(|it| TreeGraphLine::from_str(it))
             .collect::<Result<Box<[TreeGraphLine]>, TreeGraphLineParseError>>()?)
     }
