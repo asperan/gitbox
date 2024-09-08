@@ -82,6 +82,7 @@ mod tests {
             CommitData, CommitMetadata, TreeGraphLine, TreeGraphLineContent,
         },
         usecase::{
+            error::format_tree_error::FormatTreeError,
             repository::treegraphline_ingress_repository::TreeGraphLineIngressRepository,
             type_aliases::AnyError,
             usecases::{format_tree_graph::FormatTreeGraphUseCase, usecase::UseCase},
@@ -123,6 +124,14 @@ mod tests {
                 ),
             ]
             .into())
+        }
+    }
+
+    struct EmptyTreeGraphLineIngressRepsitory {}
+
+    impl TreeGraphLineIngressRepository for EmptyTreeGraphLineIngressRepsitory {
+        fn graph_lines(&self) -> Result<Box<[TreeGraphLine]>, AnyError> {
+            Ok([].into())
         }
     }
 
@@ -172,5 +181,12 @@ mod tests {
             "                    |     \u{1b}[1;37masperan:\u{1b}[0m another test message",
         );
         assert_eq!(result, expected.into());
+    }
+
+    #[test]
+    fn execute_empty() {
+        let usecase = FormatTreeGraphUseCase::new(&EmptyTreeGraphLineIngressRepsitory {});
+        let result = usecase.execute();
+        assert!(matches!(result, Err(FormatTreeError::NoCommits(_))));
     }
 }
