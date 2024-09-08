@@ -76,16 +76,25 @@ impl GitExtraIngressHelper for GitExtraManagerImpl<'_> {
             .join(EXTRA_DIR_PATH)
             .join(TYPES_FILE_PATH);
         match path.try_exists() {
-            Ok(true) => Ok(read_to_string(path)?
-                .split('\n')
-                .filter(|it| !it.is_empty() && !DEFAULT_COMMIT_TYPES.contains(it))
-                .chain(DEFAULT_COMMIT_TYPES)
+            Ok(true) => Ok(DEFAULT_COMMIT_TYPES
+                .iter()
+                .map(|it| it.to_owned())
+                .chain(
+                    read_to_string(path)?
+                        .split('\n')
+                        .filter(|it| !it.is_empty() && !DEFAULT_COMMIT_TYPES.contains(it)),
+                )
                 .map(|it| it.to_string())
                 .collect()),
             Ok(false) => {
-                self.update_types(Box::new(DEFAULT_COMMIT_TYPES.map(|it| it.to_string()).to_vec().into_iter()))?;
+                self.update_types(Box::new(
+                    DEFAULT_COMMIT_TYPES
+                        .map(|it| it.to_string())
+                        .to_vec()
+                        .into_iter(),
+                ))?;
                 Ok(DEFAULT_COMMIT_TYPES.map(|it| it.to_string()).to_vec())
-            },
+            }
             Err(e) => Err(e.into()),
         }
     }
@@ -103,7 +112,7 @@ impl GitExtraIngressHelper for GitExtraManagerImpl<'_> {
             Ok(false) => {
                 self.update_scopes(Box::new(Vec::new().into_iter()))?;
                 Ok(Vec::new())
-            },
+            }
             Err(e) => Err(e.into()),
         }
     }
