@@ -1,14 +1,19 @@
 #!/bin/bash
 set -euo pipefail
 
+if [ ! -f "$(pwd)/Cargo.toml" ]; then
+    >&2 echo "Run this script in the root Rust folder (the one with Cargo.toml)."
+    exit 1
+fi
+
 if [ "$#" -lt 1 ]; then
-    echo "This script requires 1 argument, which is the new version to use"
+    >&2 echo "This script requires 1 argument, which is the new version to use"
     exit 1
 fi
 
 # Update version in Cargo.toml
-sed -E -i "3,3 s/(version = \")(.*)(\")/\\1$1\\3/" Cargo.toml
+sed -E -i "3,3 s/(version = \")(.*)(\")/\\1$1\\3/" ./Cargo.toml
 
-# Update version in src/lib/lib.rs
-sed -E -i "14,14 s/(\\#\\[command\\(version = \")(.*)(\"\\)\\])/\1$1\3/" src/lib/lib.rs
+# Update version in src/lib/lib.rs/
+sed -E -i "14,14 s/(\\#\\[command\\(version = \")(.*)(\"\\)\\])/\1$1\3/" ./src/lib/lib.rs
 
