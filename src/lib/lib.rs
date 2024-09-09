@@ -11,7 +11,7 @@ use clap::{CommandFactory, Parser};
 #[derive(Parser, Debug)]
 #[command(name = "gb")]
 #[command(author = "Alex Speranza")]
-#[command(version = "2.0.0")]
+#[command(version = "2.1.0")]
 #[command(about = "Gitbox (gb) is wrapper for git and it enhance some functionalities.", long_about = None)]
 struct CliParser {
     #[command(subcommand)]
