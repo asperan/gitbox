@@ -6,7 +6,7 @@ description = "Git toolbox to simplify adoption of conventional commits and sema
 license = "MIT"
 repository = "https://github.com/asperan/gitbox"
 keywords = [ "conventional-commits", "semver", "cli" ]
-categories = [ "Command line utilities", "Development tools" ]
+categories = [ "command-line-utilities", "development-tools" ]
 exclude = [ "utils/", "docs/" ]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
