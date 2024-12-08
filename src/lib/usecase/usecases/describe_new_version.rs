@@ -34,11 +34,7 @@ impl UseCase<(SemanticVersion, Option<SemanticVersion>), DescribeNewVersionError
     fn execute(
         &self,
     ) -> Result<(SemanticVersion, Option<SemanticVersion>), DescribeNewVersionError> {
-        let base_version = if self.configuration.prerelease().is_active() {
-            self.version_repository.last_version()
-        } else {
-            self.version_repository.last_stable_version()
-        }?;
+        let base_version = self.version_repository.last_stable_version()?;
         let new_version = {
             let stable_version = self.next_stable(base_version.clone())?;
             let prerelease = if self.configuration.prerelease().is_active() {
@@ -170,11 +166,16 @@ impl<'a, 'b: 'a, 'c: 'a, 'd: 'a> CalculateNewVersionUseCase<'a> {
             }
             None => true,
         };
-        if !is_stable_updated
-            && last_version
-                .as_ref()
-                .as_ref()
-                .is_some_and(|it| it.prerelease().is_none())
+        if self
+            .commit_summary_repository
+            .get_commits_from(last_version.clone())?
+            .count()
+            == 0
+            || (!is_stable_updated
+                && last_version
+                    .as_ref()
+                    .as_ref()
+                    .is_some_and(|it| it.prerelease().is_none()))
         {
             Err(DescribeNoRelevantChangesError::new().into())
         } else {
@@ -220,6 +221,7 @@ enum Change {
     Major,
 }
 
+#[derive(Debug)]
 struct StableVersion {
     major: u32,
     minor: u32,
@@ -339,11 +341,11 @@ mod tests {
                     .clone()
                     .is_some_and(|it| it.prerelease().is_some())
                 {
+                    self.from_prerelease.clone().into_iter()
+                } else {
                     let mut full = self.commit_list.clone();
                     full.append(self.from_prerelease.clone().as_mut());
                     full.into_iter()
-                } else {
-                    self.commit_list.clone().into_iter()
                 },
             ))
         }
@@ -638,7 +640,26 @@ mod tests {
             metadata_configuration,
             trigger_configuration,
         );
-        let commit_summary_repository = MockCommitSummaryRepository::new(vec![], vec![]);
+        let commit_summary_repository = MockCommitSummaryRepository::new(
+            vec![CommitSummary::Conventional(
+                ConventionalCommitSummary::new(
+                    "chore".to_string(),
+                    None,
+                    ConventionalCommitSummaryBreakingFlag::Disabled,
+                    "test".to_string(),
+                )
+                .expect("Hand-crafted commits are always correct"),
+            )],
+            vec![CommitSummary::Conventional(
+                ConventionalCommitSummary::new(
+                    "chore".to_string(),
+                    None,
+                    ConventionalCommitSummaryBreakingFlag::Disabled,
+                    "test".to_string(),
+                )
+                .expect("Hand-crafted commits are always correct"),
+            )],
+        );
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
             stable_version: None.into(),
@@ -906,16 +927,35 @@ mod tests {
             trigger_configuration,
         );
         let commit_summary_repository = MockCommitSummaryRepository::new(
+            vec![
+                CommitSummary::Conventional(
+                    ConventionalCommitSummary::new(
+                        "fix".to_owned(),
+                        None,
+                        ConventionalCommitSummaryBreakingFlag::Disabled,
+                        "test".to_string(),
+                    )
+                    .expect("Hand-crafted commits are always correct"),
+                ),
+                CommitSummary::Conventional(
+                    ConventionalCommitSummary::new(
+                        "chore".to_owned(),
+                        None,
+                        ConventionalCommitSummaryBreakingFlag::Disabled,
+                        "test".to_string(),
+                    )
+                    .expect("Hand-crafted commits are always correct"),
+                ),
+            ],
             vec![CommitSummary::Conventional(
                 ConventionalCommitSummary::new(
-                    "refactor".to_owned(),
+                    "chore".to_owned(),
                     None,
                     ConventionalCommitSummaryBreakingFlag::Disabled,
                     "test".to_string(),
                 )
                 .expect("Hand-crafted commits are always correct"),
             )],
-            vec![],
         );
         let commit_metadata_repository = MockCommitMetadataRepository {};
         let version_repository = MockVersionRepository {
@@ -945,6 +985,57 @@ mod tests {
     }
 
     #[test]
+    fn prerelease_from_prerelease_without_commits_is_invalid() {
+        let prerelease_configuration = DescribePrereleaseConfiguration::new(
+            true,
+            Box::new(|it| it.to_string()),
+            Box::new(|it| it.parse().expect("The value must be a valid number")),
+            false,
+        );
+        let metadata_configuration = DescribeMetadataConfiguration::new(vec![]);
+        let trigger_configuration = trigger_configuration();
+        let configuration = DescribeConfiguration::new(
+            prerelease_configuration,
+            metadata_configuration,
+            trigger_configuration,
+        );
+        let commit_summary_repository = MockCommitSummaryRepository::new(
+            vec![CommitSummary::Conventional(
+                ConventionalCommitSummary::new(
+                    "fix".to_owned(),
+                    None,
+                    ConventionalCommitSummaryBreakingFlag::Disabled,
+                    "test".to_string(),
+                )
+                .expect("Hand-crafted commits are always correct"),
+            )],
+            vec![],
+        );
+        let commit_metadata_repository = MockCommitMetadataRepository {};
+        let version_repository = MockVersionRepository {
+            stable_version: Some(
+                SemanticVersion::new(0, 1, 0, None, None)
+                    .expect("Hand-crafted version is always correct"),
+            )
+            .into(),
+            last_version: Some(
+                SemanticVersion::new(0, 1, 1, Some("1".to_string()), None)
+                    .expect("Hand-crafted version must be correct"),
+            )
+            .into(),
+        };
+        let usecase = CalculateNewVersionUseCase::new(
+            configuration,
+            &commit_summary_repository,
+            &commit_metadata_repository,
+            &version_repository,
+        );
+        let result = usecase.execute();
+        dbg!(&result);
+        assert!(matches!(result, Err(_)));
+    }
+
+    #[test]
     fn prerelease_number_reset_on_stable_update() {
         let prerelease_configuration = DescribePrereleaseConfiguration::new(
             true,
@@ -965,15 +1056,26 @@ mod tests {
             trigger_configuration,
         );
         let commit_summary_repository = MockCommitSummaryRepository::new(
-            vec![CommitSummary::Conventional(
-                ConventionalCommitSummary::new(
-                    "fix".to_owned(),
-                    None,
-                    ConventionalCommitSummaryBreakingFlag::Disabled,
-                    "test".to_string(),
-                )
-                .expect("Hand-crafted commits are always correct"),
-            )],
+            vec![
+                CommitSummary::Conventional(
+                    ConventionalCommitSummary::new(
+                        "fix".to_owned(),
+                        None,
+                        ConventionalCommitSummaryBreakingFlag::Disabled,
+                        "test".to_string(),
+                    )
+                    .expect("Hand-crafted commits are always correct"),
+                ),
+                CommitSummary::Conventional(
+                    ConventionalCommitSummary::new(
+                        "feat".to_owned(),
+                        None,
+                        ConventionalCommitSummaryBreakingFlag::Disabled,
+                        "test".to_string(),
+                    )
+                    .expect("Hand-crafted commits are always correct"),
+                ),
+            ],
             vec![CommitSummary::Conventional(
                 ConventionalCommitSummary::new(
                     "feat".to_owned(),
@@ -1092,7 +1194,7 @@ mod tests {
         let commit_summary_repository = MockCommitSummaryRepository::new(
             vec![CommitSummary::Conventional(
                 ConventionalCommitSummary::new(
-                    "chore".to_owned(),
+                    "fix".to_owned(),
                     None,
                     ConventionalCommitSummaryBreakingFlag::Disabled,
                     "test".to_string(),
@@ -1141,7 +1243,7 @@ mod tests {
         let prerelease_configuration = DescribePrereleaseConfiguration::new(
             true,
             Box::new(|it| it.to_string()),
-            Box::new(|_it| 0),
+            Box::new(|it| it.parse().expect("The value must be a number")),
             false,
         );
         let metadata_configuration = DescribeMetadataConfiguration::new(vec![]);
@@ -1152,18 +1254,29 @@ mod tests {
             trigger_configuration,
         );
         let commit_summary_repository = MockCommitSummaryRepository::new(
+            vec![
+                CommitSummary::Conventional(
+                    ConventionalCommitSummary::new(
+                        "feat".to_owned(),
+                        None,
+                        ConventionalCommitSummaryBreakingFlag::Disabled,
+                        "test".to_string(),
+                    )
+                    .expect("Hand-crafted commits are always correct"),
+                ),
+                CommitSummary::Conventional(
+                    ConventionalCommitSummary::new(
+                        "chore".to_string(),
+                        None,
+                        ConventionalCommitSummaryBreakingFlag::Disabled,
+                        "test".to_string(),
+                    )
+                    .expect("Hand-crafted commits are always correct"),
+                ),
+            ],
             vec![CommitSummary::Conventional(
                 ConventionalCommitSummary::new(
-                    "feat".to_owned(),
-                    None,
-                    ConventionalCommitSummaryBreakingFlag::Disabled,
-                    "test".to_string(),
-                )
-                .expect("Hand-crafted commits are always correct"),
-            )],
-            vec![CommitSummary::Conventional(
-                ConventionalCommitSummary::new(
-                    "feat".to_string(),
+                    "chore".to_string(),
                     None,
                     ConventionalCommitSummaryBreakingFlag::Disabled,
                     "test".to_string(),
