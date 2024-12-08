@@ -1136,6 +1136,64 @@ mod tests {
         );
     }
 
+    #[test]
+    fn prerelease_number_increase_with_no_stable_version() {
+        let prerelease_configuration = DescribePrereleaseConfiguration::new(
+            true,
+            Box::new(|it| it.to_string()),
+            Box::new(|_it| 0),
+            false,
+        );
+        let metadata_configuration = DescribeMetadataConfiguration::new(vec![]);
+        let trigger_configuration = trigger_configuration();
+        let configuration = DescribeConfiguration::new(
+            prerelease_configuration,
+            metadata_configuration,
+            trigger_configuration,
+        );
+        let commit_summary_repository = MockCommitSummaryRepository::new(
+            vec![CommitSummary::Conventional(
+                ConventionalCommitSummary::new(
+                    "feat".to_owned(),
+                    None,
+                    ConventionalCommitSummaryBreakingFlag::Disabled,
+                    "test".to_string(),
+                )
+                .expect("Hand-crafted commits are always correct"),
+            )],
+            vec![CommitSummary::Conventional(
+                ConventionalCommitSummary::new(
+                    "feat".to_string(),
+                    None,
+                    ConventionalCommitSummaryBreakingFlag::Disabled,
+                    "test".to_string(),
+                )
+                .expect("Hand-crafted commits are always correct"),
+            )],
+        );
+        let commit_metadata_repository = MockCommitMetadataRepository {};
+        let version_repository = MockVersionRepository {
+            stable_version: None.into(),
+            last_version: Some(
+                SemanticVersion::new(0, 1, 0, Some("1".to_string()), None)
+                    .expect("Hand-crafted version must be correct"),
+            )
+            .into(),
+        };
+        let usecase = CalculateNewVersionUseCase::new(
+            configuration,
+            &commit_summary_repository,
+            &commit_metadata_repository,
+            &version_repository,
+        );
+        let result = usecase.execute().expect("This calc should be correct");
+        assert_eq!(
+            result.0,
+            SemanticVersion::new(0, 1, 0, Some("2".to_string()), None)
+                .expect("Hand-crafted version must be correct")
+        );
+    }
+
     // Test metadata generation
 
     #[test]
