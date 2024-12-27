@@ -6,7 +6,7 @@ pub struct ChangelogConfiguration<'a> {
     exclude_trigger: Option<Trigger>,
 }
 
-impl<'a> ChangelogConfiguration<'a> {
+impl ChangelogConfiguration<'_> {
     pub fn new(
         generate_from_latest_version: bool,
         format: ChangelogFormat,

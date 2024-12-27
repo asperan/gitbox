@@ -90,7 +90,6 @@ impl GitExtraIngressHelper for GitExtraManagerImpl<'_> {
                 self.update_types(Box::new(
                     DEFAULT_COMMIT_TYPES
                         .map(|it| it.to_string())
-                        .to_vec()
                         .into_iter(),
                 ))?;
                 Ok(DEFAULT_COMMIT_TYPES.map(|it| it.to_string()).to_vec())

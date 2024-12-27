@@ -1032,7 +1032,7 @@ mod tests {
         );
         let result = usecase.execute();
         dbg!(&result);
-        assert!(matches!(result, Err(_)));
+        assert!(result.is_err());
     }
 
     #[test]

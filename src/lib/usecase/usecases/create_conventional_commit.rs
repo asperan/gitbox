@@ -18,7 +18,7 @@ impl<'a, 'b: 'a> CreateConventionalCommitUseCase<'a> {
     pub fn new(
         configuration: CommitConfiguration,
         commit_repository: &'b dyn ConventionalCommitEgressRepository,
-    ) -> CreateConventionalCommitUseCase {
+    ) -> Self {
         CreateConventionalCommitUseCase {
             configuration,
             commit_repository,
