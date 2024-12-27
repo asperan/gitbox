@@ -95,6 +95,7 @@ impl VersionIngressManager for GitCli {
         let output = self.run_git_command(vec!["describe", "--tags", "--abbrev=0"].into_iter());
         match output {
             Ok(v) => Ok(Some(SemanticVersion::from_str(v.trim())?.to_string())),
+            Err(e) if e.to_string().contains("No names found") => Ok(None),
             Err(e) => Err(e),
         }
     }
