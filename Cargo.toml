@@ -37,4 +37,7 @@ path = "src/lib/lib.rs"
 name = "gb"
 path = "src/main.rs"
 
+[dev-dependencies]
+rustainers = "0.14.0"
+
 
