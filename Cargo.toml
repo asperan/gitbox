@@ -38,6 +38,8 @@ name = "gb"
 path = "src/main.rs"
 
 [dev-dependencies]
-rustainers = "0.14.0"
+hierrorchy = "0.1.0"
+indoc = "2.0.5"
+which = "7.0.1"
 
 
