@@ -4,12 +4,6 @@ Gitbox is the spiritual successor and rewrite of [get](https://github.com/aspera
 
 It leverages the git CLI tool to enable fast and simple semantic versioning and conventional commits.
 
-## Note
-Unless new features are requested, this project is considered completed. This means that there won't be more development time other than the one needed to fix bugs and implement new, approved features.
-
-To ask for a feature, create a new issue. If the requested feature is considered pertinent to the project, it may be implemented in a future version.
-If you want to implement the feature yourself, please first create a new issue to ask for its approval, then you can create a Pull Request.
-
 ## Breaking changes of 2.0.0
 * Default prerelease pattern is now a single number.
 * Move `refresh` subcommand from `commit` subcommand into a standalone subcommand.
