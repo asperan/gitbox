@@ -60,7 +60,7 @@ impl IntegrationTest {
             &self.init_commands, INIT_PHASE_DELIMITER, &self.run_commands
         );
         let test_script_path =
-            temp_dir().join(&format!("test-script_{}_{}", PACKAGE_NAME, &self.name));
+            temp_dir().join(format!("test-script_{}_{}", PACKAGE_NAME, &self.name));
         fs::write(&test_script_path, test_script_content)?;
         fs::File::open(&test_script_path)?.set_permissions(Permissions::from_mode(0o755))?;
         let result = std::process::Command::new(&container_manager()?)
@@ -82,7 +82,7 @@ impl IntegrationTest {
             .output()?;
         if result.status.success() {
             let output = std::str::from_utf8(&result.stdout).expect("stdout is a valid rust string").to_owned();
-            let run_output = output.lines().skip_while(|it| it != &INIT_PHASE_DELIMITER).skip(1).map(|it| it.to_owned()).reduce(|acc, it| acc + "\n" + &it).unwrap_or_else(|| String::new());
+            let run_output = output.lines().skip_while(|it| it != &INIT_PHASE_DELIMITER).skip(1).map(|it| it.to_owned()).reduce(|acc, it| acc + "\n" + &it).unwrap_or_else(String::new);
             if run_output != self.expected_output {
                 Err(IntegrationTestAssertionError { test_name: self.name.clone(), expected: self.expected_output.clone(), actual: run_output }.into())
             } else {

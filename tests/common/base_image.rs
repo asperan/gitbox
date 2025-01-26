@@ -48,7 +48,7 @@ pub fn build_base_image(
     let tmp_dockerfile_path =
         std::env::temp_dir().join(format!("Dockerfile.{package_name}_integration_tests"));
     std::fs::write(&tmp_dockerfile_path, dockerfile_content)
-        .map_err(|err| DockerfileWriteError::from(err))?;
+        .map_err(DockerfileWriteError::from)?;
     let result = std::process::Command::new(&container_manager()?)
         .args([
             "build",
