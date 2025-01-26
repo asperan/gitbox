@@ -1,0 +1,18 @@
+# This dockerignore is used by the integration tests
+## Docker files
+.dockerignore
+
+## Git files
+.gitignore
+.git
+
+## Generated files
+docs
+target
+
+## Integration tests source
+tests
+
+## Misc files
+LICENSE
+README.md
