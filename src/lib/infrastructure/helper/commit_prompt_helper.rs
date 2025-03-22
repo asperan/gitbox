@@ -1,7 +1,9 @@
 use regex::Regex;
 use requestty::{prompt_one, Answer, Question};
 
-use crate::usecase::type_aliases::AnyError;
+use crate::{
+    domain::conventional_commit_summary::ConventionalCommitSummary, usecase::type_aliases::AnyError,
+};
 
 use super::{
     gitextra_egress_helper::GitExtraEgressHelper, gitextra_ingress_helper::GitExtraIngressHelper,
@@ -114,20 +116,18 @@ impl<'a, 'b: 'a, 'c: 'a> CommitPromptHelper<'a> {
     }
 
     fn ask_new_type(&self) -> Result<String, AnyError> {
-        let type_regex = Regex::new(r"^[a-z]+$").unwrap();
-        let new_type = self.ask_new_input("type", type_regex)?;
+        let new_type = self.ask_new_input("type", ConventionalCommitSummary::type_pattern())?;
         self.gitextra_append_manager.append_type(&new_type)?;
         Ok(new_type)
     }
 
     fn ask_new_scope(&self) -> Result<String, AnyError> {
-        let scope_regex = Regex::new(r"^[a-z -]+$").unwrap();
-        let new_scope = self.ask_new_input("scope", scope_regex)?;
+        let new_scope = self.ask_new_input("scope", ConventionalCommitSummary::scope_pattern())?;
         self.gitextra_append_manager.append_scope(&new_scope)?;
         Ok(new_scope)
     }
 
-    fn ask_new_input(&self, what: &str, valid_regex: Regex) -> Result<String, AnyError> {
+    fn ask_new_input(&self, what: &str, valid_regex: &Regex) -> Result<String, AnyError> {
         let new_value = prompt_one(
             Question::input(format!("new-{}", what))
                 .message(format!("New {}: ", what))
