@@ -30,7 +30,7 @@ impl<'a, 'b: 'a, 'c: 'a> RefreshTypesAndScopesUseCase<'a> {
 
 impl UseCase<(), RefreshTypesAndScopesError> for RefreshTypesAndScopesUseCase<'_> {
     fn execute(&self) -> Result<(), RefreshTypesAndScopesError> {
-        let commits = self.commit_history_repository.get_all_commits()?;
+        let commits = self.commit_history_repository.get_all_commits()?.rev();
         let mut types: Vec<String> = Vec::from(DEFAULT_COMMIT_TYPES.map(|it| it.to_string()));
         let mut scopes: Vec<String> = Vec::new();
         commits

@@ -138,7 +138,7 @@ mod tests {
         );
         assert_eq!(
             git_extra_manager.scopes.borrow().as_slice(),
-            &["api", "core-deps"]
+            &["core-deps", "api"]
         );
     }
 }
