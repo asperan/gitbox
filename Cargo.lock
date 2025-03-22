@@ -372,6 +372,7 @@ dependencies = [
  "colored",
  "hierrorchy",
  "indoc",
+ "lazy_static",
  "pest",
  "pest_derive",
  "regex",

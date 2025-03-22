@@ -1,9 +1,16 @@
+use lazy_static::lazy_static;
+use regex::Regex;
 use std::ops::Deref;
 
 use super::error::conventional_commit_summary_invariant_error::{
     ConventionalCommitSummaryInvariantError, InvalidScopeError, InvalidSummaryError,
     InvalidTypeError,
 };
+
+lazy_static! {
+    static ref SCOPE_PATTERN: Regex = Regex::new(r"^[a-zA-Z0-9-]+$").unwrap();
+    static ref TYPE_PATTERN: Regex = Regex::new(r"^[a-z]+$").unwrap();
+}
 
 /*
 Summary of a conventional commit.
@@ -56,25 +63,23 @@ impl ConventionalCommitSummary {
     }
 
     fn check_type(typ: String) -> Result<String, InvalidTypeError> {
-        if typ.trim().is_empty() || typ.chars().any(|char| !char.is_ascii_lowercase()) {
-            Err(InvalidTypeError::new(typ))
-        } else {
+        if TYPE_PATTERN.is_match(&typ) {
             Ok(typ)
+        } else {
+            Err(InvalidTypeError::new(typ))
         }
     }
 
     fn check_scope(scope: Option<String>) -> Result<Option<String>, InvalidScopeError> {
         match scope {
             None => Ok(None),
-            Some(wrong)
-                if wrong.trim().is_empty()
-                    || wrong.chars().any(|char| {
-                        !(char.is_ascii_lowercase() || char.is_ascii_uppercase() || char == '-')
-                    }) =>
-            {
-                Err(InvalidScopeError::new(wrong))
+            Some(s) => {
+                if SCOPE_PATTERN.is_match(&s) {
+                    Ok(Some(s))
+                } else {
+                    Err(InvalidScopeError::new(s))
+                }
             }
-            Some(s) => Ok(Some(s)),
         }
     }
 
@@ -84,6 +89,14 @@ impl ConventionalCommitSummary {
         } else {
             Ok(summary)
         }
+    }
+
+    pub fn type_pattern() -> &'static Regex {
+        &TYPE_PATTERN
+    }
+
+    pub fn scope_pattern() -> &'static Regex {
+        &SCOPE_PATTERN
     }
 }
 
