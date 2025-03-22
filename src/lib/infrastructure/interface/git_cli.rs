@@ -148,6 +148,7 @@ impl InitEgressManager for GitCli {
 impl TagEgressManager for GitCli {
     fn create_tag(&self, label: &str, message: Option<&str>, sign: bool) -> Result<(), AnyError> {
         let mut args = vec!["tag", label];
+        args.push("--cleanup=whitespace");
         args.push("-m");
         match message {
             Some(s) => {
