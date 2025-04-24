@@ -11,6 +11,12 @@ exclude = [ "utils/", "docs/" ]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[package.metadata.dogana.debian]
+required_packages = ["git"]
+
+[package.metadata.dogana.alpine]
+required_packages = ["git"]
+
 [profile.release]
 lto = "fat"
 strip = "symbols"
@@ -39,6 +45,7 @@ name = "gb"
 path = "src/main.rs"
 
 [dev-dependencies]
+dogana = "0.1.0-1"
 hierrorchy = "0.1.0"
 indoc = "2.0.5"
 which = "7.0.1"

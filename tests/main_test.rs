@@ -1,41 +1,26 @@
-use common::integration_test::IntegrationTest;
-
-mod common;
-
-const MSRV: &str = "1.83";
-const BIN_NAME: &str = "gb";
+use dogana::{
+    dogana_images::DEBIAN_IMAGE,
+    dogana_test::{DoganaTest, DoganaTestResult},
+};
 
 #[test]
-fn setup() {
-    match common::base_image::build_base_image(MSRV, BIN_NAME, &["git"]) {
-        Ok(image_name) => {
-            let mut all_ok: bool = true;
-            if let Err(e) = IntegrationTest::new(
-                "gb-init",
-                &image_name,
-                "mkdir /tmp/workdir && cd /tmp/workdir\ngit config --global user.name \"tester\" && git config --global user.email \"tester@example.org\"",
-                "gb init\ngit log --pretty=%s",
-                "Repository initialized successfully\nchore(init): initialize empty repository",
-            )
-            .run()
-            {
-                eprintln!("{}", e);
-                all_ok = false;
-            }
-            if let Err(e) = IntegrationTest::new(
-                "gb-describe-prerelease-in-empty-repo",
-                &image_name,
-                "mkdir /tmp/workdir && cd /tmp/workdir\ngit config --global user.name \"tester\" && git config --global user.email \"tester@example.org\"\ngb init",
-                "gb describe --prerelease\ngit tag --list",
-                "0.1.0-1",
-            )
-            .run()
-            {
-                eprintln!("{}", e);
-                all_ok = false;
-            }
-            assert!(all_ok);
-        }
-        Err(e) => panic!("Failed to build base image: {}", e),
-    }
+fn test_gb_init() -> DoganaTestResult {
+    DoganaTest::builder()
+        .set_base_image(&DEBIAN_IMAGE)
+        .set_init_commands(&["mkdir /tmp/workdir && cd /tmp/workdir", "git config --global user.name \"tester\" && git config --global user.email \"tester@example.org\""])
+        .set_run_commands(&["gb init", "git log --pretty=%s"])
+        .set_expected_output("Repository initialized successfully\nchore(init): initialize empty repository")
+        .build()
+        .run()
+}
+
+#[test]
+fn test_describe_prerelease_in_empty_repository() -> DoganaTestResult {
+    DoganaTest::builder()
+        .set_base_image(&DEBIAN_IMAGE)
+        .set_init_commands(&["mkdir /tmp/workdir && cd /tmp/workdir", "git config --global user.name \"tester\" && git config --global user.email \"tester@example.org\"", "gb init"])
+        .set_run_commands(&["gb describe --prerelease", "git tag --list"])
+        .set_expected_output("0.1.0-1")
+        .build()
+        .run()
 }
